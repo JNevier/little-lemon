@@ -38,7 +38,8 @@ function Main() {
   function submitForm(formData) {
     const saved = submitAPI(formData);
     if (saved) {
-      navigate('/confirmed');
+      // Carry the booking to the next page, so it can show what was booked.
+      navigate('/confirmed', { state: { booking: formData } });
     }
     return saved;
   }
