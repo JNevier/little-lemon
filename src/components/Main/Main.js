@@ -34,10 +34,13 @@ function Main() {
   const navigate = useNavigate();
 
   // Sends the booking to the API. If it's accepted, show the confirmation page.
+  // Returns whether it was saved, so the form can tell the user when it wasn't.
   function submitForm(formData) {
-    if (submitAPI(formData)) {
+    const saved = submitAPI(formData);
+    if (saved) {
       navigate('/confirmed');
     }
+    return saved;
   }
 
   return (

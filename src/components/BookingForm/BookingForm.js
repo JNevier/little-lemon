@@ -16,6 +16,9 @@ function BookingForm({ availableTimes, dispatch, submitForm }) {
   // Kept as a string, like every input value; it's turned into a number only when it's used.
   const [guests, setGuests] = useState('1');
   const [occasion, setOccasion] = useState('Birthday');
+  // Whether the last save failed. Unlike the field errors, it can't be worked out from the
+  // fields: it's the result of a submit, so it has to be remembered in state.
+  const [saveFailed, setSaveFailed] = useState(false);
 
   // When the date changes: update our own field AND tell Main, so it can work out the new times.
   function handleDateChange(e) {
@@ -53,7 +56,8 @@ function BookingForm({ availableTimes, dispatch, submitForm }) {
       guests: Number(guests),
       occasion: occasion,
     };
-    submitForm(formData);
+    const saved = submitForm(formData);
+    setSaveFailed(!saved);
   }
 
   return (
@@ -122,6 +126,10 @@ function BookingForm({ availableTimes, dispatch, submitForm }) {
       {/* Option B: the aria-label matches the visible text, so voice control ("click Make Your
           reservation") still works and screen readers say what the button does. */}
       <input type="submit" value="Make Your reservation" aria-label={"Make Your reservation"} disabled={!isFormValid} />
+      {/* role="alert": screen readers announce it right away, without the user moving to it. */}
+      {saveFailed && (
+        <p role="alert" className="form-error">We couldn't save your booking. Please try again.</p>
+      )}
     </form>
   );
 }

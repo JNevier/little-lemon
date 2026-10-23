@@ -81,3 +81,14 @@
     max-width: 28rem;
   }
 }
+
+/* Message when a booking couldn't be saved: the same look as the field errors,
+   a little bigger and with space above it, so it stands out under the button. */
+.booking-form .form-error {
+  margin: 0.75rem 0 0;
+  padding: 0.5rem 0.75rem;
+  font-weight: 700;
+  color: var(--color-dark);
+  border-left: 4px solid var(--color-secondary-salmon);
+  background-color: var(--color-light);
+}
