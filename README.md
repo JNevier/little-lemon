@@ -13,7 +13,7 @@ The focus is a booking form that works, checks what you type, and is usable with
 You need Node.js 20 or newer and Git.
 
 ```bash
-git clone https://github.com/Re1veN7/little-lemon.git
+git clone https://github.com/JNevier/little-lemon.git
 cd little-lemon
 npm install
 npm test -- --watchAll=false
@@ -67,7 +67,7 @@ The commands below work the same in macOS/Linux Terminal and in Windows PowerShe
 ### Clone the repository
 
 ```bash
-git clone https://github.com/Re1veN7/little-lemon.git
+git clone https://github.com/JNevier/little-lemon.git
 cd little-lemon
 ```
 
@@ -225,4 +225,4 @@ There is no Figma wireframe. I skipped that step and built the pages from the co
 
 ## Author
 
-[Re1veN7](https://github.com/Re1veN7)
+[Reiven (JNevier)](https://github.com/JNevier)
