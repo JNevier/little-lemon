@@ -2,22 +2,39 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import ConfirmedBooking from './ConfirmedBooking';
 
-// LinkButton uses <Link>, which only works inside a router.
-function setupPage() {
+// A fixed booking, so the test never depends on today's date.
+const booking = { date: '2026-10-09', time: '18:00', guests: 4, occasion: 'Birthday' };
+
+// Renders the page as if we arrived at /confirmed. Pass a booking to fake a real submit;
+// leave it out to fake typing the URL directly.
+function setupPage(state) {
   render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[{ pathname: '/confirmed', state }]}>
       <ConfirmedBooking />
     </MemoryRouter>
   );
 }
 
-test('moves focus to the heading so screen readers announce the new page', () => {
-  setupPage();
-  const heading = screen.getByRole('heading', { level: 1, name: 'Booking Confirmed' });
-  expect(heading).toHaveFocus();
+describe('after a real booking', () => {
+  test('shows the booking details', () => {
+    setupPage({ booking });
+    expect(screen.getByText('Friday, October 9, 2026')).toBeInTheDocument();
+    expect(screen.getByText('18:00')).toBeInTheDocument();
+    expect(screen.getByText('4 guests')).toBeInTheDocument();
+  });
+
+  test('moves focus to the heading and sets the tab title', () => {
+    setupPage({ booking });
+    expect(screen.getByRole('heading', { level: 1, name: 'Booking Confirmed' })).toHaveFocus();
+    expect(document.title).toBe('Booking Confirmed | Little Lemon');
+  });
 });
 
-test('sets the browser tab title', () => {
-  setupPage();
-  expect(document.title).toBe('Booking Confirmed | Little Lemon');
+describe('on a direct visit', () => {
+  test('says no booking was made and links to the booking page', () => {
+    setupPage(); // no state at all
+    expect(screen.getByRole('heading', { level: 1, name: 'You haven\'t made a booking yet' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Reserve a Table' })).toHaveAttribute('href', '/reservations');
+    expect(screen.queryByText(/your table at little lemon is reserved/i)).not.toBeInTheDocument();
+  });
 });

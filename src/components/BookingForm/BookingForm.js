@@ -16,6 +16,9 @@ function BookingForm({ availableTimes, dispatch, submitForm }) {
   // Kept as a string, like every input value; it's turned into a number only when it's used.
   const [guests, setGuests] = useState('1');
   const [occasion, setOccasion] = useState('Birthday');
+  // Whether the last save failed. Unlike the field errors, it can't be worked out from the
+  // fields: it's the result of a submit, so it has to be remembered in state.
+  const [saveFailed, setSaveFailed] = useState(false);
 
   // When the date changes: update our own field AND tell Main, so it can work out the new times.
   function handleDateChange(e) {
@@ -28,11 +31,23 @@ function BookingForm({ availableTimes, dispatch, submitForm }) {
   // otherwise use the first offered time, or '' if there are none.
   const selectedTime = availableTimes.includes(time) ? time : availableTimes[0] || '';
 
+  // An empty list means nothing can be booked on this date (a real API might return that for a full day).
+  const noTimes = availableTimes.length === 0;
+
+  // Worked out first, so the time message can wait until the date is valid.
+  const dateError = isValidDate(date, today) ? '' : 'Please choose today or a later date.';
+
   // Worked out from state on every render, never stored, so it can't go stale.
   // An empty message means "this field is fine".
   const errors = {
-    date: isValidDate(date, today) ? '' : 'Please choose today or a later date.',
-    time: isValidTime(selectedTime, availableTimes) ? '' : 'Please choose an available time.',
+    date: dateError,
+    // Date first: while the date is wrong, the time message stays quiet (the date error explains it).
+    // Then say what's really wrong: "choose a time" makes no sense when there are none.
+    time: dateError
+      ? ''
+      : noTimes
+        ? 'No times are available on this date. Please choose another date.'
+        : isValidTime(selectedTime, availableTimes) ? '' : 'Please choose an available time.',
     guests: isValidGuests(guests) ? '' : 'Please enter a whole number from 1 to 10.',
     occasion: isValidOccasion(occasion) ? '' : 'Please choose an occasion.',
   };
@@ -53,7 +68,8 @@ function BookingForm({ availableTimes, dispatch, submitForm }) {
       guests: Number(guests),
       occasion: occasion,
     };
-    submitForm(formData);
+    const saved = submitForm(formData);
+    setSaveFailed(!saved);
   }
 
   return (
@@ -82,10 +98,18 @@ function BookingForm({ availableTimes, dispatch, submitForm }) {
         aria-invalid={!!errors.time}
         aria-describedby={errors.time ? "res-time-error" : undefined}
       >
-        {/* Each time is unique and stays the same between renders, so it makes a good key. */}
-        {availableTimes.map((t) => (
-          <option key={t} value={t}>{t}</option>
-        ))}
+        {noTimes ? (
+          // One disabled option explains the empty list. Its value '' matches selectedTime,
+          // so the select stays controlled, and "required" still blocks the submit.
+          <option value="" disabled>
+            No times available
+          </option>
+        ) : (
+          // Each time is unique and stays the same between renders, so it makes a good key.
+          availableTimes.map((t) => (
+            <option key={t} value={t}>{t}</option>
+          ))
+        )}
       </select>
       {errors.time && <p id="res-time-error" className="field-error">{errors.time}</p>}
 
@@ -122,6 +146,10 @@ function BookingForm({ availableTimes, dispatch, submitForm }) {
       {/* Option B: the aria-label matches the visible text, so voice control ("click Make Your
           reservation") still works and screen readers say what the button does. */}
       <input type="submit" value="Make Your reservation" aria-label={"Make Your reservation"} disabled={!isFormValid} />
+      {/* role="alert": screen readers announce it right away, without the user moving to it. */}
+      {saveFailed && (
+        <p role="alert" className="form-error">We couldn't save your booking. Please try again.</p>
+      )}
     </form>
   );
 }

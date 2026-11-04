@@ -1,7 +1,7 @@
 import { useReducer } from 'react';
 import { Routes, Route, useNavigate } from 'react-router';
 import { fetchAPI, submitAPI } from '../../api';
-import { fromInputDate } from '../../utils/dates';
+import { fromInputDate, isInputDate } from '../../utils/dates';
 import HomePage from '../../pages/HomePage/HomePage';
 import BookingPage from '../../pages/BookingPage/BookingPage';
 import ConfirmedBooking from '../../pages/ConfirmedBooking/ConfirmedBooking';
@@ -17,6 +17,10 @@ export function initializeTimes() {
 // The reducer: takes the current times and an action, returns the next times.
 export function updateTimes(state, action) {
   if (action.type === 'DATE_CHANGED') {
+    // A cleared or incomplete date isn't a real day: there are no times, and nothing to ask the API.
+    if (!isInputDate(action.date)) {
+      return [];
+    }
     // action.date is the 'YYYY-MM-DD' string from the date input, but fetchAPI needs a Date.
     const date = fromInputDate(action.date);
     return fetchAPI(date);
@@ -34,10 +38,14 @@ function Main() {
   const navigate = useNavigate();
 
   // Sends the booking to the API. If it's accepted, show the confirmation page.
+  // Returns whether it was saved, so the form can tell the user when it wasn't.
   function submitForm(formData) {
-    if (submitAPI(formData)) {
-      navigate('/confirmed');
+    const saved = submitAPI(formData);
+    if (saved) {
+      // Carry the booking to the next page, so it can show what was booked.
+      navigate('/confirmed', { state: { booking: formData } });
     }
+    return saved;
   }
 
   return (

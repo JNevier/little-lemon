@@ -1,5 +1,7 @@
-import { initializeTimes, updateTimes } from './Main';
-import { fetchAPI } from '../../api';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router';
+import Main, { initializeTimes, updateTimes } from './Main';
+import { fetchAPI, submitAPI } from '../../api';
 import { toInputDate } from '../../utils/dates';
 
 // Replace the course API with a fake, so these tests don't depend on today's date.
@@ -34,5 +36,29 @@ test('updateTimes leaves the times alone for an action it does not know', () => 
   const state = ['17:00'];
 
   expect(updateTimes(state, { type: 'RESET' })).toBe(state);
+  expect(fetchAPI).not.toHaveBeenCalled();
+});
+
+test('a booking that is not saved shows an error and stays on the form', () => {
+  fetchAPI.mockReturnValue(['17:00', '18:00']);
+  submitAPI.mockReturnValue(false);
+  render(
+    <MemoryRouter initialEntries={['/reservations']}>
+      <Main />
+    </MemoryRouter>
+  );
+
+  fireEvent.click(screen.getByRole('button', { name: 'Make Your reservation' }));
+
+  expect(screen.getByRole('alert')).toHaveTextContent('We couldn\'t save your booking. Please try again.');
+  // Still on the booking page: the confirmation heading never appeared.
+  expect(screen.getByRole('heading', { level: 1, name: 'Reserve a Table' })).toBeInTheDocument();
+});
+
+test('updateTimes gives no times for a cleared or incomplete date, without asking the API', () => {
+  ['', '2026-10', '2026-1-5'].forEach((date) => {
+    const result = updateTimes(['17:00'], { type: 'DATE_CHANGED', date });
+    expect(result).toEqual([]);
+  });
   expect(fetchAPI).not.toHaveBeenCalled();
 });
