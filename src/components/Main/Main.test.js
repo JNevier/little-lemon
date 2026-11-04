@@ -54,3 +54,11 @@ test('a booking that is not saved shows an error and stays on the form', () => {
   // Still on the booking page: the confirmation heading never appeared.
   expect(screen.getByRole('heading', { level: 1, name: 'Reserve a Table' })).toBeInTheDocument();
 });
+
+test('updateTimes gives no times for a cleared or incomplete date, without asking the API', () => {
+  ['', '2026-10', '2026-1-5'].forEach((date) => {
+    const result = updateTimes(['17:00'], { type: 'DATE_CHANGED', date });
+    expect(result).toEqual([]);
+  });
+  expect(fetchAPI).not.toHaveBeenCalled();
+});

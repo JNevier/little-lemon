@@ -15,3 +15,9 @@ export function fromInputDate(text) {
   const [year, month, day] = text.split('-').map(Number);
   return new Date(year, month - 1, day);
 }
+
+// True only for a complete 'YYYY-MM-DD' date: 4 digits, dash, 2 digits, dash, 2 digits.
+// A cleared ('') or half-typed date fails, so callers can skip it.
+export function isInputDate(text) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(text);
+}
