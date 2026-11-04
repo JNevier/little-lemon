@@ -31,11 +31,23 @@ function BookingForm({ availableTimes, dispatch, submitForm }) {
   // otherwise use the first offered time, or '' if there are none.
   const selectedTime = availableTimes.includes(time) ? time : availableTimes[0] || '';
 
+  // An empty list means nothing can be booked on this date (a real API might return that for a full day).
+  const noTimes = availableTimes.length === 0;
+
+  // Worked out first, so the time message can wait until the date is valid.
+  const dateError = isValidDate(date, today) ? '' : 'Please choose today or a later date.';
+
   // Worked out from state on every render, never stored, so it can't go stale.
   // An empty message means "this field is fine".
   const errors = {
-    date: isValidDate(date, today) ? '' : 'Please choose today or a later date.',
-    time: isValidTime(selectedTime, availableTimes) ? '' : 'Please choose an available time.',
+    date: dateError,
+    // Date first: while the date is wrong, the time message stays quiet (the date error explains it).
+    // Then say what's really wrong: "choose a time" makes no sense when there are none.
+    time: dateError
+      ? ''
+      : noTimes
+        ? 'No times are available on this date. Please choose another date.'
+        : isValidTime(selectedTime, availableTimes) ? '' : 'Please choose an available time.',
     guests: isValidGuests(guests) ? '' : 'Please enter a whole number from 1 to 10.',
     occasion: isValidOccasion(occasion) ? '' : 'Please choose an occasion.',
   };
@@ -86,10 +98,18 @@ function BookingForm({ availableTimes, dispatch, submitForm }) {
         aria-invalid={!!errors.time}
         aria-describedby={errors.time ? "res-time-error" : undefined}
       >
-        {/* Each time is unique and stays the same between renders, so it makes a good key. */}
-        {availableTimes.map((t) => (
-          <option key={t} value={t}>{t}</option>
-        ))}
+        {noTimes ? (
+          // One disabled option explains the empty list. Its value '' matches selectedTime,
+          // so the select stays controlled, and "required" still blocks the submit.
+          <option value="" disabled>
+            No times available
+          </option>
+        ) : (
+          // Each time is unique and stays the same between renders, so it makes a good key.
+          availableTimes.map((t) => (
+            <option key={t} value={t}>{t}</option>
+          ))
+        )}
       </select>
       {errors.time && <p id="res-time-error" className="field-error">{errors.time}</p>}
 

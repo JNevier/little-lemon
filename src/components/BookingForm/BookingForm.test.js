@@ -111,3 +111,13 @@ describe('accessibility', () => {
     expect(guests).not.toHaveAccessibleDescription();
   });
 });
+
+describe('when no times are available', () => {
+  test('explains why, offers no time to pick, and blocks the submit', () => {
+    render(<BookingForm availableTimes={[]} dispatch={jest.fn()} submitForm={jest.fn()} />);
+
+    expect(screen.getByText('No times are available on this date. Please choose another date.')).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'No times available' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Make Your reservation' })).toBeDisabled();
+  });
+});
