@@ -26,7 +26,7 @@ test('shows the address, hours and contact details', () => {
   expect(within(footer).getByRole('heading', { name: 'Visit' })).toBeInTheDocument();
   expect(within(footer).getByText(/678 Pisa Ave/)).toBeInTheDocument();
   // The hours must match the booking form, which offers tables from 17:00 to 23:30.
-  expect(within(footer).getByText(/5 pm to midnight/)).toBeInTheDocument();
+  expect(within(footer).getByText(/Daily, 5 pm to midnight/)).toBeInTheDocument();
   expect(within(footer).getByText(/Last table at 11:30 pm/)).toBeInTheDocument();
   expect(within(footer).getByRole('link', { name: '(312) 555-0123' })).toHaveAttribute('href', 'tel:+13125550123');
   expect(within(footer).getByRole('link', { name: 'hello@littlelemon.example' })).toHaveAttribute(

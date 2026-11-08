@@ -40,18 +40,18 @@ function Footer() {
         <div className="footer-block">
           <h2 className="footer-heading">Hours</h2>
           <p className="footer-text">
-            Dinner daily, 5 pm to midnight
+            Daily, 5 pm to midnight
             <br />
             Last table at 11:30 pm
           </p>
         </div>
 
-        <div className="footer-block">
+        <div className="footer-block footer-contact">
           <h2 className="footer-heading">Contact</h2>
-          <p className="footer-text">
-            {/* "tel:" and "mailto:" links open the phone app or email app. */}
+          {/* "tel:" and "mailto:" links open the phone app or email app.
+              Side by side on phones (to keep the footer short), stacked on wider screens. */}
+          <p className="footer-text footer-contact-links">
             <a href="tel:+13125550123">(312) 555-0123</a>
-            <br />
             <a href="mailto:hello@littlelemon.example">hello@littlelemon.example</a>
           </p>
         </div>
@@ -67,7 +67,7 @@ function Footer() {
             ))}
           </ul>
         </nav>
-        <p className="footer-copyright">© 2026 Little Lemon · A portfolio project; the restaurant is fictional.</p>
+        <p className="footer-copyright">© 2026 Little Lemon · A fictional restaurant</p>
       </div>
     </footer>
   );

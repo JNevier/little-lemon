@@ -1,7 +1,7 @@
 /* A compact footer on the brand green: the restaurant's details, one row of links, a copyright line.
    Light text on green is about 6:1. */
 .footer {
-  padding: var(--space-6) var(--page-gutter) var(--space-5);
+  padding: var(--space-5) var(--page-gutter) var(--space-3);
   background-color: var(--color-primary-green);
   color: var(--color-light);
   font-size: var(--text-sm);
@@ -18,15 +18,17 @@
   outline-offset: 2px;
 }
 
-/* Mobile first: the brand on its own row, then Visit / Hours / Contact two per row. */
+/* Mobile first: the brand on its own row, Visit and Hours side by side, then Contact on its own row.
+   The gaps are small on phones, so the whole footer stays short (under 400px). */
 .footer-top {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-5) var(--space-4);
+  gap: var(--space-4);
 }
 
-.footer-brand {
-  /* Span both columns on phones. */
+/* The brand and Contact span both columns on phones. */
+.footer-brand,
+.footer-contact {
   grid-column: 1 / -1;
 }
 
@@ -72,8 +74,15 @@
   font-style: normal;
 }
 
-/* The phone and email links: each is its own 44px-tall tap target, easy to hit with a finger. */
-.footer-text a {
+/* The phone and email links: side by side on phones, wrapping if there isn't room. */
+.footer-contact-links {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--space-5);
+}
+
+/* Each is its own 44px-tall tap target, easy to hit with a finger. */
+.footer-contact-links a {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
@@ -86,8 +95,8 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2) var(--space-5);
-  margin-top: var(--space-5);
-  padding-top: var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-1);
   /* A see-through light line, so it's subtle on the green. */
   border-top: 1px solid rgb(237 239 238 / 0.25);
 }
@@ -116,12 +125,32 @@
 
 /* Bigger screens (768px and up): brand on the left, then Visit, Hours and Contact in one row. */
 @media (min-width: 768px) {
+  .footer {
+    padding-top: var(--space-6);
+  }
+
   .footer-top {
     grid-template-columns: 1.4fr repeat(3, 1fr);
     gap: var(--space-6);
   }
 
-  .footer-brand {
+  .footer-brand,
+  .footer-contact {
     grid-column: auto;
+  }
+
+  /* Stacked on wider screens. */
+  .footer-contact-links {
+    flex-direction: column;
+  }
+}
+
+/* NEW: "pointer: fine" means the main pointer is precise, like a mouse or trackpad (not a finger).
+   Only then do the stacked contact lines sit closer together. Tablets (touch) keep the 44px tap height,
+   even though they're 768px wide or more. */
+@media (min-width: 768px) and (pointer: fine) {
+  .footer-contact-links a {
+    min-height: 0;
+    padding: var(--space-1) 0;
   }
 }

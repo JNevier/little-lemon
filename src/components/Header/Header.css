@@ -17,9 +17,11 @@
   z-index: 1;
 }
 
-/* The logo link: block, so its focus ring hugs the logo. */
+/* The logo link: at least 44px tall (easy to tap), with the logo centered in it. */
 .header-logo-link {
-  display: block;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
   border-radius: var(--radius-sm);
 }
 
