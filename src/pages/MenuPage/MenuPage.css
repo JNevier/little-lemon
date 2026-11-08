@@ -1,67 +1,148 @@
-/* Page padding so the text doesn't touch the screen edge on phones. */
-.menu-page {
-  padding: 2rem var(--page-gutter);
-}
-
-/* The filter buttons sit in a row and wrap onto a new line when they don't fit (phones). */
+/* The filter bar: a row of light tabs under the peach header, full width with a thin line under it. */
 .menu-page-filters {
+  /* NEW: position: sticky keeps an element in the normal page flow until it reaches the edge given by
+     `top`, then holds it there while the rest of the page scrolls under it. Here: the filter bar stays
+     at the top of the screen while you scroll through the dishes, so you can switch category anytime. */
+  position: sticky;
+  top: 0;
+  /* Above the dishes that scroll underneath it. */
+  z-index: 2;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  /* A little less than the page gutter on phones: each tab has its own padding too, so the first
+     tab's text still lines up with the page content. */
+  padding: 0 var(--space-2);
+  /* A solid background, so the dishes don't show through while they scroll under the bar. */
+  background-color: var(--color-white);
+  border-bottom: 1px solid var(--color-light);
+  box-shadow: var(--shadow-sm);
+  /* A safety net for very narrow screens or big zoom: if the five tabs still don't fit, the bar scrolls
+     sideways on its own, instead of making the whole page wider than the screen. */
+  overflow-x: auto;
 }
 
+/* Each tab: plain text with a see-through bar under it. Lighter than the old outlined pills.
+   On phones the padding is small so all five tabs fit from 320px up, and flex: 1 0 auto shares
+   any space left over between them, so they spread evenly across the bar. */
 .menu-page-filter {
-  /* Big enough to tap easily. */
-  min-height: 44px;
-  padding: 0.5rem 1rem;
-  border: 2px solid var(--color-primary-green);
-  border-radius: var(--radius);
-  background-color: var(--color-white);
-  color: var(--color-primary-green);
+  flex: 1 0 auto;
+  min-height: 48px;
+  padding: 0 0.3125rem;
+  border: none;
+  /* The bar under the tab. Transparent until hover or selected. */
+  border-bottom: 3px solid transparent;
+  background: none;
+  color: var(--color-dark);
   /* Buttons don't take the page font by default. */
   font-family: inherit;
-  font-size: 1rem;
+  font-size: var(--text-base);
   font-weight: 700;
+  white-space: nowrap;
   cursor: pointer;
+  transition: color var(--transition), border-color var(--transition);
 }
 
 .menu-page-filter:hover {
-  /* Green text on peach is about 5.2:1. */
-  background-color: var(--color-secondary-peach);
+  border-bottom-color: var(--color-secondary-salmon);
+  color: var(--color-primary-green);
 }
 
-/* The chosen filter. We style the aria-pressed attribute itself, so the look and what
-   screen readers hear always match. A filled background, not just a color, so it doesn't rely on color alone. */
+/* The chosen filter. We style the aria-pressed attribute itself, so the look and what screen readers
+   hear always match. A thick green bar (a shape) plus green text, so it doesn't rely on color alone.
+   Not yellow: yellow is kept for the main action. */
 .menu-page-filter[aria-pressed='true'] {
-  /* Green text on yellow is about 4.5:1. */
-  background-color: var(--color-primary-yellow);
+  border-bottom-color: var(--color-primary-green);
+  color: var(--color-primary-green);
 }
 
+/* Bigger screens (768px and up): the tabs keep their natural width, with more room inside, lined up on the left. */
+@media (min-width: 768px) {
+  .menu-page-filters {
+    gap: var(--space-1);
+    padding: 0 var(--page-gutter);
+  }
+
+  .menu-page-filter {
+    flex: none;
+    padding: 0 var(--space-3);
+  }
+}
+
+/* The focus ring sits inside the tab, so the bar's edges don't cut it off. */
 .menu-page-filter:focus-visible {
-  outline: 3px solid var(--color-dark);
-  outline-offset: 2px;
+  outline: 3px solid var(--color-primary-green);
+  outline-offset: -3px;
+  border-radius: var(--radius-sm);
 }
 
-/* The fetch error stands out with a terracotta border (--color-error). The text stays dark, so it's easy to read. */
-.menu-page-error {
-  border-left: 4px solid var(--color-error);
-  padding-left: 0.75rem;
+/* The dishes area: page padding, and room so the list's top isn't hidden under the sticky bar
+   when the page scrolls back to it. */
+.menu-page-content {
+  padding: var(--space-6) var(--page-gutter) var(--section-space);
+  /* NEW: scroll-margin-top leaves this much space above the element when the browser scrolls to it. */
+  scroll-margin-top: 3.5rem;
+}
+
+/* Focus only moves here from the code (after "Try again"), so no focus ring is needed. */
+.menu-page-content:focus {
+  outline: none;
+}
+
+/* One category: its heading, then its dishes. */
+.menu-page-section + .menu-page-section {
+  margin-top: var(--space-7);
+}
+
+/* The category heading with a short green line under it, like a label in a printed menu. */
+.menu-page-section-title {
+  margin-bottom: var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: 2px solid var(--color-primary-green);
 }
 
 /* Mobile first: one dish per row. Remove the list's bullets and default spacing. */
 .menu-page-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1rem;
+  column-gap: var(--space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-/* Bigger screens (768px and up): two dishes per row. */
-@media (min-width: 768px) {
+/* Bigger screens (900px and up): two columns of dishes. Rows, not cards, so an odd number of dishes
+   doesn't leave a lonely card: the last column is simply one row shorter. */
+@media (min-width: 900px) {
   .menu-page-list {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* The skeleton rows: two grey lines with the same spacing and divider as a real dish. */
+.menu-page-skeleton-row {
+  padding: var(--space-5) 0;
+  border-bottom: 1px solid var(--color-light);
+}
+
+.menu-page-skeleton-row .skeleton-line-short {
+  margin-top: var(--space-3);
+}
+
+/* The fetch error: a terracotta bar on the left (--color-error); the text stays dark, so it's easy to read. */
+.menu-page-error {
+  padding-left: var(--space-4);
+  border-left: 4px solid var(--color-error);
+}
+
+.menu-page-error p {
+  margin: 0 0 var(--space-4);
+}
+
+/* The closing call to action: centered on the grey band. */
+.menu-page-cta {
+  text-align: center;
+}
+
+.menu-page-cta .lead {
+  margin-left: auto;
+  margin-right: auto;
 }
