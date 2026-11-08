@@ -43,6 +43,8 @@ const pairs = [
   ['error', 'white', 'ui', 'Error bar and icon beside a message (the text says what is wrong too)'],
   ['error', 'light', 'ui', 'Error bar on a grey band'],
   ['error', 'white', 'text', 'Error heading text on white'],
+  ['white', 'error', 'text', 'Yes, cancel button (white on terracotta)'],
+  ['white', 'green', 'ui', 'Booking step numbers and date badges'],
 ];
 
 // WCAG "relative luminance": how bright a color looks, from 0 (black) to 1 (white).

@@ -1,32 +1,154 @@
-/* One column: each label sits above its field, with even space between rows.
-   This replaces the inline style from the course's HTML starter. */
+/* NEW: CSS Grid areas. grid-template-areas draws the layout as a little map made of names, and each part
+   says which name it fills (grid-area). Change the map in a media query, and the parts move, without
+   touching the HTML.
+   Phones: one column. The error summary, the three steps, then the summary just above the button. */
 .booking-form {
   display: grid;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'errors'
+    'steps'
+    'summary'
+    'actions';
 }
 
-/* Labels: bold so they stand out from the fields under them. */
-.booking-form label {
+.booking-form-errors {
+  grid-area: errors;
+}
+
+.booking-form-steps {
+  grid-area: steps;
+}
+
+.booking-summary {
+  grid-area: summary;
+}
+
+.booking-form-actions {
+  grid-area: actions;
+}
+
+/* Wide screens (960px and up): the form on the left, the summary in a column on the right.
+   The summary's name fills all three rows of the right column. */
+@media (min-width: 960px) {
+  .booking-form {
+    grid-template-columns: minmax(0, 1fr) 20rem;
+    grid-template-areas:
+      'errors  summary'
+      'steps   summary'
+      'actions summary';
+    /* Columns are 2rem apart. Rows have no gap: the error summary isn't always there,
+       and an empty row would still leave a gap. The parts use margins instead. */
+    column-gap: var(--space-6);
+    /* Each row is only as tall as its content; leftover height goes to the last row. */
+    grid-template-rows: auto auto 1fr;
+  }
+
+  /* The summary stays in view while the form scrolls (it sticks inside its column).
+     align-self: start lets it be shorter than the column, so it has room to move. */
+  .booking-summary {
+    position: sticky;
+    top: var(--space-5);
+    align-self: start;
+  }
+}
+
+/* --- The three steps --- */
+
+/* The steps are white cards, stacked with even space between them. */
+.booking-form-steps {
+  display: grid;
+  gap: var(--space-5);
+  margin-bottom: var(--space-5);
+}
+
+.booking-step {
+  padding: var(--space-5);
+}
+
+/* The step heading: a green number in a circle, then the name. */
+.booking-step-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-h2);
+}
+
+/* The number circle. White on green is about 7:1. */
+.booking-step-number {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: var(--color-primary-green);
+  color: var(--color-white);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
   font-weight: 700;
 }
 
-/* Fields fill the width on phones and are tall enough to tap easily. */
-.booking-form input,
+/* --- Fields --- */
+
+/* One field: its label, the input, then any error or hint, stacked with small gaps. */
+.booking-field {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+}
+
+/* Space between one field (or row of fields) and the next. */
+.booking-field + .booking-field,
+.booking-field + .booking-field-row,
+.booking-field-row + .booking-field,
+.booking-field + .booking-seating {
+  margin-top: var(--space-4);
+}
+
+/* Fields inside a row are spaced by the row's own gap, so they don't also get the margin above
+   (otherwise the second field in a row would sit lower than the first). */
+.booking-field-row > .booking-field {
+  margin-top: 0;
+}
+
+/* Two fields side by side from 600px; one under the other on phones. */
+.booking-field-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+@media (min-width: 600px) {
+  .booking-field-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Labels and the seating legend: bold so they stand out from the fields under them. */
+.booking-field label,
+.booking-seating legend {
+  font-weight: 700;
+}
+
+/* Text fields, selects and the text box: full width and tall enough to tap easily. */
+.booking-form input:not([type='radio']),
 .booking-form select,
 .booking-form textarea {
   box-sizing: border-box;
   width: 100%;
   min-height: 2.75rem;
-  padding: 0.5rem 0.75rem;
+  padding: var(--space-2) var(--space-3);
   font: inherit;
   color: var(--color-dark);
   background-color: var(--color-white);
   border: 1px solid var(--color-primary-green);
-  border-radius: 0.5rem;
+  border-radius: var(--radius-sm);
 }
 
-/* Keyboard focus ring, matching the nav links. Outlines need 3:1; green on white is about 7:1. */
+/* Keyboard focus ring, matching the links. Outlines need 3:1; green on white is about 7:1. */
 .booking-form input:focus-visible,
 .booking-form select:focus-visible,
 .booking-form textarea:focus-visible {
@@ -34,81 +156,10 @@
   outline-offset: 2px;
 }
 
-/* A little extra space before each new label, so the label/field pairs read as groups. */
-.booking-form input + label,
-.booking-form select + label,
-.booking-form fieldset + label {
-  margin-top: 0.75rem;
-}
-
-/* Submit button: brand yellow, rounded like the site's other buttons. */
-.booking-form input[type='submit'] {
-  margin-top: 1.5rem;
-  font-weight: 700;
-  background-color: var(--color-primary-yellow);
-  border: none;
-  border-radius: var(--radius);
-  cursor: pointer;
-}
-
-.booking-form input[type='submit']:hover {
-  background-color: var(--color-secondary-salmon);
-}
-
-/* Disabled (form not valid yet): faded, a "not allowed" cursor, and no hover color change.
-   Placed after :hover so it wins when both apply. */
-.booking-form input[type='submit']:disabled {
-  background-color: var(--color-primary-yellow);
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Error message under a field. Dark text for readable contrast; the terracotta bar (--color-error) marks it as a warning
-   (salmon text on white would be too faint to read). */
-.booking-form .field-error {
-  margin: 0;
-  padding-left: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--color-dark);
-  border-left: 4px solid var(--color-error);
-}
-
-/* Keep the gap before the next label when an error message sits between them. */
-.booking-form .field-error + label {
-  margin-top: 0.75rem;
-}
-
-/* Bigger screens (768px and up): don't stretch the fields across the whole page. */
-@media (min-width: 768px) {
-  .booking-form {
-    max-width: 28rem;
-  }
-}
-
-/* Message when a booking couldn't be saved: the same look as the field errors,
-   a little bigger and with space above it, so it stands out under the button. */
-.booking-form .form-error {
-  margin: 0.75rem 0 0;
-  padding: 0.5rem 0.75rem;
-  font-weight: 700;
-  color: var(--color-dark);
-  border-left: 4px solid var(--color-error);
-  background-color: var(--color-light);
-}
-
-/* "Fields marked * are required." at the top of the form. */
-.booking-form-required-note {
-  margin: 0 0 0.5rem;
-}
-
-/* The * after every required label. It's added by CSS so the label's text (its accessible name)
-   stays "Choose date", not "Choose date *". The "/ ''" part tells screen readers to skip the star:
-   the fields are already announced as "required" because of the required attribute.
-   The first line is a fallback for browsers that don't understand the "/ ''" form. */
-.booking-form .required::after {
-  content: ' *';
-  content: ' *' / '';
-  color: var(--color-dark);
+/* A field with a problem gets a thicker terracotta border, as well as its message.
+   :is(input, select, textarea) makes this rule as specific as the one above, and it comes later, so it wins. */
+.booking-form :is(input, select, textarea)[aria-invalid='true'] {
+  border: 2px solid var(--color-error);
 }
 
 /* Users can make the text box taller, but not wider than the form. */
@@ -116,46 +167,196 @@
   resize: vertical;
 }
 
-/* Small grey help text under a field or under the button. Dark grey on white is readable (about 12:1). */
-.booking-form .field-hint {
+/* Error message under a field. Dark text for readable contrast; the terracotta bar (--color-error) marks it
+   as a warning (salmon text on white would be too faint to read). */
+.booking-form .field-error {
   margin: 0;
-  font-size: 0.875rem;
+  padding-left: var(--space-2);
+  font-size: var(--text-sm);
   color: var(--color-dark);
+  border-left: 4px solid var(--color-error);
 }
 
-/* The radio group: remove the browser's box, and give it the same space as the other fields. */
-.booking-form-seating {
-  margin: 0.75rem 0 0;
+/* Help text under a field (dark on white, about 12.6:1). */
+.booking-form .field-hint {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+/* --- Seating cards --- */
+
+/* The radio group: remove the browser's box around a fieldset. */
+.booking-seating {
+  margin: 0;
   padding: 0;
   border: none;
 }
 
-/* The group's name looks like the other labels. */
-.booking-form-seating legend {
-  font-weight: 700;
+.booking-seating legend {
+  margin-bottom: var(--space-2);
   padding: 0;
-  margin-bottom: 0.25rem;
 }
 
-/* One choice: the circle and its text side by side. The whole row is the label, so tapping the
-   text picks the choice too, and the row is 44px tall, easy to tap.
-   ".booking-form .booking-form-radio" (two classes) beats ".booking-form label", so these labels aren't bold. */
-.booking-form .booking-form-radio {
-  display: flex;
+/* Phones: the three choices stacked. 600px and up: side by side. */
+.booking-seating-options {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+@media (min-width: 600px) {
+  .booking-seating-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* One choice: a bordered box with the radio circle, the name and a short line under it.
+   The whole box is the label, so clicking anywhere in it picks the choice. */
+.seating-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--space-2);
   align-items: center;
-  gap: 0.5rem;
-  min-height: 44px;
-  font-weight: 400;
+  padding: var(--space-3) var(--space-4);
+  border: 2px solid var(--color-light);
+  border-radius: var(--radius-sm);
   cursor: pointer;
+  transition: border-color var(--transition), background-color var(--transition);
 }
 
-/* Radio buttons must not get the text-field styles above (full width, padding, border). */
-.booking-form input[type='radio'] {
+.seating-card:hover {
+  border-color: var(--color-secondary-salmon);
+}
+
+/* NEW: :has() selects an element by what's inside it. Here: the card whose radio is checked gets a green
+   border and a peach background, so the choice shows on the whole card, not just on the small circle.
+   The filled circle stays too, so it never relies on color alone. */
+.seating-card:has(input:checked) {
+  border-color: var(--color-primary-green);
+  background-color: var(--color-secondary-peach);
+}
+
+/* Keyboard focus on the radio draws the ring around the whole card. */
+.seating-card:has(input:focus-visible) {
+  outline: 3px solid var(--color-primary-green);
+  outline-offset: 2px;
+}
+
+.seating-card input:focus-visible {
+  outline: none;
+}
+
+/* The radio circle: brand green when picked. */
+.seating-card input {
   width: 1.25rem;
   height: 1.25rem;
-  min-height: 0;
   margin: 0;
-  padding: 0;
-  /* Brand green for the picked circle. */
   accent-color: var(--color-primary-green);
+}
+
+.seating-card-name {
+  font-weight: 700;
+}
+
+/* The short line sits under the name, in the second column. */
+.seating-card-description {
+  grid-column: 2;
+  font-size: var(--text-sm);
+}
+
+/* --- The live summary --- */
+
+.booking-summary {
+  margin-bottom: var(--space-5);
+  padding: var(--space-5);
+}
+
+.booking-summary-title {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-h2);
+}
+
+/* The restaurant details under the booking: smaller text, on a peach panel. Dark on peach is about 9.5:1. */
+.booking-summary-info {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-secondary-peach);
+  font-size: var(--text-sm);
+}
+
+.booking-summary-info p {
+  margin: 0;
+}
+
+.booking-summary-info p + p {
+  margin-top: var(--space-1);
+}
+
+/* --- Error summary --- */
+
+/* A white box with a thick terracotta border, at the top of the form. */
+.booking-form-errors {
+  margin-bottom: var(--space-5);
+  padding: var(--space-4) var(--space-5);
+  border: 3px solid var(--color-error);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-white);
+}
+
+/* It gets focus from the code, and its border already shows where it is, so no extra ring is needed. */
+.booking-form-errors:focus {
+  outline: none;
+}
+
+.booking-form-errors:focus-visible {
+  outline: 3px solid var(--color-dark);
+  outline-offset: 2px;
+}
+
+.booking-form-errors-title {
+  margin-bottom: var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.booking-form-errors-list {
+  margin: 0;
+  padding-left: var(--space-5);
+}
+
+/* Each error is a link to its field. Dark text (about 12.6:1), underlined, bold. */
+.booking-form-errors-list a {
+  display: inline-flex;
+  align-items: center;
+  /* 44px tall, easy to tap. */
+  min-height: 44px;
+  color: var(--color-dark);
+  font-weight: 700;
+}
+
+/* --- Button and save message --- */
+
+/* Full width on phones (easy to reach with a thumb); its natural width on wide screens. */
+.booking-form-submit {
+  width: 100%;
+}
+
+@media (min-width: 600px) {
+  .booking-form-submit {
+    width: auto;
+    min-width: 16rem;
+  }
+}
+
+/* Message when a booking couldn't be saved: the same look as the field errors,
+   a little bigger and with space above it, so it stands out under the button. */
+.booking-form .form-error {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-2) var(--space-3);
+  font-weight: 700;
+  color: var(--color-dark);
+  border-left: 4px solid var(--color-error);
+  background-color: var(--color-white);
 }

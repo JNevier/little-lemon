@@ -1,0 +1,38 @@
+/* Label on the left, value on the right, with a thin line between rows. */
+.reservation-summary {
+  margin: 0;
+}
+
+.reservation-summary-row {
+  display: grid;
+  grid-template-columns: 6rem 1fr;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-light);
+}
+
+.reservation-summary-row:last-child {
+  border-bottom: none;
+}
+
+/* The labels: small spaced-out capitals in green, like the eyebrows (green on white is about 7:1). */
+.reservation-summary-row dt {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.7;
+  text-transform: uppercase;
+  color: var(--color-primary-green);
+}
+
+.reservation-summary-row dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+/* "Not chosen yet": normal weight and italic, so it reads as a placeholder, not as a real value.
+   Still dark text (about 12.6:1), not faded grey, so it stays easy to read. */
+.reservation-summary-empty {
+  font-style: italic;
+  font-weight: 400;
+}

@@ -1,6 +1,6 @@
-/* Page padding so the text doesn't touch the screen edge on phones. */
-.my-reservations-page {
-  padding: 2rem var(--page-gutter);
+/* The tabs sit on the header's bottom edge, so the header's bottom padding is removed. */
+.my-reservations-page-header {
+  padding-bottom: 0;
 }
 
 /* The heading gets focus from code after a cancel, not from the user, so no focus ring is needed. */
@@ -8,65 +8,154 @@
   outline: none;
 }
 
+/* The bookings area: page padding on a light grey band, so the white cards stand out. */
+.my-reservations-page-body {
+  padding: var(--space-5) var(--page-gutter) var(--section-space);
+  background-color: var(--color-light);
+}
+
 /* The status message is bold so a sighted user notices it too. When empty it takes no space. */
 .my-reservations-page-status {
+  margin: 0 0 var(--space-4);
   font-weight: 700;
-  margin: 0 0 1rem;
 }
 
-/* Remove the list's bullets and default spacing; rows are separated by a gap instead. */
+.my-reservations-page-status:empty {
+  margin: 0;
+}
+
+/* "Upcoming" and "Past", each with its own list. */
+.my-reservations-page-group + .my-reservations-page-group {
+  margin-top: var(--space-7);
+}
+
+/* Remove the list's bullets and default spacing; cards are separated by a gap instead. */
 .my-reservations-page-list {
-  list-style: none;
+  display: grid;
+  gap: var(--space-4);
   margin: 0;
   padding: 0;
+  list-style: none;
+}
+
+/* The empty state: a white card with the message and the booking button. */
+.my-reservations-page-empty {
+  padding: var(--space-5);
+}
+
+.my-reservations-page-empty p {
+  margin: 0 0 var(--space-4);
+}
+
+/* --- One reservation card --- */
+
+/* Phones: the date badge on the left, the details beside it, the Cancel button underneath.
+   Grid areas again: "badge body" on the first row, the actions across the whole second row. */
+.reservation-card {
   display: grid;
-  gap: 1rem;
-}
-
-/* One reservation: a light, rounded box. Mobile first: details on top, Cancel button underneath. */
-.my-reservations-page-item {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background-color: var(--color-light);
-  border-radius: var(--radius);
-}
-
-/* The date is this row's heading. It uses the body font at card-title size, like the h3 cards. */
-.my-reservations-page-date {
-  margin: 0;
-  font-family: var(--font-body);
-  font-size: 1.125rem;
-  font-weight: 700;
-  line-height: 1.5;
-}
-
-.my-reservations-page-details {
-  margin: 0.25rem 0 0;
-}
-
-/* Cancel: an outlined button, so it doesn't look like the main yellow action. */
-.my-reservations-page-cancel {
-  min-height: 44px;
-  padding: 0.5rem 1.25rem;
-  border: 2px solid var(--color-primary-green);
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    'badge body'
+    'actions actions';
+  gap: var(--space-4);
+  padding: var(--space-5);
   border-radius: var(--radius);
   background-color: var(--color-white);
-  color: var(--color-primary-green);
-  font: inherit;
+  box-shadow: var(--shadow-sm);
+}
+
+.reservation-card-badge {
+  grid-area: badge;
+}
+
+.reservation-card-body {
+  grid-area: body;
+}
+
+.reservation-card-actions {
+  grid-area: actions;
+}
+
+/* Wider screens (600px and up): badge, details and actions all in one row. */
+@media (min-width: 600px) {
+  .reservation-card {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: 'badge body actions';
+    align-items: center;
+  }
+}
+
+/* The date badge: a green square with the day number and the month. White on green is about 7:1. */
+.reservation-card-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary-green);
+  color: var(--color-white);
+  line-height: 1;
+}
+
+.reservation-card-day {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+.reservation-card-month {
+  font-size: var(--text-sm);
   font-weight: 700;
-  cursor: pointer;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.my-reservations-page-cancel:hover {
-  /* Green text on peach is about 5.2:1. */
-  background-color: var(--color-secondary-peach);
+/* A past booking: the badge is a green outline instead of filled green, so upcoming ones stand out.
+   The heading "Past" above the list says it in words, so this isn't the only signal. */
+.reservation-card-past .reservation-card-badge {
+  border: 2px solid var(--color-primary-green);
+  background-color: var(--color-white);
+  color: var(--color-primary-green);
 }
 
-.my-reservations-page-cancel:focus-visible {
-  outline: 3px solid var(--color-dark);
-  outline-offset: 2px;
+/* The full date is the card's heading, in the body font at card-title size. */
+.reservation-card-date {
+  margin: 0;
+}
+
+.reservation-card-time {
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-primary-green);
+}
+
+/* The details as pills (the .tag look is shared, in index.css). */
+.reservation-card-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reservation-card-name {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-sm);
+}
+
+/* --- Cancel and its confirmation --- */
+
+.reservation-card-question {
+  margin: 0 0 var(--space-2);
+  font-weight: 700;
+}
+
+.reservation-card-answers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
