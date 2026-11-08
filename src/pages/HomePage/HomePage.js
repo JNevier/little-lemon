@@ -8,6 +8,9 @@ import Chicago from '../../components/Chicago/Chicago';
 function HomePage() {
   return (
     <>
+      {/* React 19 moves this into the page's <head>, so the browser tab says where you are.
+          The home page leads with what the restaurant is, which also helps search results. */}
+      <title>Little Lemon | Mediterranean Restaurant in Chicago</title>
       <CallToAction />
       <Specials />
       <CustomersSay />
