@@ -1,6 +1,16 @@
 import { useState } from 'react';
 import { toInputDate } from '../../utils/dates';
-import { OCCASIONS, isValidDate, isValidTime, isValidGuests, isValidOccasion } from './validation';
+import {
+  OCCASIONS,
+  SEATING_OPTIONS,
+  isValidDate,
+  isValidTime,
+  isValidGuests,
+  isValidOccasion,
+  isValidName,
+  isValidEmail,
+  isValidSeating,
+} from './validation';
 import './BookingForm.css';
 
 // A controlled form: React state holds every field's value, and each input just shows it.
@@ -18,6 +28,15 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
   // Kept as a string, like every input value; it's turned into a number only when it's used.
   const [guests, setGuests] = useState('1');
   const [occasion, setOccasion] = useState('Birthday');
+  // Contact details and extras. Name and email start empty: the guest has to type them.
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [seating, setSeating] = useState('No preference');
+  const [requests, setRequests] = useState('');
+  // NEW: the "touched" pattern. A field is touched once the user has left it (the blur event).
+  // Name and email start empty, which is invalid; without this, a brand-new form would greet
+  // the user with red error text before they've typed anything.
+  const [touched, setTouched] = useState({ name: false, email: false });
   // Whether the last save failed. Unlike the field errors, it can't be worked out from the
   // fields: it's the result of a submit, so it has to be remembered in state.
   const [saveFailed, setSaveFailed] = useState(false);
@@ -60,9 +79,23 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
         : isValidTime(selectedTime, openTimes) ? '' : 'Please choose an available time.',
     guests: isValidGuests(guests) ? '' : 'Please enter a whole number from 1 to 10.',
     occasion: isValidOccasion(occasion) ? '' : 'Please choose an occasion.',
+    seating: isValidSeating(seating) ? '' : 'Please choose a seating preference.',
+    name: isValidName(name) ? '' : 'Please enter your name (at least 2 characters).',
+    email: isValidEmail(email) ? '' : 'Please enter a valid email address, like name@example.com.',
   };
   // The form is valid only when every message is empty.
   const isFormValid = Object.values(errors).every((v) => v === '');
+
+  // Which name/email errors to SHOW: only for fields the user has already left.
+  // The button still uses `errors` above, so it stays disabled until everything is valid.
+  const shownNameError = touched.name ? errors.name : '';
+  const shownEmailError = touched.email ? errors.email : '';
+
+  // Marks one field as touched, keeping the others as they are.
+  // { ...touched } copies the object; [field]: true then sets just that one key.
+  function markTouched(field) {
+    setTouched({ ...touched, [field]: true });
+  }
 
   function handleSubmit(e) {
     // Stop the browser's default submit, which would reload the page and wipe the state.
@@ -77,6 +110,11 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
       // Number, not parseInt: it keeps exactly what was typed (2.7 stays 2.7), so validation can catch it.
       guests: Number(guests),
       occasion: occasion,
+      seating: seating,
+      // trim() removes spaces at both ends, so " Test Guest " is saved as "Test Guest".
+      name: name.trim(),
+      email: email.trim(),
+      requests: requests.trim(),
     };
     const saved = submitForm(formData);
     setSaveFailed(!saved);
@@ -85,7 +123,10 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
   return (
     // A name turns the form into a landmark that screen readers can jump to.
     <form className="booking-form" aria-label={"Reserve a Table"} onSubmit={handleSubmit}>
-      <label htmlFor="res-date">Choose date</label>
+      {/* The * after a label comes from CSS (the "required" class), so labels keep their plain names. */}
+      <p className="booking-form-required-note">Fields marked * are required.</p>
+
+      <label htmlFor="res-date" className="required">Choose date</label>
       <input
         type="date"
         id="res-date"
@@ -99,7 +140,7 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
       />
       {errors.date && <p id="res-date-error" className="field-error">{errors.date}</p>}
 
-      <label htmlFor="res-time">Choose time</label>
+      <label htmlFor="res-time" className="required">Choose time</label>
       <select
         id="res-time"
         required
@@ -123,7 +164,7 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
       </select>
       {errors.time && <p id="res-time-error" className="field-error">{errors.time}</p>}
 
-      <label htmlFor="guests">Number of guests</label>
+      <label htmlFor="guests" className="required">Number of guests</label>
       <input
         type="number"
         id="guests"
@@ -137,7 +178,7 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
       />
       {errors.guests && <p id="guests-error" className="field-error">{errors.guests}</p>}
 
-      <label htmlFor="occasion">Occasion</label>
+      <label htmlFor="occasion" className="required">Occasion</label>
       <select
         id="occasion"
         required
@@ -153,9 +194,90 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
       </select>
       {errors.occasion && <p id="occasion-error" className="field-error">{errors.occasion}</p>}
 
+      {/* A group of radio buttons goes in a fieldset; the legend is the group's name.
+          Screen readers say "Seating preference, group" and then each choice.
+          All three share name="seating", so only one can be picked, and the arrow keys move between them. */}
+      <fieldset className="booking-form-seating">
+        <legend className="required">Seating preference</legend>
+        {SEATING_OPTIONS.map((option) => (
+          <label key={option} className="booking-form-radio">
+            <input
+              type="radio"
+              name="seating"
+              value={option}
+              checked={seating === option}
+              onChange={(e) => setSeating(e.target.value)}
+              required
+            />
+            {option}
+          </label>
+        ))}
+      </fieldset>
+
+      <label htmlFor="res-name" className="required">Full name</label>
+      <input
+        type="text"
+        id="res-name"
+        required
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        // onBlur runs when the user leaves the field (Tab away or click elsewhere).
+        onBlur={() => markTouched('name')}
+        // NEW: autocomplete tells the browser what this field is for, so it can offer to fill it in
+        // from the user's saved details. It saves typing, and helps people with memory or motor
+        // difficulties (WCAG 1.3.5 "Identify Input Purpose"). "name" means the person's full name.
+        autoComplete="name"
+        aria-invalid={!!shownNameError}
+        aria-describedby={shownNameError ? "res-name-error" : undefined}
+      />
+      {shownNameError && <p id="res-name-error" className="field-error">{shownNameError}</p>}
+
+      <label htmlFor="res-email" className="required">Email</label>
+      <input
+        // type="email" brings up the keyboard with @ on phones.
+        type="email"
+        id="res-email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        onBlur={() => markTouched('email')}
+        // "email": the browser can offer the user's saved email address.
+        autoComplete="email"
+        aria-invalid={!!shownEmailError}
+        aria-describedby={shownEmailError ? "res-email-error" : undefined}
+      />
+      {shownEmailError && <p id="res-email-error" className="field-error">{shownEmailError}</p>}
+
+      <label htmlFor="res-requests">Special requests (optional)</label>
+      <textarea
+        id="res-requests"
+        rows="3"
+        // The browser stops typing after 200 characters.
+        maxLength={200}
+        value={requests}
+        onChange={(e) => setRequests(e.target.value)}
+        aria-describedby="res-requests-hint"
+      />
+      {/* Always shown, so the limit is known before typing. */}
+      <p id="res-requests-hint" className="field-hint">
+        For example a high chair or an allergy. Up to 200 characters ({requests.length}/200).
+      </p>
+
       {/* Option B: the aria-label matches the visible text, so voice control ("click Make Your
           reservation") still works and screen readers say what the button does. */}
-      <input type="submit" value="Make Your reservation" aria-label={"Make Your reservation"} disabled={!isFormValid} />
+      <input
+        type="submit"
+        value="Make Your reservation"
+        aria-label={"Make Your reservation"}
+        disabled={!isFormValid}
+        // While the button is disabled, screen readers also read the hint below it, so users know why.
+        aria-describedby={isFormValid ? undefined : "submit-hint"}
+      />
+      {!isFormValid && (
+        <p id="submit-hint" className="field-hint">
+          Fill in all required fields to enable the button.
+        </p>
+      )}
       {/* role="alert": screen readers announce it right away, without the user moving to it. */}
       {saveFailed && (
         <p role="alert" className="form-error">We couldn't save your booking. Please try again.</p>

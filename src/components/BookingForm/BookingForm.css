@@ -13,7 +13,8 @@
 
 /* Fields fill the width on phones and are tall enough to tap easily. */
 .booking-form input,
-.booking-form select {
+.booking-form select,
+.booking-form textarea {
   box-sizing: border-box;
   width: 100%;
   min-height: 2.75rem;
@@ -27,14 +28,16 @@
 
 /* Keyboard focus ring, matching the nav links. Outlines need 3:1; green on white is about 7:1. */
 .booking-form input:focus-visible,
-.booking-form select:focus-visible {
+.booking-form select:focus-visible,
+.booking-form textarea:focus-visible {
   outline: 3px solid var(--color-primary-green);
   outline-offset: 2px;
 }
 
 /* A little extra space before each new label, so the label/field pairs read as groups. */
 .booking-form input + label,
-.booking-form select + label {
+.booking-form select + label,
+.booking-form fieldset + label {
   margin-top: 0.75rem;
 }
 
@@ -91,4 +94,68 @@
   color: var(--color-dark);
   border-left: 4px solid var(--color-secondary-salmon);
   background-color: var(--color-light);
+}
+
+/* "Fields marked * are required." at the top of the form. */
+.booking-form-required-note {
+  margin: 0 0 0.5rem;
+}
+
+/* The * after every required label. It's added by CSS so the label's text (its accessible name)
+   stays "Choose date", not "Choose date *". The "/ ''" part tells screen readers to skip the star:
+   the fields are already announced as "required" because of the required attribute.
+   The first line is a fallback for browsers that don't understand the "/ ''" form. */
+.booking-form .required::after {
+  content: ' *';
+  content: ' *' / '';
+  color: var(--color-dark);
+}
+
+/* Users can make the text box taller, but not wider than the form. */
+.booking-form textarea {
+  resize: vertical;
+}
+
+/* Small grey help text under a field or under the button. Dark grey on white is readable (about 12:1). */
+.booking-form .field-hint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-dark);
+}
+
+/* The radio group: remove the browser's box, and give it the same space as the other fields. */
+.booking-form-seating {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  border: none;
+}
+
+/* The group's name looks like the other labels. */
+.booking-form-seating legend {
+  font-weight: 700;
+  padding: 0;
+  margin-bottom: 0.25rem;
+}
+
+/* One choice: the circle and its text side by side. The whole row is the label, so tapping the
+   text picks the choice too, and the row is 44px tall, easy to tap.
+   ".booking-form .booking-form-radio" (two classes) beats ".booking-form label", so these labels aren't bold. */
+.booking-form .booking-form-radio {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+/* Radio buttons must not get the text-field styles above (full width, padding, border). */
+.booking-form input[type='radio'] {
+  width: 1.25rem;
+  height: 1.25rem;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  /* Brand green for the picked circle. */
+  accent-color: var(--color-primary-green);
 }

@@ -4,10 +4,18 @@ import { toInputDate } from '../../utils/dates';
 
 // Renders the form with a fixed list of times and fake functions for Main's props.
 // It returns the fake submitForm so a test can check how it was called.
+// Name and email start empty (invalid), so the setup fills them with obviously fake details;
+// that way the other fields' defaults make a valid form, as before.
 function setupForm() {
   const submitForm = jest.fn();
   render(<BookingForm availableTimes={['17:00', '18:00']} dispatch={jest.fn()} submitForm={submitForm} />);
+  fillContactDetails();
   return submitForm;
+}
+
+function fillContactDetails() {
+  fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'Test Guest' } });
+  fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'guest@example.com' } });
 }
 
 test('renders the "Choose date" label', () => {
@@ -68,7 +76,17 @@ describe('submit button and submission', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Make Your reservation' }));
 
     expect(submitForm).toHaveBeenCalledTimes(1);
-    expect(submitForm).toHaveBeenCalledWith({ date: toInputDate(new Date()), time: '18:00', guests: 4, occasion: 'Anniversary' });
+    // The booking now also carries the contact details and seating (the defaults here).
+    expect(submitForm).toHaveBeenCalledWith({
+      date: toInputDate(new Date()),
+      time: '18:00',
+      guests: 4,
+      occasion: 'Anniversary',
+      seating: 'No preference',
+      name: 'Test Guest',
+      email: 'guest@example.com',
+      requests: '',
+    });
   });
 
   test('an invalid form is never sent, even if it gets submitted', () => {
