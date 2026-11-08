@@ -45,11 +45,12 @@ The app opens at [http://localhost:3000](http://localhost:3000). Step-by-step de
 - **Menu page** that loads 13 dishes from a JSON file and lays them out like a printed menu: name, a dotted line, the price, a short description and dietary tags (Vegetarian, Vegan, Gluten-free, Contains nuts), with a photo for dishes that have one. "All" shows one section per category. The filter tabs stay at the top of the screen while you scroll, and the chosen filter is saved in the address (`/menu?category=Mains`), so the Back button and shared links work. Grey placeholder rows show while it loads, and if it can't load, a **Try again** button loads it again. The page ends with a "Reserve a Table" button.
 - **About page** with the restaurant's story and a link to book a table.
 - **No dead links**: every link opens a real page. There is no online ordering or login: with no server, both would be fake, so the site leaves them out. An old link to `/order-online` or `/login` shows the "Page not found" page.
-- **Booking form** with date, time, number of guests, occasion, seating preference (indoor, outdoor or no preference), full name, email and optional special requests (up to 200 characters).
+- **Booking form** in three numbered steps: **When** (date, time, number of guests), **Your table** (occasion, and seating as three choice cards: indoor, outdoor or no preference) and **Your details** (full name, email and optional special requests, up to 200 characters). Tabs at the top switch between **Book a table** and **My reservations**.
+- **Live summary**: a "Your reservation" card shows the date, time, guests, occasion and seating as you fill in the form, with the opening hours, the address and the 15-minute hold. On wide screens it sits in a column on the right and stays in view while you scroll; on phones it sits just above the button.
 - **Available times change with the date** you pick.
-- **Validation with clear messages**: you can't pick a past date, book for fewer than 1 or more than 10 guests, or leave out your name or a valid email. Name and email errors only appear after you leave the field, so a fresh form isn't covered in red. The submit button stays disabled until everything is valid, with a note under it saying why.
-- **Confirmation page** that shows the booking's date, time and number of guests.
-- **My Reservations page**: every booking is saved in the browser (`localStorage`), so it's still there after a reload. Each one can be cancelled, and screen readers announce "Reservation cancelled."
+- **Validation with clear messages**: you can't pick a past date, book for fewer than 1 or more than 10 guests, or leave out your name or a valid email. Name and email errors only appear after you leave the field (or press the button), so a fresh form isn't covered in red. The **Confirm reservation** button is always enabled: pressing it with a problem shows an error summary at the top that lists each problem, links to its field, and gets keyboard focus. Only the optional field is marked "(optional)"; every other field is required.
+- **Confirmation page**: a check mark, "You're booked", the same summary as beside the form, and two next steps: **View my reservations** and **Book another table**.
+- **My Reservations page**: every booking is saved in the browser (`localStorage`), so it's still there after a reload. Bookings are split into **Upcoming** and **Past**, each card with a date badge, the time, small pills for guests, occasion and seating, and the name. **Cancel** asks first ("Cancel this reservation?" **Yes, cancel** / **Keep it**), and screen readers announce "Reservation cancelled." Past bookings are kept as a record and can't be cancelled.
 - **No double bookings**: a time you've already booked disappears from the time list for that date, and comes back if you cancel. (Demo rule: this browser can't book the same slot twice. With no real server, other visitors' bookings aren't known.)
 - **Helpful messages for edge cases**: a failed save, a date with no times, a cleared date, and a visit to the confirmation page with no booking.
 - **Responsive layout**: designed for phones first and checked from 280px (the smallest phones) to 1920px wide, in portrait and landscape. On phones the navigation folds into a menu button; from 768px up the links are always shown, and from 1024px they sit beside the logo. Nothing scrolls sideways, and every link and button is at least 44px tall, so it's easy to tap.
@@ -102,8 +103,8 @@ No other libraries: no CSS framework, no form library and no state library. Form
 | --- | --- | --- |
 | `useState` | Booking form, phone menu, My Reservations | Remembers a value between renders, like a field's text or which filter is chosen. |
 | `useReducer` | `Main.js` | Works out the available times when the date changes (the course's `initializeTimes` and `updateTimes`). |
-| `useEffect` | `useFetch`, `useLocalStorage`, `Header` | Runs code after the screen updates: loading the menu, saving bookings, closing the phone menu on a page change. |
-| `useRef` | `Header`, My Reservations, Menu page | A direct handle on an element, to move keyboard focus back to the menu button or to the heading, or to scroll the menu list back into view. |
+| `useEffect` | `useFetch`, `useLocalStorage`, `Header`, booking form, My Reservations | Runs code after the screen updates: loading the menu, saving bookings, closing the phone menu on a page change, and moving focus to something that has just appeared (the error summary, the "Keep it" button). |
+| `useRef` | `Header`, booking form, My Reservations, Menu page | A direct handle on an element, to move keyboard focus (to the menu button, the error summary or a heading), or to scroll the menu list back into view. |
 | `useContext` | `useReservations()` | Reads the saved reservations from any page without passing props down. |
 | `useNavigate`, `useLocation` | `Main.js`, `ConfirmedBooking`, `Header` | React Router hooks: go to the confirmation page in code, and read the current page. |
 | `useSearchParams` | Menu page | Reads and writes `?category=` in the address, so the chosen filter survives Back, reload and shared links. |
@@ -189,20 +190,21 @@ The site is hosted on [Vercel](https://vercel.com) at **[littlelemon-chicago.ver
 
 1. Run `npm start` and click the yellow **Reserve a Table** button in the header or on the home page.
 2. The date starts on today. Pick a later date with a different day of the month, and the list of times changes.
-3. Type `0` in **Number of guests**. A message appears under the field, and the **Make Your reservation** button turns faded and can't be clicked.
-4. Change it to a number from 1 to 10. The message goes away and the button works again.
+3. Type `0` in **Number of guests**. A message appears under the field, and the summary on the right says "Not chosen yet" for guests.
+4. Change it to a number from 1 to 10. The message goes away and the summary updates.
 5. Choose a time and an occasion. Type your name, then type an email like `a@b` and press `Tab`: an error appears. Fix the email and the error goes away. Pick a seating preference (the arrow keys move between the choices).
-6. Click **Make Your reservation** (or press `Enter` in a text field).
-7. You land on the **Booking Confirmed** page, which thanks you by name and shows your date, time, number of guests and seating.
+6. Click **Confirm reservation** (or press `Enter` in a text field). If something is missing, a box at the top lists it; click a problem to jump to its field.
+7. You land on the **You're booked** page, which thanks you by name and shows your date, time, number of guests, occasion and seating.
 8. Click **View my reservations**. Your booking is listed. Reload the page: it's still there.
-9. Go back to **Reserve a Table** and pick the same date. The time you booked is no longer in the list.
-10. On **My Reservations**, click **Cancel**. The booking disappears, and its time is offered again on the booking form.
+9. Click the **Book a table** tab and pick the same date. The time you booked is no longer in the list.
+10. On **My Reservations**, click **Cancel**, then **Yes, cancel**. The booking disappears, and its time is offered again on the booking form. (**Keep it** leaves the booking as it was.)
 
 ## Try the edge cases
 
 1. **Visit the confirmation page with no booking.** Go to [http://localhost:3000/confirmed](http://localhost:3000/confirmed). It says you haven't made a booking yet and links to the booking page.
-2. **Clear the date.** On the booking page, clear the date field. Only the date error shows, the time list shows **No times available**, and the button stays disabled.
-3. **Try invalid guest numbers.** Type `0`, `11` or `2.5`. A message appears and the button stays disabled.
+2. **Clear the date.** On the booking page, clear the date field. Only the date error shows, and the time list shows **No times available**. Pressing **Confirm reservation** lists the problem in the error summary.
+3. **Try invalid guest numbers.** Type `0`, `11` or `2.5`. A message appears under the field, and pressing **Confirm reservation** lists it in the error summary instead of sending the booking.
+4. **Press Confirm on an empty form.** The error summary says "Please fix 2 problems" (name and email), gets focus, and each item jumps to its field.
 
 Two cases can't be triggered in the browser, because the course API always saves and always offers times for a real date. The automated tests cover them:
 
@@ -245,6 +247,7 @@ src/
 
 - `src/components/`: reusable pieces of the page. Each folder holds a component, its CSS and, where there is one, its test.
 - `src/components/BookingForm/`: the booking form, its validation functions (`validation.js`) and their tests.
+- `src/components/ReservationSummary/`: the booking details as label/value pairs, shared by the booking form's live summary and the confirmation page. `src/components/ReservationTabs/`: the "Book a table" / "My reservations" tabs.
 - `src/components/Main/`: the page routes and the booking logic (available times and submitting a booking).
 - `src/pages/`: one folder per page the router can show.
 - `src/hooks/`: custom hooks. `useFetch(url)` loads JSON and returns `{ data, loading, error, retry }`, cancels the request if the page closes first, and loads again when `retry()` is called. `useLocalStorage(key, initialValue)` works like `useState` but also saves the value in the browser.
@@ -263,12 +266,14 @@ Run the tests with `npm test -- --watchAll=false` (see [Run the tests](#run-the-
 
 Each test file sits next to the code it tests and ends in `.test.js`. The tests cover:
 
-- **The booking form**: the labels, the HTML validation attributes (`required`, `min`, `max`, `maxLength`), the `autocomplete` values, the button being disabled or enabled with its explanation, and that a valid booking is sent once with the right data while an invalid one is never sent.
+- **The booking form**: the labels, the HTML validation attributes (`required`, `min`, `max`, `maxLength`), `noValidate`, the `autocomplete` values, the three step headings, the always-enabled button, and that a valid booking is sent once with the right data while an invalid one is never sent.
+- **The error summary**: it appears only after a submit with problems, lists each one as a link to its field, takes focus, shows the name and email errors even if those fields were never left, shrinks as problems are fixed, and disappears when none are left.
+- **The live summary**: it shows the starting values, updates when the time, guests and seating change, and shows "Not chosen yet" for a wrong value.
 - **Errors after "touched"**: name and email errors are hidden on a fresh form, appear after leaving the field with a bad value, and disappear once it's fixed.
-- **The seating group**: found as a group named "Seating preference", one shared name for its radio buttons, and "No preference" picked first.
+- **The seating group**: found as a group named "Seating preference", one shared name for its radio buttons, "No preference" picked first, and a short description for each choice. Only the optional field says "(optional)", and there are no stars.
 - **The validation functions**: valid and invalid values for each field, including the edges (for example 0, 1, 10 and 11 guests; an empty name, only spaces and one letter; `a@b` and other email typos).
 - **The available-times logic** in `Main.js`, with the API replaced by a fake (a mock), so the results don't depend on today's date.
-- **Accessibility details**: each field is found by its label, the form has a name, errors are linked to their fields, and the confirmation page moves focus to its heading.
+- **Accessibility details**: each field is found by its label, the form has a name, errors are linked to their fields, and the confirmation page moves focus to its heading and offers **View my reservations** (primary) and **Book another table** (secondary).
 - **Edge cases**: a failed save, a direct visit to the confirmation page, a date with no times, and a cleared date.
 - **Loading data** (`useFetch`): a successful load, an HTTP error, a network error, a cancelled request that must not show an error, and `retry()` loading again after an error. `fetch` is replaced by a fake in each test.
 - **The home page**: each section and its heading, the hero's two buttons, no invented reviews or star ratings, the loading skeleton, only the featured dishes with their photo, price and tags, a calm message with a menu link if the dishes can't load, and the Visit us details.
@@ -276,8 +281,8 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 - **Routing**: every in-app link on the home page and in the nav opens a real page, and an unknown address shows the 404 page.
 - **The phone menu**: the button opens and closes the menu, `Escape` closes it and returns focus to the button, and moving to another page closes it.
 - **Saving in the browser** (`useLocalStorage`): reading, writing, broken saved data and blocked storage, none of which may crash the app. Each test starts with `localStorage.clear()`.
-- **Reservations** (Context and My Reservations page): adding, cancelling, sorting by date and time, the empty state, the "Reservation cancelled." message, and that booked times are hidden on the form.
-- **The whole booking journey** in one test: book a table, reload, see it on My Reservations, check its time is hidden, cancel it, and check the time is back.
+- **Reservations** (Context and My Reservations page): adding, cancelling, sorting by date and time, Upcoming and Past (most recent past first, no Cancel on past ones), the empty states, the tabs with `aria-current`, Cancel asking first, **Keep it** returning focus to Cancel, **Yes, cancel** with the "Reservation cancelled." message, and that booked times are hidden on the form.
+- **The whole booking journey** in one test: book a table, reload, see it on My Reservations, check its time is hidden, switch with the tab, cancel it (and confirm), and check the time is back.
 
 - **Navigation and page titles**: the nav has its three page links and the yellow "Reserve a Table" button in order, and marks only the current page with `aria-current="page"`; the footer has one row of links, the opening hours and contact details, and no links to generic social sites; the skip link is the first Tab stop and moves focus to the main content; every page has its own browser tab title.
 
@@ -285,11 +290,11 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 
 ### Coverage
 
-**106 tests in 17 files, all passing.** Coverage measured with `CI=true npm test -- --coverage --watchAll=false`:
+**119 tests in 17 files, all passing.** Coverage measured with `CI=true npm test -- --coverage --watchAll=false`:
 
 | Statements | Branches | Functions | Lines |
 | --- | --- | --- | --- |
-| 98.38% | 92.56% | 99.09% | 98.31% |
+| 98.63% | 92.13% | 99.24% | 98.57% |
 
 What isn't covered: `src/index.js` (it only starts the app in a real browser), the course API's `submitAPI` (always replaced by a fake in tests), a few branches in the booking form and the header that only change an `aria-*` attribute or a fallback value, and the menu page's scroll back to the top of the list (it only runs in a real browser, where the page can scroll; it was checked there).
 
@@ -297,17 +302,20 @@ What isn't covered: `src/index.js` (it only starts the app in a real browser), t
 
 - **Labels**: every field has a `<label>` connected to it, so clicking the label focuses the field and screen readers read the label out.
 - **Error messages**: an invalid field is marked with `aria-invalid` and linked to its message with `aria-describedby`, so a screen reader reads the problem when you reach the field.
-- **Required fields**: marked with a visible `*` (and a "Fields marked * are required." note). The star is added by CSS and hidden from screen readers, which already announce "required" from the `required` attribute.
+- **Required fields**: every field is required except one, so only that one is marked: "Special requests (optional)". Screen readers still announce "required" on the others, from the `required` attribute.
+- **Error summary**: pressing **Confirm reservation** with a problem shows a box at the top of the form that lists every problem as a link to its field, and moves keyboard focus to it (with `useRef`), so screen readers read it out. The button is never disabled. **Why:** a disabled button can't say why it's disabled, and many users can't find out. The form uses `noValidate`, so the browser's own pop-ups don't appear on top of the page's messages.
+- **Seating cards**: they look like cards but are real radio buttons in a `<fieldset>`, so `Tab` and the arrow keys work as usual. Each choice's name is just "Indoor" (and so on), and its short line is read as a description.
 - **Grouped choices**: the seating radio buttons sit in a `<fieldset>` with a `<legend>`, so screen readers announce the group's name.
 - **Autofill**: the name and email fields use `autocomplete="name"` and `autocomplete="email"` (WCAG 1.3.5), so browsers can fill them in.
 - **Named form**: the form has the name "Reserve a Table", so screen-reader users can jump straight to it.
-- **Button name**: the submit button's accessible name matches its visible text. **Why:** voice-control users say what they see ("click Make Your reservation"), so the names must match.
+- **Button name**: the submit button's accessible name matches its visible text. **Why:** voice-control users say what they see ("click Confirm reservation"), so the names must match.
 - **Skip link**: the first `Tab` on any page shows a "Skip to main content" link. Pressing `Enter` moves focus past the logo and the nav links to the page content (WCAG 2.4.1).
 - **Page titles**: every page sets its own browser tab title, like "Menu | Little Lemon", so you know where you are from the tab or a screen reader (WCAG 2.4.2).
 - **Page changes**: the confirmation page also moves focus to its heading, so screen readers announce the new page.
 - **Urgent messages**: the failed-save message uses `role="alert"`, so screen readers read it out as soon as it appears.
 - **Menu filters**: the filter buttons use `aria-pressed`, so screen readers say which category is chosen. The loading message uses `role="status"` (read out politely) and a failed load uses `role="alert"`.
-- **Cancel buttons**: every row's button says "Cancel", but its full name says which booking it cancels (for example "Cancel reservation for Friday, October 9, 2026 at 18:00"). After a cancel, focus moves to the page heading, so keyboard users don't lose their place.
+- **Cancel buttons**: every card's button says "Cancel", but its full name says which booking it cancels (for example "Cancel reservation for Friday, October 9, 2026 at 18:00"). Pressing it shows "Cancel this reservation?" in its place and moves focus to **Keep it**, the safe answer. **Keep it** returns focus to Cancel; **Yes, cancel** moves focus to the page heading, so keyboard users don't lose their place.
+- **Tabs**: "Book a table" and "My reservations" are links in a `<nav>` named "Reservations"; the current one has `aria-current="page"` and a green bar under it.
 - **Phone menu button**: it says whether the menu is open (`aria-expanded`), names the menu it controls (`aria-controls`), closes with `Escape` (focus goes back to the button) and closes when you move to another page.
 - **Keyboard**: everything works with `Tab`, the arrow keys and `Enter`, and every control shows a visible focus ring.
 - **Semantic HTML**: one `<h1>` per page, headings in order, and the `header`, `nav`, `main` and `footer` landmarks.
@@ -371,11 +379,13 @@ Every text and background pair is checked against WCAG 2.1 AA by a small script 
 | error | white | 4.99:1 | 3:1 | Pass | Error bar and icon beside a message (the text says what is wrong too) |
 | error | light | 4.32:1 | 3:1 | Pass | Error bar on a grey band |
 | error | white | 4.99:1 | 4.5:1 | Pass | Error heading text on white |
+| white | error | 4.99:1 | 4.5:1 | Pass | Yes, cancel button (white on terracotta) |
+| white | green | 6.95:1 | 3:1 | Pass | Booking step numbers and date badges |
 
 ## Known limitations
 
 - **No online ordering or accounts**: ordering food and logging in both need a real server (orders, payments, accounts), so they're left out on purpose rather than shown as fake pages. Bookings work without an account.
-- **Sample data**: Little Lemon is a fictional restaurant. The menu (dishes, prices and dietary tags), the About page and home page story, the three "Why Little Lemon" highlights, and the address, opening hours, phone number and email (in `src/data/restaurant.js`) are made up. There are no customer reviews, ratings or awards, because they would have to be invented. The phone number uses the 555-01xx range kept for fiction, and the email uses the reserved `.example` domain, so neither can reach a real person. The opening hours (daily, 5 pm to midnight, last table at 11:30 pm) match the times the booking form offers.
+- **Sample data**: Little Lemon is a fictional restaurant. The menu (dishes, prices and dietary tags), the About page and home page story, the three "Why Little Lemon" highlights, and the address, opening hours, phone number and email (in `src/data/restaurant.js`) are made up. There are no customer reviews, ratings or awards, because they would have to be invented. The phone number uses the 555-01xx range kept for fiction, and the email uses the reserved `.example` domain, so neither can reach a real person. The opening hours (daily, 5 pm to midnight, last table at 11:30 pm) match the times the booking form offers. The "we hold your table for 15 minutes" rule is made up too.
 - **Bookings stay in this browser**: the course API doesn't save anything, so bookings are kept in this browser's `localStorage` only. Another browser or device won't see them, and clearing site data removes them. The course API still always says a booking "succeeded".
 - **Create React App is deprecated**: the React team stopped recommending Create React App in February 2025, and it no longer has active maintainers. It still builds and tests this project fine. Moving to [Vite](https://vite.dev) is a possible next step.
 - **Demo-only double-booking check**: a booked time is hidden only in the browser that booked it. A real restaurant would need a server that knows every guest's bookings.
