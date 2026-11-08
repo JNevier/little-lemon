@@ -67,7 +67,7 @@ All names, emails and bookings in these screenshots are fake test data.
 
 ![Home page specials: three photo cards (Bruschetta, Greek Salad, Lemon Dessert) with price badges and Vegetarian tags](docs/screenshots/home-specials-desktop.jpg)
 
-![Menu page: a peach header, the All, Starters, Mains, Desserts and Drinks tabs, and the Starters section with photos, dotted lines to the prices, and dietary tags](docs/screenshots/menu-desktop.jpg)
+![Menu page: a green header, the All, Starters, Mains, Desserts and Drinks tabs, and the Starters section with photos, dotted lines to the prices, and dietary tags](docs/screenshots/menu-desktop.jpg)
 
 ![Booking page: the When and Your table steps filled in on the left, and the Your reservation summary on the right showing Friday, November 20, 2026 at 19:00 for 4 guests, outdoor](docs/screenshots/booking-desktop.jpg)
 
@@ -362,6 +362,7 @@ There is no Figma wireframe. I skipped that step and built the pages from the co
 The shared look lives in [`src/index.css`](src/index.css), so every page uses the same building blocks:
 
 - **Colours**: the brand green, yellow, salmon, peach, light grey and dark grey, plus one extra, a deep terracotta (`#b8501f`) for error marks, because the brand salmon is too light on white.
+- **Page headers**: the top of every inner page (Menu, About, Reserve a Table, My Reservations) is a brand-green band with a white title, the same green as the home page hero, so every page starts the same way. Peach is kept for small accents: dietary tags, icon circles and the selected seating card.
 - **Yellow means "act here"**: only the one main action on a screen is a yellow button (`.button-primary`). Other actions are green outline buttons (`.button-secondary`) or text links. The current page in the nav is underlined, not yellow.
 - **Spacing scale**: `--space-1` (4px) to `--space-8` (64px). Sections are 48px apart on phones and 64px from 768px up.
 - **Type scale**: Markazi Text for headings, Karla for text. Page titles and section titles grow with the screen using `clamp()`, from 40px to 64px for page titles.
@@ -379,14 +380,14 @@ Every text and background pair is checked against WCAG 2.1 AA by a small script 
 | --- | --- | --- | --- | --- | --- |
 | dark | white | 12.63:1 | 4.5:1 | Pass | Body text on the page |
 | dark | light | 10.94:1 | 4.5:1 | Pass | Body text on grey bands |
-| dark | peach | 9.53:1 | 4.5:1 | Pass | Text on peach header bands |
+| dark | peach | 9.53:1 | 4.5:1 | Pass | Text on peach panels (booking summary info, selected seating card) |
 | green | white | 6.95:1 | 4.5:1 | Pass | Links, prices, secondary buttons on white |
 | green | light | 6.02:1 | 4.5:1 | Pass | Links and prices on grey bands |
 | green | peach | 5.24:1 | 4.5:1 | Pass | Links on peach, secondary button hover |
 | dark | yellow | 8.23:1 | 4.5:1 | Pass | Primary button text |
 | dark | salmon | 5.68:1 | 4.5:1 | Pass | Primary button hover |
 | white | green | 6.95:1 | 4.5:1 | Pass | Text on green bands and the footer |
-| light | green | 6.02:1 | 4.5:1 | Pass | Footer text |
+| light | green | 6.02:1 | 4.5:1 | Pass | Footer text, page header lead and tabs |
 | yellow | green | 4.53:1 | 3:1 | Pass | Hero title on green (large text only) |
 | yellow | green | 4.53:1 | 3:1 | Pass | Focus ring on green |
 | white | greenHover | 5.17:1 | 4.5:1 | Pass | Hero outline button text on hover |
