@@ -6,6 +6,7 @@ import HomePage from '../../pages/HomePage/HomePage';
 import BookingPage from '../../pages/BookingPage/BookingPage';
 import ConfirmedBooking from '../../pages/ConfirmedBooking/ConfirmedBooking';
 import NotFoundPage from '../../pages/NotFoundPage/NotFoundPage';
+import MenuPage from '../../pages/MenuPage/MenuPage';
 
 // Builds the starting list of available times: the times for today,
 // because the date field also starts on today.
@@ -57,6 +58,7 @@ function Main() {
           element={<BookingPage availableTimes={availableTimes} dispatch={dispatch} submitForm={submitForm} />}
         />
         <Route path="/confirmed" element={<ConfirmedBooking />} />
+        <Route path="/menu" element={<MenuPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </main>

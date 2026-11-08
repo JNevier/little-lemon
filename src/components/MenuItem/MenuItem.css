@@ -1,0 +1,32 @@
+/* One dish: a light, rounded box, like the Specials cards. */
+.menu-item {
+  background-color: var(--color-light);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+
+/* Name and price share one row. baseline lines up the bottoms of the letters. */
+.menu-item-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+/* The name's font comes from the global h3 rule in index.css. Remove the browser's gaps. */
+.menu-item-name,
+.menu-item-price {
+  margin: 0;
+}
+
+.menu-item-price {
+  font-weight: 500;
+  /* Green on the light box is about 6:1. */
+  color: var(--color-primary-green);
+  /* Keep "$12.99" on one line. */
+  white-space: nowrap;
+}
+
+.menu-item-description {
+  margin: 0.5rem 0 0;
+}
