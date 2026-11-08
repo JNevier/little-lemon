@@ -45,7 +45,7 @@ The app opens at [http://localhost:3000](http://localhost:3000). Step-by-step de
 - **Validation with clear messages**: you can't pick a past date or book for fewer than 1 or more than 10 guests, and the submit button stays disabled until everything is valid.
 - **Confirmation page** that shows the booking's date, time and number of guests.
 - **Helpful messages for edge cases**: a failed save, a date with no times, a cleared date, and a visit to the confirmation page with no booking.
-- **Responsive layout**: designed for phones first, with a wider layout from 768px up.
+- **Responsive layout**: designed for phones first and checked from 280px (the smallest phones) to 1920px wide, in portrait and landscape. On phones the navigation folds into a menu button; from 768px up the links are always shown, and from 1024px they sit beside the logo. Nothing scrolls sideways, and every link and button is at least 44px tall, so it's easy to tap.
 - **Accessible**: every field has a label, errors are read out by screen readers, and the whole flow works with the keyboard alone.
 
 ## Tech stack
@@ -190,6 +190,7 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 - **Loading data** (`useFetch`): a successful load, an HTTP error, a network error, and a cancelled request that must not show an error. `fetch` is replaced by a fake in each test.
 - **The menu page**: the loading message, the dishes and their prices, the category filter and its pressed state, and the error message.
 - **Routing**: every in-app link on the home page and in the nav opens a real page, and an unknown address shows the 404 page.
+- **The phone menu**: the button opens and closes the menu, `Escape` closes it and returns focus to the button, and moving to another page closes it.
 
 **Why fake the API and fix the date in tests:** a test that uses today's real date could pass today and fail tomorrow.
 
@@ -202,6 +203,7 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 - **Page changes**: the confirmation page sets its own browser tab title and moves focus to its heading, so screen readers announce the new page.
 - **Urgent messages**: the failed-save message uses `role="alert"`, so screen readers read it out as soon as it appears.
 - **Menu filters**: the filter buttons use `aria-pressed`, so screen readers say which category is chosen. The loading message uses `role="status"` (read out politely) and a failed load uses `role="alert"`.
+- **Phone menu button**: it says whether the menu is open (`aria-expanded`), names the menu it controls (`aria-controls`), closes with `Escape` (focus goes back to the button) and closes when you move to another page.
 - **Keyboard**: everything works with `Tab`, the arrow keys and `Enter`, and every control shows a visible focus ring.
 - **Semantic HTML**: one `<h1>` per page, headings in order, and the `header`, `nav`, `main` and `footer` landmarks.
 

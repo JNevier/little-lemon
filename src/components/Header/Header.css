@@ -4,14 +4,85 @@
   height: auto;
 }
 
-/* Mobile first: logo on top, links below, both centered. */
+/* Mobile first: logo on the left, menu button on the right, in one row.
+   flex-wrap lets the opened menu drop onto its own full-width row underneath. */
 .header {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   gap: 1rem;
   /* Left/right padding uses the shared gutter, so the logo lines up with the content below. */
   padding: 1rem var(--page-gutter);
+}
+
+/* The menu button: a 44px square, easy to tap. */
+.header-menu-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 2px solid var(--color-primary-green);
+  border-radius: 0.5rem;
+  background-color: var(--color-white);
+  /* The icon's lines use currentColor, so they take this green. */
+  color: var(--color-primary-green);
+  cursor: pointer;
+}
+
+/* While the menu is open, the button is filled in, so you can see its state as well as hear it. */
+.header-menu-button[aria-expanded='true'] {
+  background-color: var(--color-primary-yellow);
+}
+
+.header-menu-button:focus-visible {
+  outline: 3px solid var(--color-primary-green);
+  outline-offset: 2px;
+}
+
+/* On phones the links are hidden until the button opens them.
+   display: none also removes them from the Tab order and from screen readers while closed. */
+.header-menu {
+  display: none;
+  /* Take a whole row of its own, under the logo and button. */
+  flex-basis: 100%;
+}
+
+.header-menu-open {
+  display: block;
+}
+
+/* Inside the phone menu the links are stacked, one per row, full width: easy to read and to tap. */
+.header-menu .nav-list {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.25rem;
+}
+
+/* Medium screens (768px and up): there's room for all six links in one row,
+   so always show them and hide the button. Logo on top, links below, both centered. */
+@media (min-width: 768px) {
+  .header {
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .header-menu-button {
+    display: none;
+  }
+
+  .header-menu {
+    display: block;
+    flex-basis: auto;
+  }
+
+  .header-menu .nav-list {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
 }
 
 /* Wide screens (1024px and up): logo on the left, links on the right.

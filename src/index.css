@@ -41,6 +41,20 @@ body {
   font-size: 1rem;
   line-height: 1.5;
   color: var(--color-dark);
+  /* Set the page color on purpose. Without it, some browsers and dark-mode settings paint the page dark,
+     and our dark text becomes unreadable. */
+  background-color: var(--color-white);
+  /* A very long word (like an email address) breaks onto the next line instead of
+     pushing the page wider than a small phone screen, or wider than a page zoomed to 400%. */
+  overflow-wrap: break-word;
+}
+
+/* No image is ever wider than the box it sits in, so photos can't stretch the page sideways.
+   height: auto keeps the proportions when the width shrinks. Images that set their own height
+   in their component's CSS (like the hero photo) still use that height. */
+img {
+  max-width: 100%;
+  height: auto;
 }
 
 /* Style guide: lines of text are at most 65 characters wide, so they stay easy to read. */
