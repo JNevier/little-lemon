@@ -91,6 +91,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  /* border-box: the past badge's 2px border fits inside the 4rem, so both badges are the same size. */
+  box-sizing: border-box;
   width: 4rem;
   height: 4rem;
   border-radius: var(--radius-sm);
