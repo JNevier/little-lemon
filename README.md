@@ -81,7 +81,7 @@ Measured with [PageSpeed Insights](https://pagespeed.web.dev) (Lighthouse 13.6, 
 | --- | --- | --- | --- |
 | 85 | 100 | 100 | 100 |
 
-Performance is held back by one measure, **Largest Contentful Paint (4.2 s)**: the time until the biggest thing on screen, the hero photo, has loaded. The photo is large, and on a slow phone connection it takes a while. Everything else is in the green: first paint 1.5 s, no blocking time and no layout shift. Smaller, phone-sized versions of the photo would be the next improvement. Scores change a little from run to run.
+Performance is held back by one measure, **Largest Contentful Paint (4.2 s)**: the time until the biggest thing on screen, the hero photo, has loaded. The photo is large, and on a slow phone connection it takes a while. Everything else is in the green: first paint 1.5 s, no blocking time and no layout shift. Since this run, phones get a smaller copy of the hero photo (133 KB instead of 288 KB, chosen by the browser with `srcset` and `sizes`), and the photo is marked `fetchpriority="high"` so it downloads first. The scores above were measured before that change. Scores change a little from run to run.
 
 ## Tech stack
 
