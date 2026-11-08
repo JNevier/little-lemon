@@ -1,5 +1,6 @@
 import './Footer.css';
 import { Link } from 'react-router';
+import restaurant from '../../data/restaurant';
 
 // The links in the footer's bottom row. A short list, because the header already has the full navigation.
 const footerLinks = [
@@ -9,10 +10,8 @@ const footerLinks = [
   { to: '/reservations', label: 'Reserve' },
 ];
 
-// SAMPLE DATA: Little Lemon is a fictional restaurant. The address, hours, phone number and email are made up.
-// - 555-01xx phone numbers are reserved for fiction, so they never reach a real person.
-// - ".example" is a reserved domain, so the email can't belong to anyone either.
-// - The hours match the booking form: the course API offers tables from 17:00 to 23:30.
+// The address, hours and contact details are sample data, kept in src/data/restaurant.js
+// (the home page's "Visit us" section shows the same details).
 function Footer() {
   return (
     <footer className="footer">
@@ -31,18 +30,18 @@ function Footer() {
           <h2 className="footer-heading">Visit</h2>
           {/* <address> marks contact details for the site's owner. */}
           <address className="footer-text">
-            678 Pisa Ave
+            {restaurant.street}
             <br />
-            Chicago, IL 60611
+            {restaurant.city}
           </address>
         </div>
 
         <div className="footer-block">
           <h2 className="footer-heading">Hours</h2>
           <p className="footer-text">
-            Daily, 5 pm to midnight
+            {restaurant.hours}
             <br />
-            Last table at 11:30 pm
+            {restaurant.lastTable}
           </p>
         </div>
 
@@ -51,8 +50,8 @@ function Footer() {
           {/* "tel:" and "mailto:" links open the phone app or email app.
               Side by side on phones (to keep the footer short), stacked on wider screens. */}
           <p className="footer-text footer-contact-links">
-            <a href="tel:+13125550123">(312) 555-0123</a>
-            <a href="mailto:hello@littlelemon.example">hello@littlelemon.example</a>
+            <a href={restaurant.phoneLink}>{restaurant.phone}</a>
+            <a href={`mailto:${restaurant.email}`}>{restaurant.email}</a>
           </p>
         </div>
       </div>

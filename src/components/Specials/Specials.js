@@ -1,60 +1,64 @@
+import { Link } from 'react-router';
 import SpecialCard from '../SpecialCard/SpecialCard';
-import LinkButton from '../LinkButton/LinkButton';
+import useFetch from '../../hooks/useFetch';
 import './Specials.css';
 
-// Dish names, prices and descriptions come from the course mock-up (Module 1 exercises).
-// The array lives outside the component because it never changes, so it isn't re-created on every render.
-const specials = [
-  {
-    id: 'greek-salad',
-    name: 'Greek salad',
-    price: '$12.99',
-    description:
-      'The famous greek salad of crispy lettuce, peppers, olives and our Chicago style feta cheese, garnished with crunchy garlic and rosemary croutons.',
-    image: '/images/greek-salad.png',
-    alt: 'A bowl of Greek salad with feta, olives, tomatoes and cucumber',
-  },
-  {
-    id: 'bruschetta',
-    name: 'Bruschetta',
-    price: '$5.99',
-    description:
-      'Our Bruschetta is made from grilled bread that has been smeared with garlic and seasoned with salt and olive oil.',
-    image: '/images/bruschetta.png',
-    alt: 'Toasted bread topped with chopped tomatoes, basil and shaved cheese',
-  },
-  {
-    id: 'lemon-dessert',
-    name: 'Lemon Dessert',
-    price: '$5.00',
-    description:
-      "This comes straight from grandma's recipe book, every last ingredient has been sourced and is as authentic as can be imagined.",
-    image: '/images/lemon-dessert.png',
-    alt: 'A slice of lemon dessert topped with toasted meringue and a bright yellow filling',
-  },
-];
+// How many placeholder cards to show while the dishes load: the same as the number of specials,
+// so the section is already the right size and the page doesn't jump when the real cards arrive.
+const PLACEHOLDER_COUNT = 3;
 
 function Specials() {
+  // One source for every dish: the same file the Menu page reads. A dish with "featured": true
+  // in public/data/menu.json appears here, with the same name, price and description as on the menu.
+  const { data, loading, error } = useFetch('/data/menu.json');
+  const featured = (data ?? []).filter((dish) => dish.featured);
+
   return (
-    <section className="specials">
-      {/* The title and the menu button share one row on wider screens. */}
+    <section className="section section-muted specials" aria-labelledby="specials-title">
+      {/* The title on the left and the menu link on the right, on wider screens. */}
       <div className="specials-header">
-        <h2>This week's specials!</h2>
-        {/* Same destination as the nav's "Menu" link. */}
-        <LinkButton to="/menu">Online Menu</LinkButton>
+        <div>
+          <p className="eyebrow">From our kitchen</p>
+          <h2 id="specials-title">This week's specials</h2>
+        </div>
+        {/* A text link, not another button: the hero above already has the menu button. */}
+        <Link to="/menu" className="specials-menu-link">
+          View full menu <span aria-hidden="true">→</span>
+        </Link>
       </div>
-      <div className="specials-list">
-        {specials.map((dish) => (
-          <SpecialCard
-            key={dish.id}
-            name={dish.name}
-            price={dish.price}
-            description={dish.description}
-            image={dish.image}
-            alt={dish.alt}
-          />
-        ))}
-      </div>
+
+      {loading && (
+        <>
+          {/* Screen readers hear this. The grey boxes below are only for sighted users, so they're hidden from screen readers. */}
+          <p role="status" className="visually-hidden">Loading this week's specials…</p>
+          {/* NEW: a "skeleton": grey shapes the size of the real cards, shown while the data loads. */}
+          <div className="specials-list" aria-hidden="true" data-testid="specials-skeleton">
+            {Array.from({ length: PLACEHOLDER_COUNT }, (_, index) => (
+              <div key={index} className="special-card-skeleton">
+                <div className="skeleton-block skeleton-image" />
+                <div className="skeleton-block skeleton-line" />
+                <div className="skeleton-block skeleton-line skeleton-line-short" />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* If the file can't load, a calm sentence with the way forward. Not role="alert":
+          the rest of the page works, so nothing needs to interrupt the visitor. */}
+      {error && (
+        <p className="specials-error">
+          We couldn't load this week's specials. You can still <Link to="/menu">see the full menu</Link>.
+        </p>
+      )}
+
+      {data && (
+        <ul className="specials-list">
+          {featured.map((dish) => (
+            <SpecialCard key={dish.id} dish={dish} />
+          ))}
+        </ul>
+      )}
     </section>
   );
 }

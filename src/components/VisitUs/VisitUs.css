@@ -1,0 +1,57 @@
+/* Mobile first: the intro and button on top, the details card below. */
+.visit-us {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+}
+
+/* The details card: label on the left, value on the right, with a thin line between rows. */
+.visit-us-details {
+  margin: 0;
+  padding: var(--space-2) var(--space-5);
+}
+
+.visit-us-row {
+  display: grid;
+  grid-template-columns: 6rem 1fr;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--color-light);
+}
+
+.visit-us-row:last-child {
+  border-bottom: none;
+}
+
+/* The labels: small spaced-out capitals in green, like the eyebrows. */
+.visit-us-row dt {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.7;
+  text-transform: uppercase;
+  color: var(--color-primary-green);
+}
+
+/* Browsers indent <dd> by default; remove it. */
+.visit-us-row dd {
+  margin: 0;
+}
+
+/* The phone link: 44px tall, easy to tap. The negative margin keeps the row the same height as the others. */
+.visit-us-phone {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin: -10px 0;
+  font-weight: 700;
+}
+
+/* Bigger screens (768px and up): the intro on the left, the details card on the right. */
+@media (min-width: 768px) {
+  .visit-us {
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: var(--space-8);
+  }
+}

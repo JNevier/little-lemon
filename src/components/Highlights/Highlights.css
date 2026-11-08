@@ -1,0 +1,36 @@
+/* Mobile first: the three highlights stacked. A list, so the browser's bullets and indent are reset. */
+.highlights-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  margin: var(--space-6) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The icon sits in a peach circle. Green on peach is about 5.2:1 (icons need 3:1). */
+.highlights-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background-color: var(--color-secondary-peach);
+  color: var(--color-primary-green);
+}
+
+.highlights-title {
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+.highlights-text {
+  margin: 0;
+}
+
+/* Bigger screens (768px and up): the three highlights side by side. */
+@media (min-width: 768px) {
+  .highlights-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

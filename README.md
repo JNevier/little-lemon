@@ -41,7 +41,7 @@ The app opens at [http://localhost:3000](http://localhost:3000). Step-by-step de
 
 ## Features
 
-- **Home page** with a hero section, this week's specials, customer reviews and a short "about us" section.
+- **Home page** with a hero (a "Reserve a Table" button, a "See the menu" button and the address and opening time), three reasons to visit ("Why Little Lemon"), this week's specials as photo cards, a short story about the owners, and a "Visit us" section with the address, hours and phone number. The specials come from the same `menu.json` file as the Menu page, so a dish's name, price and description are the same everywhere. Grey placeholder cards keep their space while they load, so the page doesn't jump.
 - **Menu page** that loads the dishes from a JSON file, with filter buttons for Starters, Mains, Desserts and Drinks, a loading message and a clear error if the menu can't be loaded.
 - **About page** with the restaurant's story and a link to book a table.
 - **No dead links**: every link opens a real page. There is no online ordering or login: with no server, both would be fake, so the site leaves them out. An old link to `/order-online` or `/login` shows the "Page not found" page.
@@ -186,7 +186,7 @@ The site is hosted on [Vercel](https://vercel.com) at **[littlelemon-chicago.ver
 
 ## Try the booking flow
 
-1. Run `npm start` and click **Reservations** in the menu, or **Reserve a Table** on the home page.
+1. Run `npm start` and click the yellow **Reserve a Table** button in the header or on the home page.
 2. The date starts on today. Pick a later date with a different day of the month, and the list of times changes.
 3. Type `0` in **Number of guests**. A message appears under the field, and the **Make Your reservation** button turns faded and can't be clicked.
 4. Change it to a number from 1 to 10. The message goes away and the button works again.
@@ -194,7 +194,7 @@ The site is hosted on [Vercel](https://vercel.com) at **[littlelemon-chicago.ver
 6. Click **Make Your reservation** (or press `Enter` in a text field).
 7. You land on the **Booking Confirmed** page, which thanks you by name and shows your date, time, number of guests and seating.
 8. Click **View my reservations**. Your booking is listed. Reload the page: it's still there.
-9. Go back to **Reservations** and pick the same date. The time you booked is no longer in the list.
+9. Go back to **Reserve a Table** and pick the same date. The time you booked is no longer in the list.
 10. On **My Reservations**, click **Cancel**. The booking disappears, and its time is offered again on the booking form.
 
 ## Try the edge cases
@@ -221,6 +221,8 @@ src/
 │   └── useLocalStorage.js
 ├── context/
 │   └── ReservationsContext.js
+├── data/
+│   └── restaurant.js
 ├── components/
 │   ├── BookingForm/
 │   ├── Main/
@@ -246,8 +248,9 @@ src/
 - `src/pages/`: one folder per page the router can show.
 - `src/hooks/`: custom hooks. `useFetch(url)` loads JSON and returns `{ data, loading, error }`, and cancels the request if the page closes first. `useLocalStorage(key, initialValue)` works like `useState` but also saves the value in the browser.
 - `src/context/`: `ReservationsContext.js` shares the saved reservations with any page through `useReservations()`, so they don't have to be passed down through every component.
-- `public/data/menu.json`: the sample menu. Files in `public/` are served as they are, so the app fetches it like a real API.
-- `src/utils/`: small helpers. `dates.js` converts between a date input's `YYYY-MM-DD` text and a JavaScript date, and checks that a date is complete.
+- `public/data/menu.json`: the sample menu. Files in `public/` are served as they are, so the app fetches it like a real API. Each dish has a name, category, price, description and dietary `tags`; dishes with `"featured": true` (and an `image`) appear in the home page's specials.
+- `src/data/restaurant.js`: the restaurant's sample address, hours, phone number and email, in one place. The home page and the footer both read it, so they can't disagree.
+- `src/utils/`: small helpers. `dates.js` converts between a date input's `YYYY-MM-DD` text and a JavaScript date, and checks that a date is complete. `price.js` formats a price as US dollars (`5` becomes `$5.00`), for the menu and the home page.
 - `src/api.js`: the course's booking API (see [About the booking API](#about-the-booking-api)).
 - `src/index.css`: the design system: brand colours, spacing, type sizes, shadows, buttons and the section layout, as CSS variables and shared classes.
 - `scripts/check-contrast.js`: checks the colour contrast of every pair the site uses (see [Colour contrast](#colour-contrast)).
@@ -267,6 +270,7 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 - **Accessibility details**: each field is found by its label, the form has a name, errors are linked to their fields, and the confirmation page moves focus to its heading.
 - **Edge cases**: a failed save, a direct visit to the confirmation page, a date with no times, and a cleared date.
 - **Loading data** (`useFetch`): a successful load, an HTTP error, a network error, and a cancelled request that must not show an error. `fetch` is replaced by a fake in each test.
+- **The home page**: each section and its heading, the hero's two buttons, no invented reviews or star ratings, the loading skeleton, only the featured dishes with their photo, price and tags, a calm message with a menu link if the dishes can't load, and the Visit us details.
 - **The menu page**: the loading message, the dishes and their prices, the category filter and its pressed state, and the error message.
 - **Routing**: every in-app link on the home page and in the nav opens a real page, and an unknown address shows the 404 page.
 - **The phone menu**: the button opens and closes the menu, `Escape` closes it and returns focus to the button, and moving to another page closes it.
@@ -280,11 +284,11 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 
 ### Coverage
 
-**92 tests in 15 files, all passing.** Coverage measured with `CI=true npm test -- --coverage --watchAll=false`:
+**98 tests in 17 files, all passing.** Coverage measured with `CI=true npm test -- --coverage --watchAll=false`:
 
 | Statements | Branches | Functions | Lines |
 | --- | --- | --- | --- |
-| 98.63% | 91.12% | 98.92% | 98.57% |
+| 98.68% | 91.79% | 99% | 98.63% |
 
 What isn't covered: `src/index.js` (it only starts the app in a real browser), the course API's `submitAPI` (always replaced by a fake in tests), and a few branches in the booking form, the header and the menu page that only change an `aria-*` attribute or a fallback value.
 
@@ -336,6 +340,8 @@ The shared look lives in [`src/index.css`](src/index.css), so every page uses th
 - **Spacing scale**: `--space-1` (4px) to `--space-8` (64px). Sections are 48px apart on phones and 64px from 768px up.
 - **Type scale**: Markazi Text for headings, Karla for text. Page titles and section titles grow with the screen using `clamp()`, from 40px to 64px for page titles.
 - **Depth**: soft shadows (`--shadow-sm`, `--shadow-md`, `--shadow-lg`) instead of flat grey boxes.
+- **Cards**: white, rounded and lightly shadowed on a grey band. A card you can click (like a home page special) lifts a little on hover and when it has keyboard focus.
+- **Icons**: three small line icons drawn as inline SVG in the component (a book, a leaf and a lemon), so there's no icon library.
 - **Motion**: hover and focus changes take 180ms, and all motion is switched off when the visitor's system asks for reduced motion (`prefers-reduced-motion`).
 
 ### Colour contrast
@@ -356,6 +362,9 @@ Every text and background pair is checked against WCAG 2.1 AA by a small script 
 | light | green | 6.02:1 | 4.5:1 | Pass | Footer text |
 | yellow | green | 4.53:1 | 3:1 | Pass | Hero title on green (large text only) |
 | yellow | green | 4.53:1 | 3:1 | Pass | Focus ring on green |
+| white | greenHover | 5.17:1 | 4.5:1 | Pass | Hero outline button text on hover |
+| light | green | 6.02:1 | 3:1 | Pass | Hero outline button border on green |
+| green | peach | 5.24:1 | 3:1 | Pass | Home highlight icons in peach circles |
 | green | white | 6.95:1 | 3:1 | Pass | Focus rings, borders, active underline on white |
 | dark | yellow | 8.23:1 | 3:1 | Pass | Focus ring around the yellow button |
 | error | white | 4.99:1 | 3:1 | Pass | Error bar and icon beside a message (the text says what is wrong too) |
@@ -365,7 +374,7 @@ Every text and background pair is checked against WCAG 2.1 AA by a small script 
 ## Known limitations
 
 - **No online ordering or accounts**: ordering food and logging in both need a real server (orders, payments, accounts), so they're left out on purpose rather than shown as fake pages. Bookings work without an account.
-- **Sample data**: Little Lemon is a fictional restaurant. The menu, the About page story, the customer reviews, and the footer's address, opening hours, phone number and email are made up. The phone number uses the 555-01xx range kept for fiction, and the email uses the reserved `.example` domain, so neither can reach a real person. The opening hours (daily, 5 pm to midnight, last table at 11:30 pm) match the times the booking form offers.
+- **Sample data**: Little Lemon is a fictional restaurant. The menu (dishes, prices and dietary tags), the About page and home page story, the three "Why Little Lemon" highlights, and the address, opening hours, phone number and email (in `src/data/restaurant.js`) are made up. There are no customer reviews, ratings or awards, because they would have to be invented. The phone number uses the 555-01xx range kept for fiction, and the email uses the reserved `.example` domain, so neither can reach a real person. The opening hours (daily, 5 pm to midnight, last table at 11:30 pm) match the times the booking form offers.
 - **Bookings stay in this browser**: the course API doesn't save anything, so bookings are kept in this browser's `localStorage` only. Another browser or device won't see them, and clearing site data removes them. The course API still always says a booking "succeeded".
 - **Create React App is deprecated**: the React team stopped recommending Create React App in February 2025, and it no longer has active maintainers. It still builds and tests this project fine. Moving to [Vite](https://vite.dev) is a possible next step.
 - **Demo-only double-booking check**: a booked time is hidden only in the browser that booked it. A real restaurant would need a server that knows every guest's bookings.
