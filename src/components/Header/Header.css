@@ -1,9 +1,3 @@
-.header-logo {
-  max-width: 160px;
-  /* Keeps the image's proportions when the width changes. */
-  height: auto;
-}
-
 /* Mobile first: logo on the left, menu button on the right, in one row.
    flex-wrap lets the opened menu drop onto its own full-width row underneath. */
 .header {
@@ -11,9 +5,30 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: var(--space-4);
   /* Left/right padding uses the shared gutter, so the logo lines up with the content below. */
-  padding: 1rem var(--page-gutter);
+  padding: var(--space-3) var(--page-gutter);
+  background-color: var(--color-white);
+  /* A thin line and a whisper of shadow separate the header from the page under it. */
+  border-bottom: 1px solid var(--color-light);
+  box-shadow: var(--shadow-sm);
+  /* Keeps the shadow above the next section's background. */
+  position: relative;
+  z-index: 1;
+}
+
+/* The logo link: block, so its focus ring hugs the logo. */
+.header-logo-link {
+  display: block;
+  border-radius: var(--radius-sm);
+}
+
+.header-logo {
+  display: block;
+  /* Smaller on phones, so the logo and the menu button fit on one row with room to spare. */
+  width: 148px;
+  /* Keeps the image's proportions when the width changes. */
+  height: auto;
 }
 
 /* The menu button: a 44px square, easy to tap. */
@@ -25,16 +40,19 @@
   height: 44px;
   padding: 0;
   border: 2px solid var(--color-primary-green);
-  border-radius: 0.5rem;
+  border-radius: var(--radius-sm);
   background-color: var(--color-white);
   /* The icon's lines use currentColor, so they take this green. */
   color: var(--color-primary-green);
   cursor: pointer;
+  transition: background-color var(--transition);
 }
 
-/* While the menu is open, the button is filled in, so you can see its state as well as hear it. */
+/* While the menu is open, the button is filled green with a light icon, so you can see its state as
+   well as hear it ("expanded"). Not yellow: yellow is kept for the main action. */
 .header-menu-button[aria-expanded='true'] {
-  background-color: var(--color-primary-yellow);
+  background-color: var(--color-primary-green);
+  color: var(--color-white);
 }
 
 .header-menu-button:focus-visible {
@@ -50,47 +68,86 @@
   flex-basis: 100%;
 }
 
+/* The open phone menu: a full-width panel. The negative margins stretch it to the screen edges
+   (past the header's side padding), and the padding brings the links back in line with the logo. */
 .header-menu-open {
   display: block;
+  margin: 0 calc(-1 * var(--page-gutter)) calc(-1 * var(--space-3));
+  padding: var(--space-2) var(--page-gutter) var(--space-5);
+  border-top: 1px solid var(--color-light);
 }
 
 /* Inside the phone menu the links are stacked, one per row, full width: easy to read and to tap. */
 .header-menu .nav-list {
   flex-direction: column;
   align-items: stretch;
-  gap: 0.25rem;
+  gap: 0;
 }
 
-/* Medium screens (768px and up): there's room for all six links in one row,
-   so always show them and hide the button. Logo on top, links below, both centered. */
+/* Bigger rows on phones (56px), with a thin line between them, and slightly bigger text. */
+.header-menu .nav-link {
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  padding: var(--space-3) var(--space-2);
+  border-bottom: 1px solid var(--color-light);
+  font-size: var(--text-lg);
+}
+
+/* The "Reserve a Table" button spans the whole width at the bottom of the phone menu. */
+.header-menu .nav-cta-item {
+  margin-top: var(--space-5);
+}
+
+.header-menu .nav-cta {
+  width: 100%;
+}
+
+/* Medium screens and up (768px+): there's room for the three links and the button in one row,
+   so always show them, hide the menu button, and put the logo on the left, the links on the right. */
 @media (min-width: 768px) {
   .header {
-    flex-direction: column;
-    justify-content: center;
+    flex-wrap: nowrap;
+  }
+
+  .header-logo {
+    width: 180px;
   }
 
   .header-menu-button {
     display: none;
   }
 
-  .header-menu {
+  .header-menu,
+  .header-menu-open {
     display: block;
     flex-basis: auto;
+    margin: 0;
+    padding: 0;
+    border: none;
   }
 
   .header-menu .nav-list {
     flex-direction: row;
     align-items: center;
-    gap: 1rem;
+    gap: var(--space-5);
   }
-}
 
-/* Wide screens (1024px and up): logo on the left, links on the right.
-   Not at 768px: logo, six links and the page gutters don't fit in one row there, so the links wrapped.
-   align-items: center (from above) now centers them vertically, because the axes switched. */
-@media (min-width: 1024px) {
-  .header {
-    flex-direction: row;
-    justify-content: space-between;
+  .header-menu .nav-link {
+    display: block;
+    min-height: 44px;
+    padding: var(--space-3) var(--space-1);
+    border-bottom: none;
+    font-size: var(--text-base);
+  }
+
+  .header-menu .nav-cta-item {
+    margin-top: 0;
+    /* A bit more space before the button, so it reads as separate from the page links. */
+    margin-left: var(--space-2);
+  }
+
+  .header-menu .nav-cta {
+    width: auto;
   }
 }
