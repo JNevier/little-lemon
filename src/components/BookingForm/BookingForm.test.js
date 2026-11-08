@@ -121,3 +121,40 @@ describe('when no times are available', () => {
     expect(screen.getByRole('button', { name: 'Make Your reservation' })).toBeDisabled();
   });
 });
+
+describe('times already booked in this browser', () => {
+  // Fake saved bookings (not real people).
+  const today = toInputDate(new Date());
+
+  test('a time booked on the chosen date is not offered', () => {
+    const reservations = [{ id: 'r1', date: today, time: '17:00', guests: 2, occasion: 'Birthday' }];
+    render(
+      <BookingForm availableTimes={['17:00', '18:00']} dispatch={jest.fn()} submitForm={jest.fn()} reservations={reservations} />
+    );
+
+    // Only 18:00 is left, and it's picked automatically.
+    const timeOptions = [...screen.getByLabelText('Choose time').options].map((o) => o.value);
+    expect(timeOptions).toEqual(['18:00']);
+    expect(screen.getByLabelText('Choose time')).toHaveValue('18:00');
+  });
+
+  test('a booking on another date does not hide the time', () => {
+    const reservations = [{ id: 'r1', date: '2099-01-01', time: '17:00', guests: 2, occasion: 'Birthday' }];
+    render(
+      <BookingForm availableTimes={['17:00', '18:00']} dispatch={jest.fn()} submitForm={jest.fn()} reservations={reservations} />
+    );
+
+    const timeOptions = [...screen.getByLabelText('Choose time').options].map((o) => o.value);
+    expect(timeOptions).toEqual(['17:00', '18:00']);
+  });
+
+  test('when every time is booked, the form says so and blocks the submit', () => {
+    const reservations = ['17:00', '18:00'].map((time, i) => ({ id: `r${i}`, date: today, time, guests: 2, occasion: 'Birthday' }));
+    render(
+      <BookingForm availableTimes={['17:00', '18:00']} dispatch={jest.fn()} submitForm={jest.fn()} reservations={reservations} />
+    );
+
+    expect(screen.getByText('No times are available on this date. Please choose another date.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Make Your reservation' })).toBeDisabled();
+  });
+});

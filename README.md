@@ -44,6 +44,8 @@ The app opens at [http://localhost:3000](http://localhost:3000). Step-by-step de
 - **Available times change with the date** you pick.
 - **Validation with clear messages**: you can't pick a past date or book for fewer than 1 or more than 10 guests, and the submit button stays disabled until everything is valid.
 - **Confirmation page** that shows the booking's date, time and number of guests.
+- **My Reservations page**: every booking is saved in the browser (`localStorage`), so it's still there after a reload. Each one can be cancelled, and screen readers announce "Reservation cancelled."
+- **No double bookings**: a time you've already booked disappears from the time list for that date, and comes back if you cancel. (Demo rule: this browser can't book the same slot twice. With no real server, other visitors' bookings aren't known.)
 - **Helpful messages for edge cases**: a failed save, a date with no times, a cleared date, and a visit to the confirmation page with no booking.
 - **Responsive layout**: designed for phones first and checked from 280px (the smallest phones) to 1920px wide, in portrait and landscape. On phones the navigation folds into a menu button; from 768px up the links are always shown, and from 1024px they sit beside the logo. Nothing scrolls sideways, and every link and button is at least 44px tall, so it's easy to tap.
 - **Accessible**: every field has a label, errors are read out by screen readers, and the whole flow works with the keyboard alone.
@@ -124,7 +126,10 @@ You don't need it to try the app. `npm start` is enough.
 3. Type `0` in **Number of guests**. A message appears under the field, and the **Make Your reservation** button turns faded and can't be clicked.
 4. Change it to a number from 1 to 10. The message goes away and the button works again.
 5. Choose a time and an occasion, then click **Make Your reservation** (or press `Enter` in the **Number of guests** field).
-6. You land on the **Booking Confirmed** page, which shows your date, time and number of guests. Use **Back to Home** to return.
+6. You land on the **Booking Confirmed** page, which shows your date, time and number of guests.
+7. Click **View my reservations**. Your booking is listed. Reload the page: it's still there.
+8. Go back to **Reservations** and pick the same date. The time you booked is no longer in the list.
+9. On **My Reservations**, click **Cancel**. The booking disappears, and its time is offered again on the booking form.
 
 ## Try the edge cases
 
@@ -146,7 +151,10 @@ src/
 ├── index.css
 ├── api.js
 ├── hooks/
-│   └── useFetch.js
+│   ├── useFetch.js
+│   └── useLocalStorage.js
+├── context/
+│   └── ReservationsContext.js
 ├── components/
 │   ├── BookingForm/
 │   ├── Main/
@@ -162,6 +170,7 @@ src/
 │   ├── ComingSoonPage/
 │   ├── BookingPage/
 │   ├── ConfirmedBooking/
+│   ├── MyReservationsPage/
 │   └── NotFoundPage/
 └── utils/
 ```
@@ -170,7 +179,8 @@ src/
 - `src/components/BookingForm/`: the booking form, its validation functions (`validation.js`) and their tests.
 - `src/components/Main/`: the page routes and the booking logic (available times and submitting a booking).
 - `src/pages/`: one folder per page the router can show.
-- `src/hooks/`: custom hooks. `useFetch(url)` loads JSON and returns `{ data, loading, error }`, and cancels the request if the page closes first.
+- `src/hooks/`: custom hooks. `useFetch(url)` loads JSON and returns `{ data, loading, error }`, and cancels the request if the page closes first. `useLocalStorage(key, initialValue)` works like `useState` but also saves the value in the browser.
+- `src/context/`: `ReservationsContext.js` shares the saved reservations with any page through `useReservations()`, so they don't have to be passed down through every component.
 - `public/data/menu.json`: the sample menu. Files in `public/` are served as they are, so the app fetches it like a real API.
 - `src/utils/`: small helpers. `dates.js` converts between a date input's `YYYY-MM-DD` text and a JavaScript date, and checks that a date is complete.
 - `src/api.js`: the course's booking API (see [About the booking API](#about-the-booking-api)).
@@ -191,6 +201,9 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 - **The menu page**: the loading message, the dishes and their prices, the category filter and its pressed state, and the error message.
 - **Routing**: every in-app link on the home page and in the nav opens a real page, and an unknown address shows the 404 page.
 - **The phone menu**: the button opens and closes the menu, `Escape` closes it and returns focus to the button, and moving to another page closes it.
+- **Saving in the browser** (`useLocalStorage`): reading, writing, broken saved data and blocked storage, none of which may crash the app. Each test starts with `localStorage.clear()`.
+- **Reservations** (Context and My Reservations page): adding, cancelling, sorting by date and time, the empty state, the "Reservation cancelled." message, and that booked times are hidden on the form.
+- **The whole booking journey** in one test: book a table, reload, see it on My Reservations, check its time is hidden, cancel it, and check the time is back.
 
 **Why fake the API and fix the date in tests:** a test that uses today's real date could pass today and fail tomorrow.
 
@@ -203,6 +216,7 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 - **Page changes**: the confirmation page sets its own browser tab title and moves focus to its heading, so screen readers announce the new page.
 - **Urgent messages**: the failed-save message uses `role="alert"`, so screen readers read it out as soon as it appears.
 - **Menu filters**: the filter buttons use `aria-pressed`, so screen readers say which category is chosen. The loading message uses `role="status"` (read out politely) and a failed load uses `role="alert"`.
+- **Cancel buttons**: every row's button says "Cancel", but its full name says which booking it cancels (for example "Cancel reservation for Friday, October 9, 2026 at 18:00"). After a cancel, focus moves to the page heading, so keyboard users don't lose their place.
 - **Phone menu button**: it says whether the menu is open (`aria-expanded`), names the menu it controls (`aria-controls`), closes with `Escape` (focus goes back to the button) and closes when you move to another page.
 - **Keyboard**: everything works with `Tab`, the arrow keys and `Enter`, and every control shows a visible focus ring.
 - **Semantic HTML**: one `<h1>` per page, headings in order, and the `header`, `nav`, `main` and `footer` landmarks.
@@ -231,7 +245,7 @@ There is no Figma wireframe. I skipped that step and built the pages from the co
 
 - **Coming-soon pages**: Order Online and Login aren't built. Their links open a "coming soon" page instead.
 - **Sample data**: the menu, the About page story, the customer reviews and the contact details in the footer are made up.
-- **No real bookings**: the course API doesn't save anything, so a booking is never stored and always "succeeds".
+- **Bookings stay in this browser**: the course API doesn't save anything, so bookings are kept in this browser's `localStorage` only. Another browser or device won't see them, and clearing site data removes them. The course API still always says a booking "succeeded".
 - **Placeholder preview image**: the `og:image` link used for social-media previews points to a placeholder address until the site is deployed.
 
 ## Git workflow

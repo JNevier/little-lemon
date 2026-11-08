@@ -2,6 +2,7 @@ import { useReducer } from 'react';
 import { Routes, Route, useNavigate } from 'react-router';
 import { fetchAPI, submitAPI } from '../../api';
 import { fromInputDate, isInputDate } from '../../utils/dates';
+import { useReservations } from '../../context/ReservationsContext';
 import HomePage from '../../pages/HomePage/HomePage';
 import BookingPage from '../../pages/BookingPage/BookingPage';
 import ConfirmedBooking from '../../pages/ConfirmedBooking/ConfirmedBooking';
@@ -9,6 +10,7 @@ import NotFoundPage from '../../pages/NotFoundPage/NotFoundPage';
 import MenuPage from '../../pages/MenuPage/MenuPage';
 import AboutPage from '../../pages/AboutPage/AboutPage';
 import ComingSoonPage from '../../pages/ComingSoonPage/ComingSoonPage';
+import MyReservationsPage from '../../pages/MyReservationsPage/MyReservationsPage';
 
 // Builds the starting list of available times: the times for today,
 // because the date field also starts on today.
@@ -39,12 +41,16 @@ function Main() {
   const [availableTimes, dispatch] = useReducer(updateTimes, undefined, initializeTimes);
   // A function that changes the page from code, like clicking a link. Hooks go at the top level.
   const navigate = useNavigate();
+  // The bookings saved in this browser, from the ReservationsProvider in App.js.
+  const { reservations, addReservation } = useReservations();
 
   // Sends the booking to the API. If it's accepted, show the confirmation page.
   // Returns whether it was saved, so the form can tell the user when it wasn't.
   function submitForm(formData) {
     const saved = submitAPI(formData);
     if (saved) {
+      // Remember it in this browser, so it shows on My Reservations and its time can't be booked twice.
+      addReservation(formData);
       // Carry the booking to the next page, so it can show what was booked.
       navigate('/confirmed', { state: { booking: formData } });
     }
@@ -57,9 +63,17 @@ function Main() {
         <Route path="/" element={<HomePage />} />
         <Route
           path="/reservations"
-          element={<BookingPage availableTimes={availableTimes} dispatch={dispatch} submitForm={submitForm} />}
+          element={
+            <BookingPage
+              availableTimes={availableTimes}
+              dispatch={dispatch}
+              submitForm={submitForm}
+              reservations={reservations}
+            />
+          }
         />
         <Route path="/confirmed" element={<ConfirmedBooking />} />
+        <Route path="/my-reservations" element={<MyReservationsPage />} />
         <Route path="/menu" element={<MenuPage />} />
         <Route path="/about" element={<AboutPage />} />
         {/* The same page twice, with a different title prop for each unbuilt feature. */}
