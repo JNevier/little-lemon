@@ -17,6 +17,8 @@ const colors = {
   white: '#ffffff',
   // A deep terracotta from the salmon family, for error marks. Salmon itself is too light (2.2:1 on white).
   error: '#b8501f',
+  // The hero's outline button on hover: 12% see-through white over the green band looks like this color.
+  greenHover: '#5f716b',
 };
 
 // Every pair used on the site: [text or part color, background color, 'text' or 'large' or 'ui', where it's used].
@@ -33,6 +35,9 @@ const pairs = [
   ['light', 'green', 'text', 'Footer text'],
   ['yellow', 'green', 'large', 'Hero title on green (large text only)'],
   ['yellow', 'green', 'ui', 'Focus ring on green'],
+  ['white', 'greenHover', 'text', 'Hero outline button text on hover'],
+  ['light', 'green', 'ui', 'Hero outline button border on green'],
+  ['green', 'peach', 'ui', 'Home highlight icons in peach circles'],
   ['green', 'white', 'ui', 'Focus rings, borders, active underline on white'],
   ['dark', 'yellow', 'ui', 'Focus ring around the yellow button'],
   ['error', 'white', 'ui', 'Error bar and icon beside a message (the text says what is wrong too)'],

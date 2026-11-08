@@ -2,6 +2,16 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import App from './App';
 
+// The home page (its specials) and the Menu page load dishes with fetch. This fake never answers,
+// so these tests don't need menu data, and nothing changes on screen after a test has finished.
+beforeEach(() => {
+  global.fetch = jest.fn(() => new Promise(() => {}));
+});
+
+afterEach(() => {
+  delete global.fetch;
+});
+
 test('renders the main heading', () => {
   // App needs a router around it, like BrowserRouter in index.js.
   // MemoryRouter keeps the URL in memory, so the test doesn't need a real address bar.
@@ -25,11 +35,8 @@ function renderAppAt(path) {
 }
 
 test('every link on the home page and in the nav opens a real page, not the 404 page', () => {
-  // The Menu page loads its dishes with fetch. This fake never answers, so the test doesn't need menu data.
-  global.fetch = jest.fn(() => new Promise(() => {}));
-
   // Collect every in-app address that the home page links to: the header nav, the footer nav,
-  // and the hero and Specials buttons. A Set removes the repeats.
+  // and the links in the home page's sections. A Set removes the repeats.
   const { unmount } = renderAppAt('/');
   const paths = new Set(
     screen
@@ -54,8 +61,6 @@ test('every link on the home page and in the nav opens a real page, not the 404 
     expect(screen.queryByRole('heading', { name: 'Page not found' })).not.toBeInTheDocument();
     page.unmount();
   });
-
-  delete global.fetch;
 });
 
 test('an unknown address still shows the 404 page', () => {
@@ -96,8 +101,6 @@ describe('skip link', () => {
 });
 
 test('every page has its own browser tab title', () => {
-  // The Menu page fetches its dishes; this fake never answers, so no menu data is needed.
-  global.fetch = jest.fn(() => new Promise(() => {}));
   const paths = ['/', '/about', '/menu', '/reservations', '/confirmed', '/my-reservations', '/no-such-page'];
 
   const titles = paths.map((path) => {
@@ -111,6 +114,4 @@ test('every page has its own browser tab title', () => {
   titles.forEach((title) => expect(title).toMatch(/Little Lemon/));
   // ...and no two pages share a title (a Set drops repeats, so its size would shrink).
   expect(new Set(titles).size).toBe(paths.length);
-
-  delete global.fetch;
 });

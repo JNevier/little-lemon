@@ -1,34 +1,93 @@
-/* Space around the whole Specials section. */
-.specials {
-  padding: 2rem var(--page-gutter);
-}
-
-/* Title on the left, "Online Menu" button on the right. On narrow screens the button
+/* Title on the left, "View full menu" on the right. On narrow screens the link
    wraps onto its own line instead of squeezing the title. */
 .specials-header {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  align-items: flex-end;
+  gap: var(--space-2) var(--space-5);
+  margin-bottom: var(--space-6);
 }
 
-/* The flex row handles the spacing, so the heading's browser margin isn't needed. */
+/* The flex row handles the spacing, so the heading's own margin isn't needed. */
 .specials-header h2 {
   margin: 0;
 }
 
-/* Mobile first: one card per row. */
+/* A bold text link, 44px tall so it's easy to tap. */
+.specials-menu-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  font-weight: 700;
+}
+
+/* Mobile first: one card per row. It's a list, so the bullets and indent are reset. */
 .specials-list {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.5rem;
+  gap: var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 /* Bigger screens (768px and up): three cards side by side. */
 @media (min-width: 768px) {
   .specials-list {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.specials-error {
+  margin: 0;
+}
+
+/* The skeleton: a white card with grey blocks in the same places as the real card's photo and text.
+   min-height makes it about as tall as a real card, so nothing jumps when the dishes arrive.
+   It doesn't lift on hover: there's nothing to click yet. */
+.special-card-skeleton {
+  min-height: 24.5rem;
+  border-radius: var(--radius);
+  background-color: var(--color-white);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.skeleton-block {
+  border-radius: var(--radius-sm);
+  background-color: var(--color-light);
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+/* The same height as a real card's photo. */
+.skeleton-image {
+  height: 12rem;
+  border-radius: 0;
+}
+
+.skeleton-line {
+  height: 1rem;
+  margin: var(--space-5) var(--space-5) 0;
+}
+
+.skeleton-line-short {
+  width: 60%;
+  margin-top: var(--space-3);
+}
+
+/* NEW: @keyframes describes an animation step by step. This one fades the grey blocks
+   gently in and out, so the visitor can see something is still happening. */
+@keyframes skeleton-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* No pulsing for people who turned on "Reduce motion": the grey shapes simply stay still. */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-block {
+    animation: none;
   }
 }

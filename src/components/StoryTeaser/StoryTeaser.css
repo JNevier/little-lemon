@@ -1,0 +1,36 @@
+/* Mobile first: the photo on top, the text below. */
+.story-teaser {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+}
+
+.story-teaser-image {
+  display: block;
+  width: 100%;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+}
+
+/* The last paragraph's bottom margin is replaced by the link's own space. */
+.story-teaser-text p:last-of-type {
+  margin-bottom: var(--space-3);
+}
+
+/* A bold text link, 44px tall so it's easy to tap. */
+.story-teaser-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  font-weight: 700;
+}
+
+/* Bigger screens (768px and up): the photo on the left, the text on the right, lined up through the middle. */
+@media (min-width: 768px) {
+  .story-teaser {
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: var(--space-8);
+  }
+}

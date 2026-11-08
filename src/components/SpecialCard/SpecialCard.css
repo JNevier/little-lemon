@@ -1,43 +1,114 @@
-/* One dish card: a light, rounded box. */
+/* One dish card: white, rounded, with a soft shadow, on the grey band.
+   position: relative is the frame that the stretched link and the price badge are placed in. */
 .special-card {
-  background-color: var(--color-light);
-  border-radius: var(--radius);
-  /* Cut off the image's square corners so they follow the card's rounded corners. */
-  overflow: hidden;
-  /* Stack the card's parts top to bottom as a flex column. */
+  position: relative;
   display: flex;
   flex-direction: column;
+  background-color: var(--color-white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  /* Cut off the photo's square corners so they follow the card's rounded corners. */
+  overflow: hidden;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+/* Hover lift: the card rises a little and its shadow grows, which says "you can click this".
+   NEW: :focus-within is true when anything inside the card has keyboard focus, so keyboard users
+   see the same lift when they Tab onto the dish name. */
+.special-card:hover,
+.special-card:focus-within {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.special-card-media {
+  position: relative;
 }
 
 .special-card-image {
   /* Images are inline by default, which leaves a small gap under them; block removes it. */
   display: block;
   width: 100%;
-  /* Every card's photo gets the same height, so the cards line up. The fixed height also reserves the space before the image loads. */
+  /* Every card's photo gets the same height, so the cards line up. */
   height: 12rem;
   object-fit: cover;
 }
 
-/* The text keeps some space from the card's edges; the image stays edge to edge. */
-.special-card-heading,
-.special-card-description {
-  padding: 0 1rem;
-}
-
-/* Name and price share one row: name on the left, price pushed to the right.
-   baseline lines up the bottoms of the letters, even though the two texts have different sizes. */
-.special-card-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 1rem;
-}
-
-/* The card title's font, size and weight come from the global h3 rule in index.css. */
-
-/* Style guide: highlight text such as a price is 16px Medium. */
+/* The price badge on the photo's top-right corner: green on white is about 7:1. */
 .special-card-price {
-  font-weight: 500;
-  /* Green on the light card is about 6:1; salmon would be only about 1.9:1. */
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius);
+  background-color: var(--color-white);
+  box-shadow: var(--shadow-md);
   color: var(--color-primary-green);
+  font-weight: 700;
+}
+
+/* flex: 1 makes the text area fill the card, so cards in the same row are the same height. */
+.special-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: var(--space-5);
+}
+
+.special-card-title {
+  margin: 0 0 var(--space-2);
+}
+
+/* The dish name reads as a title, not as underlined link text. Hover underlines it. */
+.special-card-link {
+  color: var(--color-dark);
+  text-decoration: none;
+}
+
+.special-card-link:hover {
+  text-decoration: underline;
+}
+
+/* The stretched link: an invisible box (::after) that covers the whole card.
+   position: absolute with inset: 0 fills the nearest frame, which is the .special-card. */
+.special-card-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+/* The focus ring goes around the whole card (the shape you can click), not just the name. */
+.special-card-link:focus-visible {
+  outline: none;
+}
+
+.special-card-link:focus-visible::after {
+  border-radius: var(--radius);
+  outline: 3px solid var(--color-primary-green);
+  outline-offset: -3px;
+}
+
+.special-card-description {
+  margin: 0;
+}
+
+/* The tags row sits at the bottom of the card (margin-top: auto pushes it down). */
+.special-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: auto 0 0;
+  padding: var(--space-4) 0 0;
+  list-style: none;
+}
+
+/* A small dietary tag: green text on a light peach pill (about 5.2:1). */
+.tag {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius);
+  background-color: var(--color-secondary-peach);
+  color: var(--color-primary-green);
+  font-size: var(--text-sm);
+  font-weight: 700;
 }
