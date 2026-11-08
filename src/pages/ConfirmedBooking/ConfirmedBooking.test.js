@@ -38,3 +38,21 @@ describe('on a direct visit', () => {
     expect(screen.queryByText(/your table at little lemon is reserved/i)).not.toBeInTheDocument();
   });
 });
+
+describe('with contact details', () => {
+  test('thanks the guest by name and shows the seating and request', () => {
+    // Fake details (not a real person).
+    setupPage({
+      booking: { ...booking, name: 'Test Guest', email: 'guest@example.com', seating: 'Outdoor', requests: 'A high chair, please.' },
+    });
+    expect(screen.getByText(/thank you, test guest!/i)).toBeInTheDocument();
+    expect(screen.getByText('Outdoor')).toBeInTheDocument();
+    expect(screen.getByText('Your request: A high chair, please.')).toBeInTheDocument();
+  });
+
+  test('an older booking without a name still reads naturally', () => {
+    setupPage({ booking });
+    expect(screen.getByText(/^thank you! your table/i)).toBeInTheDocument();
+    expect(screen.queryByText(/seating/i)).not.toBeInTheDocument();
+  });
+});

@@ -34,10 +34,21 @@ function ConfirmedBooking() {
           The ref callback runs when the h1 appears and moves focus there, so screen readers
           announce the new page. */}
       <h1 tabIndex={-1} ref={(heading) => heading?.focus()}>Booking Confirmed</h1>
-      <p>Thank you! Your table at Little Lemon is reserved. We look forward to seeing you.</p>
+      {/* Bookings made before the form asked for a name don't have one, so the name is optional here. */}
+      <p>
+        Thank you{booking.name ? `, ${booking.name}` : ''}! Your table at Little Lemon is reserved.
+        We look forward to seeing you.
+      </p>
       <p>
         <strong>{dateText}</strong> at <strong>{booking.time}</strong> for <strong>{guestsText}</strong>.
       </p>
+      {/* "&&" shows the part after it only when the part before it has a value. */}
+      {booking.seating && (
+        <p>
+          Seating: <strong>{booking.seating}</strong>
+        </p>
+      )}
+      {booking.requests && <p>Your request: {booking.requests}</p>}
       <LinkButton to="/">Back to Home</LinkButton>
       <p>
         <Link to="/my-reservations" className="confirmed-booking-link">View my reservations</Link>
