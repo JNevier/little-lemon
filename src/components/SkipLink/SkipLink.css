@@ -1,0 +1,25 @@
+/* The skip link floats over the top-left corner of the page, but starts moved up out of sight.
+   It isn't display: none, because then it couldn't get keyboard focus at all. */
+.skip-link {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  /* Above the header, so nothing covers it when it appears. */
+  z-index: 10;
+  /* Moved up by twice its own height: completely off the screen. */
+  transform: translateY(-200%);
+  /* The same look as the yellow buttons: dark on yellow is about 8.2:1. */
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius);
+  background-color: var(--color-primary-yellow);
+  color: var(--color-dark);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* When it gets keyboard focus, it slides into view. */
+.skip-link:focus {
+  transform: none;
+  outline: 3px solid var(--color-dark);
+  outline-offset: 2px;
+}

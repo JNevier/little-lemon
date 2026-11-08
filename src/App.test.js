@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import App from './App';
 
@@ -58,4 +58,47 @@ test('every link on the home page and in the nav opens a real page, not the 404 
 test('an unknown address still shows the 404 page', () => {
   renderAppAt('/no-such-page');
   expect(screen.getByRole('heading', { level: 1, name: 'Page not found' })).toBeInTheDocument();
+});
+
+describe('skip link', () => {
+  test('is the first thing the Tab key reaches', () => {
+    renderAppAt('/');
+    // Every element the Tab key can reach, in page order (tabIndex -1 is left out on purpose).
+    const focusable = document.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    expect(focusable[0]).toBe(screen.getByRole('link', { name: 'Skip to main content' }));
+  });
+
+  test('points at the main content and moves focus there when used', () => {
+    renderAppAt('/');
+    const skipLink = screen.getByRole('link', { name: 'Skip to main content' });
+    const main = screen.getByRole('main');
+
+    expect(skipLink).toHaveAttribute('href', '#main-content');
+    expect(main).toHaveAttribute('id', 'main-content');
+
+    fireEvent.click(skipLink);
+    expect(main).toHaveFocus();
+  });
+});
+
+test('every page has its own browser tab title', () => {
+  // The Menu page fetches its dishes; this fake never answers, so no menu data is needed.
+  global.fetch = jest.fn(() => new Promise(() => {}));
+  const paths = ['/', '/about', '/menu', '/reservations', '/confirmed', '/my-reservations', '/order-online', '/login', '/no-such-page'];
+
+  const titles = paths.map((path) => {
+    const page = renderAppAt(path);
+    const title = document.title;
+    page.unmount();
+    return title;
+  });
+
+  // Every title names the restaurant...
+  titles.forEach((title) => expect(title).toMatch(/Little Lemon/));
+  // ...and no two pages share a title (a Set drops repeats, so its size would shrink).
+  expect(new Set(titles).size).toBe(paths.length);
+
+  delete global.fetch;
 });
