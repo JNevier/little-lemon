@@ -45,13 +45,13 @@ test('book a table, see it after a reload, cancel it, and get the time back', ()
   fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'Test Guest' } });
   fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'guest@example.com' } });
   fireEvent.click(screen.getByRole('radio', { name: 'Indoor' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Make Your reservation' }));
-  expect(screen.getByRole('heading', { level: 1, name: 'Booking Confirmed' })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Confirm reservation' }));
+  expect(screen.getByRole('heading', { level: 1, name: "You're booked" })).toBeInTheDocument();
 
   // 2. "Reload": throw the whole app away and start it again. The booking comes back from storage.
   firstVisit.unmount();
   renderAppAt('/my-reservations');
-  const rows = screen.getAllByRole('listitem').filter((row) => row.closest('.my-reservations-page-list'));
+  const rows = screen.getAllByRole('listitem').filter((row) => row.classList.contains('reservation-card'));
   expect(rows).toHaveLength(1);
   expect(within(rows[0]).getByText(/18:00/)).toBeInTheDocument();
 
@@ -61,9 +61,10 @@ test('book a table, see it after a reload, cancel it, and get the time back', ()
   fireEvent.change(screen.getByLabelText('Choose date'), { target: { value: date } });
   expect(offeredTimes()).toEqual(['17:00']);
 
-  // 4. Cancel it on My Reservations.
-  fireEvent.click(screen.getByRole('link', { name: 'View my reservations' }));
+  // 4. Cancel it on My Reservations (switch with the tab, then confirm the cancel).
+  fireEvent.click(screen.getByRole('link', { name: 'My reservations' }));
   fireEvent.click(screen.getByRole('button', { name: /^Cancel reservation for .* at 18:00$/ }));
+  fireEvent.click(screen.getByRole('button', { name: 'Yes, cancel' }));
   expect(screen.getByRole('status')).toHaveTextContent('Reservation cancelled.');
   expect(screen.getByText("You don't have any reservations yet.")).toBeInTheDocument();
 
