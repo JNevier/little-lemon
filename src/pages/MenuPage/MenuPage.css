@@ -1,4 +1,4 @@
-/* The filter bar: a row of light tabs under the peach header, full width with a thin line under it. */
+/* The filter bar: a row of light tabs under the green header, full width with a thin line under it. */
 .menu-page-filters {
   /* NEW: position: sticky keeps an element in the normal page flow until it reaches the edge given by
      `top`, then holds it there while the rest of the page scrolls under it. Here: the filter bar stays

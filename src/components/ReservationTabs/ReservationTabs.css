@@ -1,18 +1,19 @@
-/* The two tabs sit at the bottom of the peach page header, like the menu's filter tabs. */
+/* The two tabs sit at the bottom of the green page header, like the menu's filter tabs. */
 .reservation-tabs {
   display: flex;
   gap: var(--space-2);
   margin-top: var(--space-5);
 }
 
-/* Each tab: dark text with a see-through bar under it. 48px tall, easy to tap. */
+/* Each tab: light text with a see-through bar under it. 48px tall, easy to tap.
+   Light grey on green is about 6:1. */
 .reservation-tab {
   display: inline-flex;
   align-items: center;
   min-height: 48px;
   padding: 0 var(--space-3);
   border-bottom: 3px solid transparent;
-  color: var(--color-dark);
+  color: var(--color-light);
   font-weight: 700;
   text-decoration: none;
   transition: color var(--transition), border-color var(--transition);
@@ -23,14 +24,15 @@
   padding-left: 0;
 }
 
+/* Hover: a soft see-through white bar, just a hint. */
 .reservation-tab:hover {
-  border-bottom-color: var(--color-secondary-salmon);
-  color: var(--color-primary-green);
+  border-bottom-color: rgb(255 255 255 / 0.5);
+  color: var(--color-white);
 }
 
-/* The page you're on: a thick green bar (a shape, not only a color) and green text.
-   Green on peach is about 5.2:1. */
+/* The page you're on: a thick white bar (a shape, not only a color) and white text.
+   White on green is about 7:1. */
 .reservation-tab.active {
-  border-bottom-color: var(--color-primary-green);
-  color: var(--color-primary-green);
+  border-bottom-color: var(--color-white);
+  color: var(--color-white);
 }
