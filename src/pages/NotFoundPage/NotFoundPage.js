@@ -6,7 +6,7 @@ function NotFoundPage() {
   return (
     <section className="not-found-page">
       <h1>Page not found</h1>
-      <p>We couldn't find that page. It may not be built yet.</p>
+      <p>We couldn't find that page.</p>
       <Link to="/">Back to the home page</Link>
     </section>
   );

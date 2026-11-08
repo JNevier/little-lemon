@@ -1,0 +1,9 @@
+/* The intro and the closing action get the page padding.
+   The Chicago section in between already has its own padding, so it isn't wrapped. */
+.about-page-intro {
+  padding: 2rem var(--page-gutter) 0;
+}
+
+.about-page-action {
+  padding: 0 var(--page-gutter) 2rem;
+}
