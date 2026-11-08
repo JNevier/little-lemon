@@ -54,7 +54,7 @@ The app opens at [http://localhost:3000](http://localhost:3000). Step-by-step de
 - **My Reservations page**: every booking is saved in the browser (`localStorage`), so it's still there after a reload. Bookings are split into **Upcoming** and **Past**, each card with a date badge, the time, small pills for guests, occasion and seating, and the name. **Cancel** asks first ("Cancel this reservation?" **Yes, cancel** / **Keep it**), and screen readers announce "Reservation cancelled." Past bookings are kept as a record and can't be cancelled.
 - **No double bookings**: a time you've already booked disappears from the time list for that date, and comes back if you cancel. (Demo rule: this browser can't book the same slot twice. With no real server, other visitors' bookings aren't known.)
 - **Helpful messages for edge cases**: a failed save, a date with no times, a cleared date, and a visit to the confirmation page with no booking.
-- **Responsive layout**: designed for phones first and checked from 280px (the smallest phones) to 1920px wide, in portrait and landscape. On phones the navigation folds into a menu button; from 768px up the links are always shown, and from 1024px they sit beside the logo. Nothing scrolls sideways, and every link and button is at least 44px tall, so it's easy to tap.
+- **Responsive layout**: designed for phones first and checked from 280px (the smallest phones) to 1920px wide, in portrait and landscape. On phones the navigation folds into a menu button; from 768px up the logo, the links and the Reserve a Table button share one row. Nothing scrolls sideways, and every link and button is at least 44px tall, so it's easy to tap (the footer's phone and email links are smaller only when the pointer is a mouse). On the narrowest phones (under 320px) the menu's filter tabs scroll sideways inside their own bar.
 - **Accessible**: every field has a label, errors are read out by screen readers, and the whole flow works with the keyboard alone.
 
 ## Screenshots
@@ -63,21 +63,27 @@ All names, emails and bookings in these screenshots are fake test data.
 
 **Desktop**
 
-![Home page: hero with "Reserve a Table", and this week's specials](docs/screenshots/home-desktop.jpg)
+![Home page: a green hero with the Little Lemon title, Reserve a Table and See the menu buttons, the address and dinner time, and a photo of the food](docs/screenshots/home-desktop.jpg)
 
-![Menu page with the Mains filter chosen, showing three dishes and their prices](docs/screenshots/menu-desktop.jpg)
+![Home page specials: three photo cards (Bruschetta, Greek Salad, Lemon Dessert) with price badges and Vegetarian tags](docs/screenshots/home-specials-desktop.jpg)
 
-![My Reservations page listing two fake bookings, each with a Cancel button](docs/screenshots/my-reservations-desktop.jpg)
+![Menu page: a peach header, the All, Starters, Mains, Desserts and Drinks tabs, and the Starters section with photos, dotted lines to the prices, and dietary tags](docs/screenshots/menu-desktop.jpg)
+
+![Booking page: the When and Your table steps filled in on the left, and the Your reservation summary on the right showing Friday, November 20, 2026 at 19:00 for 4 guests, outdoor](docs/screenshots/booking-desktop.jpg)
+
+![My Reservations page: Upcoming bookings with date badges and detail pills, one showing the Cancel this reservation question with Yes, cancel and Keep it, and a Past section below](docs/screenshots/my-reservations-desktop.jpg)
+
+![About page: the Our story header, and the story next to two overlapping photos of Mario and Adrian in the kitchen](docs/screenshots/about-desktop.jpg)
 
 **Phone**
 
 | Menu button opened | Booking form | Confirmation |
 | --- | --- | --- |
-| <img src="docs/screenshots/nav-mobile.jpg" alt="Phone view with the menu button opened and the six page links stacked" width="240" /> | <img src="docs/screenshots/booking-form-mobile.jpg" alt="Phone view of the booking form with seating, name, email and special request filled in" width="240" /> | <img src="docs/screenshots/confirmation-mobile.jpg" alt="Phone view of the Booking Confirmed page thanking Test Guest, with the date, time, guests, seating and request" width="240" /> |
+| <img src="docs/screenshots/nav-mobile.jpg" alt="Phone view with the menu opened: Home, About and Menu links and a full-width Reserve a Table button" width="240" /> | <img src="docs/screenshots/booking-form-mobile.jpg" alt="Phone view of the Your details step filled in with Test Guest, guest@example.com and a request, above the Your reservation summary" width="240" /> | <img src="docs/screenshots/confirmation-mobile.jpg" alt="Phone view of the You're booked page thanking Test Guest, with the date, time, guests, occasion, seating, name and request" width="240" /> |
 
 ## Lighthouse
 
-Measured with [PageSpeed Insights](https://pagespeed.web.dev) (Lighthouse 13.6, **mobile**: an emulated mid-range phone on a slow 4G connection) on the live home page, November 8, 2026. These are from the second of two runs after the hero photo change.
+Measured with [PageSpeed Insights](https://pagespeed.web.dev) (Lighthouse 13.6, **mobile**: an emulated mid-range phone on a slow 4G connection) on the live home page, November 8, 2026. These are from the second of two runs after the hero photo change, **before the UI redesign**; they will be measured again once the redesign is live.
 
 | Performance | Accessibility | Best Practices | SEO |
 | --- | --- | --- | --- |
@@ -254,6 +260,7 @@ src/
 - `src/pages/`: one folder per page the router can show.
 - `src/hooks/`: custom hooks. `useFetch(url)` loads JSON and returns `{ data, loading, error, retry }`, cancels the request if the page closes first, and loads again when `retry()` is called. `useLocalStorage(key, initialValue)` works like `useState` but also saves the value in the browser.
 - `src/context/`: `ReservationsContext.js` shares the saved reservations with any page through `useReservations()`, so they don't have to be passed down through every component.
+- `public/images/`: the photos and logos. The dish photos are resized with macOS `sips` (for example `bruschetta.jpg` went from a 1920px, 404 KB PNG to an 800px, 76 KB JPEG, and `shakshuka.jpg` from 313 KB to 75 KB), so they load quickly on phones.
 - `public/data/menu.json`: the sample menu. Files in `public/` are served as they are, so the app fetches it like a real API. Each dish has a name, category, price, description and dietary `tags`; dishes with `"featured": true` (and an `image`) appear in the home page's specials.
 - `src/data/restaurant.js`: the restaurant's sample address, hours, phone number and email, in one place. The home page and the footer both read it, so they can't disagree.
 - `src/utils/`: small helpers. `dates.js` converts between a date input's `YYYY-MM-DD` text and a JavaScript date, and checks that a date is complete. `price.js` formats a price as US dollars (`5` becomes `$5.00`), for the menu and the home page.
