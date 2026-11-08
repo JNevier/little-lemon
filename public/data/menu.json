@@ -1,0 +1,86 @@
+[
+  {
+    "id": "bruschetta",
+    "name": "Bruschetta",
+    "category": "Starters",
+    "price": 5.99,
+    "description": "Grilled bread rubbed with garlic, topped with tomato, basil and olive oil."
+  },
+  {
+    "id": "hummus-plate",
+    "name": "Hummus Plate",
+    "category": "Starters",
+    "price": 7.5,
+    "description": "Creamy chickpea hummus with warm pita and a drizzle of lemon oil."
+  },
+  {
+    "id": "greek-salad",
+    "name": "Greek Salad",
+    "category": "Starters",
+    "price": 12.99,
+    "description": "Crisp lettuce, peppers, olives and feta, with garlic and rosemary croutons."
+  },
+  {
+    "id": "grilled-fish",
+    "name": "Grilled Sea Bass",
+    "category": "Mains",
+    "price": 24.0,
+    "description": "Whole sea bass grilled with lemon and herbs, served with roast potatoes."
+  },
+  {
+    "id": "lamb-souvlaki",
+    "name": "Lamb Souvlaki",
+    "category": "Mains",
+    "price": 21.5,
+    "description": "Marinated lamb skewers with tzatziki, rice and a small salad."
+  },
+  {
+    "id": "vegetable-moussaka",
+    "name": "Vegetable Moussaka",
+    "category": "Mains",
+    "price": 18.0,
+    "description": "Layers of aubergine, potato and lentils under a golden bechamel."
+  },
+  {
+    "id": "lemon-dessert",
+    "name": "Lemon Dessert",
+    "category": "Desserts",
+    "price": 5.0,
+    "description": "Grandma's lemon tart with a crisp base and toasted meringue."
+  },
+  {
+    "id": "baklava",
+    "name": "Baklava",
+    "category": "Desserts",
+    "price": 6.5,
+    "description": "Thin layers of pastry with walnuts and honey syrup."
+  },
+  {
+    "id": "orange-cake",
+    "name": "Orange Olive Oil Cake",
+    "category": "Desserts",
+    "price": 6.0,
+    "description": "A moist cake made with olive oil and fresh orange zest."
+  },
+  {
+    "id": "lemonade",
+    "name": "Fresh Lemonade",
+    "category": "Drinks",
+    "price": 3.5,
+    "description": "Squeezed to order, with a sprig of mint."
+  },
+  {
+    "id": "mint-tea",
+    "name": "Mint Tea",
+    "category": "Drinks",
+    "price": 3.0,
+    "description": "Hot green tea with fresh mint leaves."
+  },
+  {
+    "id": "greek-coffee",
+    "name": "Greek Coffee",
+    "category": "Drinks",
+    "price": 3.25,
+    "description": "Strong, finely ground coffee brewed in a small pot."
+  }
+]

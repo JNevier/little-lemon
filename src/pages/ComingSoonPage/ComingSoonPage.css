@@ -1,0 +1,4 @@
+/* Page padding so the text doesn't touch the screen edge on phones. */
+.coming-soon-page {
+  padding: 2rem var(--page-gutter);
+}
