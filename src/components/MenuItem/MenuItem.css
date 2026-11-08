@@ -1,4 +1,4 @@
-/* One dish: a light, rounded box, like the Specials cards. */
+/* One dish: a light, rounded box, like the home page's specials. */
 .menu-item {
   background-color: var(--color-light);
   border-radius: var(--radius);
