@@ -2,6 +2,8 @@
 
 A React web app for a small restaurant where you can pick a date, time and party size, and book a table online.
 
+**Live demo: [littlelemon-chicago.vercel.app](https://littlelemon-chicago.vercel.app)**
+
 ## About
 
 This is my capstone project for the Meta Front-End Developer course.
@@ -26,6 +28,9 @@ The app opens at [http://localhost:3000](http://localhost:3000). Step-by-step de
 
 | What to check | Where to find it |
 | --- | --- |
+| The live site | [littlelemon-chicago.vercel.app](https://littlelemon-chicago.vercel.app) |
+| What it looks like | [Screenshots](#screenshots) |
+| Speed and accessibility scores | [Lighthouse](#lighthouse) |
 | Design and responsive layout | Open the app and resize the window, or see [Design](#design) |
 | Booking form and validation | [Try the booking flow](#try-the-booking-flow) |
 | Edge cases and error messages | [Try the edge cases](#try-the-edge-cases) |
@@ -49,6 +54,34 @@ The app opens at [http://localhost:3000](http://localhost:3000). Step-by-step de
 - **Helpful messages for edge cases**: a failed save, a date with no times, a cleared date, and a visit to the confirmation page with no booking.
 - **Responsive layout**: designed for phones first and checked from 280px (the smallest phones) to 1920px wide, in portrait and landscape. On phones the navigation folds into a menu button; from 768px up the links are always shown, and from 1024px they sit beside the logo. Nothing scrolls sideways, and every link and button is at least 44px tall, so it's easy to tap.
 - **Accessible**: every field has a label, errors are read out by screen readers, and the whole flow works with the keyboard alone.
+
+## Screenshots
+
+All names, emails and bookings in these screenshots are fake test data.
+
+**Desktop**
+
+![Home page: hero with "Reserve a Table", and this week's specials](docs/screenshots/home-desktop.jpg)
+
+![Menu page with the Mains filter chosen, showing three dishes and their prices](docs/screenshots/menu-desktop.jpg)
+
+![My Reservations page listing two fake bookings, each with a Cancel button](docs/screenshots/my-reservations-desktop.jpg)
+
+**Phone**
+
+| Menu button opened | Booking form | Confirmation |
+| --- | --- | --- |
+| <img src="docs/screenshots/nav-mobile.jpg" alt="Phone view with the menu button opened and the six page links stacked" width="240" /> | <img src="docs/screenshots/booking-form-mobile.jpg" alt="Phone view of the booking form with seating, name, email and special request filled in" width="240" /> | <img src="docs/screenshots/confirmation-mobile.jpg" alt="Phone view of the Booking Confirmed page thanking Test Guest, with the date, time, guests, seating and request" width="240" /> |
+
+## Lighthouse
+
+Measured with [PageSpeed Insights](https://pagespeed.web.dev) (Lighthouse 13.6, **mobile**: an emulated mid-range phone on a slow 4G connection) on the live home page, November 8, 2026.
+
+| Performance | Accessibility | Best Practices | SEO |
+| --- | --- | --- | --- |
+| 85 | 100 | 100 | 100 |
+
+Performance is held back by one measure, **Largest Contentful Paint (4.2 s)**: the time until the biggest thing on screen, the hero photo, has loaded. The photo is large, and on a slow phone connection it takes a while. Everything else is in the green: first paint 1.5 s, no blocking time and no layout shift. Smaller, phone-sized versions of the photo would be the next improvement. Scores change a little from run to run.
 
 ## Tech stack
 
@@ -138,7 +171,7 @@ You don't need it to try the app. `npm start` is enough.
 
 ## Deployment
 
-The site is hosted on [Vercel](https://vercel.com), connected to this GitHub repository. Every push to `main` deploys a new version.
+The site is hosted on [Vercel](https://vercel.com) at **[littlelemon-chicago.vercel.app](https://littlelemon-chicago.vercel.app)**, connected to this GitHub repository. Every push to `main` deploys a new version.
 
 | Vercel setting | Value |
 | --- | --- |
@@ -297,7 +330,6 @@ There is no Figma wireframe. I skipped that step and built the pages from the co
 - **Coming-soon pages**: Order Online and Login aren't built. Their links open a "coming soon" page instead.
 - **Sample data**: the menu, the About page story, the customer reviews and the contact details in the footer are made up.
 - **Bookings stay in this browser**: the course API doesn't save anything, so bookings are kept in this browser's `localStorage` only. Another browser or device won't see them, and clearing site data removes them. The course API still always says a booking "succeeded".
-- **Placeholder preview image**: the `og:image` link used for social-media previews points to a placeholder address until the site is deployed.
 - **Create React App is deprecated**: the React team stopped recommending Create React App in February 2025, and it no longer has active maintainers. It still builds and tests this project fine. Moving to [Vite](https://vite.dev) is a possible next step.
 - **Demo-only double-booking check**: a booked time is hidden only in the browser that booked it. A real restaurant would need a server that knows every guest's bookings.
 
