@@ -58,7 +58,9 @@ function Main() {
   }
 
   return (
-    <main>
+    // id: the skip link's target. tabIndex={-1}: code can move focus here (the skip link does),
+    // but it isn't added to the Tab order, because it isn't a control you operate.
+    <main id="main-content" tabIndex={-1}>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route

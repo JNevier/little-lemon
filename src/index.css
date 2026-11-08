@@ -88,3 +88,9 @@ h3 {
     font-size: 2.5rem;
   }
 }
+
+/* <main> gets focus from the skip link, not from the user. It isn't a control,
+   so it doesn't need a focus ring (the page simply continues from there). */
+main:focus {
+  outline: none;
+}
