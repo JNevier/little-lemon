@@ -284,6 +284,43 @@ main:focus {
   box-shadow: var(--shadow-sm);
 }
 
+/* A small dietary tag ("Vegetarian", "Contains nuts"), on the home page specials and the menu.
+   Green text on a peach pill is about 5.2:1. */
+.tag {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius);
+  background-color: var(--color-secondary-peach);
+  color: var(--color-primary-green);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+/* A "skeleton": grey shapes shown where content will appear while it loads (home specials, menu).
+   Each component sets the sizes and spacing; these rules give the shared look. */
+.skeleton-block {
+  border-radius: var(--radius-sm);
+  background-color: var(--color-light);
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+/* One line of text-shaped grey. */
+.skeleton-line {
+  height: 1rem;
+}
+
+.skeleton-line-short {
+  width: 60%;
+}
+
+/* NEW: @keyframes describes an animation step by step. This one fades the grey blocks
+   gently in and out, so the visitor can see something is still happening.
+   (The reduced-motion rule at the end of this file stops it for people who asked for less motion.) */
+@keyframes skeleton-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
 /* Hides text visually but keeps it for screen readers (for example a heading that the layout already
    makes obvious to sighted users). The standard pattern: a 1px box with its content clipped away. */
 .visually-hidden {
@@ -312,5 +349,10 @@ main:focus {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
+  }
+
+  /* The skeleton's grey shapes simply stay still. */
+  .skeleton-block {
+    animation: none;
   }
 }
