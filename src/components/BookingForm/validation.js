@@ -5,6 +5,9 @@
 // The occasions the form offers. The form builds its options from this same list.
 export const OCCASIONS = ['Birthday', 'Anniversary'];
 
+// The seating choices the form offers as radio buttons. Same idea as OCCASIONS.
+export const SEATING_OPTIONS = ['Indoor', 'Outdoor', 'No preference'];
+
 // A 'YYYY-MM-DD' date that is today or later. "today" is passed in, so tests can use a fixed day.
 export function isValidDate(date, today) {
   // The exact shape a date input gives: 4 digits, dash, 2 digits, dash, 2 digits.
@@ -26,4 +29,22 @@ export function isValidGuests(guests) {
 // One of the occasions in the list above.
 export function isValidOccasion(occasion) {
   return OCCASIONS.includes(occasion);
+}
+
+// A name with at least 2 characters once the spaces at both ends are removed,
+// so "  " (only spaces) or a single letter doesn't count.
+export function isValidName(name) {
+  return name.trim().length >= 2;
+}
+
+// A BASIC email check: something, then @, then something, a dot, and something, with no spaces.
+// It catches typos like "a@b" or "name.example.com". It can't tell if the address really exists;
+// only sending an email could prove that.
+export function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+// One of the seating choices in the list above.
+export function isValidSeating(seating) {
+  return SEATING_OPTIONS.includes(seating);
 }
