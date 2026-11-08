@@ -249,7 +249,8 @@ src/
 - `public/data/menu.json`: the sample menu. Files in `public/` are served as they are, so the app fetches it like a real API.
 - `src/utils/`: small helpers. `dates.js` converts between a date input's `YYYY-MM-DD` text and a JavaScript date, and checks that a date is complete.
 - `src/api.js`: the course's booking API (see [About the booking API](#about-the-booking-api)).
-- `src/index.css`: the global styles and the brand colours and fonts as CSS variables.
+- `src/index.css`: the design system: brand colours, spacing, type sizes, shadows, buttons and the section layout, as CSS variables and shared classes.
+- `scripts/check-contrast.js`: checks the colour contrast of every pair the site uses (see [Colour contrast](#colour-contrast)).
 - `vercel.json`: tells Vercel to send `index.html` for every page address (see [Deployment](#deployment)).
 
 ## Testing
@@ -273,17 +274,17 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 - **Reservations** (Context and My Reservations page): adding, cancelling, sorting by date and time, the empty state, the "Reservation cancelled." message, and that booked times are hidden on the form.
 - **The whole booking journey** in one test: book a table, reload, see it on My Reservations, check its time is hidden, cancel it, and check the time is back.
 
-- **Navigation and page titles**: the nav has all four links in order and marks only the current page with `aria-current="page"`; the skip link is the first Tab stop and moves focus to the main content; every page has its own browser tab title.
+- **Navigation and page titles**: the nav has its three page links and the yellow "Reserve a Table" button in order, and marks only the current page with `aria-current="page"`; the footer has one row of links, the opening hours and contact details, and no links to generic social sites; the skip link is the first Tab stop and moves focus to the main content; every page has its own browser tab title.
 
 **Why fake the API and fix the date in tests:** a test that uses today's real date could pass today and fail tomorrow.
 
 ### Coverage
 
-**88 tests in 14 files, all passing.** Coverage measured with `CI=true npm test -- --coverage --watchAll=false`:
+**92 tests in 15 files, all passing.** Coverage measured with `CI=true npm test -- --coverage --watchAll=false`:
 
 | Statements | Branches | Functions | Lines |
 | --- | --- | --- | --- |
-| 98.62% | 91.05% | 98.92% | 98.57% |
+| 98.63% | 91.12% | 98.92% | 98.57% |
 
 What isn't covered: `src/index.js` (it only starts the app in a real browser), the course API's `submitAPI` (always replaced by a fake in tests), and a few branches in the booking form, the header and the menu page that only change an `aria-*` attribute or a fallback value.
 
@@ -326,10 +327,45 @@ The only change from the original is that the two functions are exported. The to
 
 There is no Figma wireframe. I skipped that step and built the pages from the course's Little Lemon style guide (colours, fonts and spacing) and its mock-up.
 
+### Design system
+
+The shared look lives in [`src/index.css`](src/index.css), so every page uses the same building blocks:
+
+- **Colours**: the brand green, yellow, salmon, peach, light grey and dark grey, plus one extra, a deep terracotta (`#b8501f`) for error marks, because the brand salmon is too light on white.
+- **Yellow means "act here"**: only the one main action on a screen is a yellow button (`.button-primary`). Other actions are green outline buttons (`.button-secondary`) or text links. The current page in the nav is underlined, not yellow.
+- **Spacing scale**: `--space-1` (4px) to `--space-8` (64px). Sections are 48px apart on phones and 64px from 768px up.
+- **Type scale**: Markazi Text for headings, Karla for text. Page titles and section titles grow with the screen using `clamp()`, from 40px to 64px for page titles.
+- **Depth**: soft shadows (`--shadow-sm`, `--shadow-md`, `--shadow-lg`) instead of flat grey boxes.
+- **Motion**: hover and focus changes take 180ms, and all motion is switched off when the visitor's system asks for reduced motion (`prefers-reduced-motion`).
+
+### Colour contrast
+
+Every text and background pair is checked against WCAG 2.1 AA by a small script with no packages: run `node scripts/check-contrast.js`. Normal text needs 4.5:1; large text, focus rings and other UI parts need 3:1.
+
+| Foreground | Background | Ratio | Needs | Result | Used for |
+| --- | --- | --- | --- | --- | --- |
+| dark | white | 12.63:1 | 4.5:1 | Pass | Body text on the page |
+| dark | light | 10.94:1 | 4.5:1 | Pass | Body text on grey bands |
+| dark | peach | 9.53:1 | 4.5:1 | Pass | Text on peach header bands |
+| green | white | 6.95:1 | 4.5:1 | Pass | Links, prices, secondary buttons on white |
+| green | light | 6.02:1 | 4.5:1 | Pass | Links and prices on grey bands |
+| green | peach | 5.24:1 | 4.5:1 | Pass | Links on peach, secondary button hover |
+| dark | yellow | 8.23:1 | 4.5:1 | Pass | Primary button text |
+| dark | salmon | 5.68:1 | 4.5:1 | Pass | Primary button hover |
+| white | green | 6.95:1 | 4.5:1 | Pass | Text on green bands and the footer |
+| light | green | 6.02:1 | 4.5:1 | Pass | Footer text |
+| yellow | green | 4.53:1 | 3:1 | Pass | Hero title on green (large text only) |
+| yellow | green | 4.53:1 | 3:1 | Pass | Focus ring on green |
+| green | white | 6.95:1 | 3:1 | Pass | Focus rings, borders, active underline on white |
+| dark | yellow | 8.23:1 | 3:1 | Pass | Focus ring around the yellow button |
+| error | white | 4.99:1 | 3:1 | Pass | Error bar and icon beside a message (the text says what is wrong too) |
+| error | light | 4.32:1 | 3:1 | Pass | Error bar on a grey band |
+| error | white | 4.99:1 | 4.5:1 | Pass | Error heading text on white |
+
 ## Known limitations
 
 - **No online ordering or accounts**: ordering food and logging in both need a real server (orders, payments, accounts), so they're left out on purpose rather than shown as fake pages. Bookings work without an account.
-- **Sample data**: the menu, the About page story, the customer reviews and the contact details in the footer are made up.
+- **Sample data**: Little Lemon is a fictional restaurant. The menu, the About page story, the customer reviews, and the footer's address, opening hours, phone number and email are made up. The phone number uses the 555-01xx range kept for fiction, and the email uses the reserved `.example` domain, so neither can reach a real person. The opening hours (daily, 5 pm to midnight, last table at 11:30 pm) match the times the booking form offers.
 - **Bookings stay in this browser**: the course API doesn't save anything, so bookings are kept in this browser's `localStorage` only. Another browser or device won't see them, and clearing site data removes them. The course API still always says a booking "succeeded".
 - **Create React App is deprecated**: the React team stopped recommending Create React App in February 2025, and it no longer has active maintainers. It still builds and tests this project fine. Moving to [Vite](https://vite.dev) is a possible next step.
 - **Demo-only double-booking check**: a booked time is hidden only in the browser that booked it. A real restaurant would need a server that knows every guest's bookings.
