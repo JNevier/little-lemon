@@ -1,4 +1,43 @@
-/* Page padding so the text doesn't touch the screen edge on phones. */
+/* The same look as the confirmation page: a light grey band with one white card in the middle. */
 .not-found-page {
-  padding: 2rem var(--page-gutter);
+  padding: var(--section-space) var(--page-gutter);
+  background-color: var(--color-light);
+}
+
+.not-found-page-card {
+  max-width: 36rem;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5);
+}
+
+/* The lemon in a peach circle. Green on peach is about 5.2:1. */
+.not-found-page-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  margin-bottom: var(--space-4);
+  border-radius: 50%;
+  background-color: var(--color-secondary-peach);
+  color: var(--color-primary-green);
+}
+
+/* The two buttons share a row and wrap on narrow phones. */
+.not-found-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* The booking link: a text link on its own line, 44px tall so it's easy to tap. */
+.not-found-page-reserve {
+  margin: var(--space-4) 0 0;
+}
+
+.not-found-page-reserve a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 700;
 }
