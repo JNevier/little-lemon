@@ -29,6 +29,8 @@ The app opens at [http://localhost:3000](http://localhost:3000). Step-by-step de
 | What to check | Where to find it |
 | --- | --- |
 | The live site | [littlelemon-chicago.vercel.app](https://littlelemon-chicago.vercel.app) |
+| What it looks like | [Screenshots](#screenshots) |
+| Speed and accessibility scores | [Lighthouse](#lighthouse) |
 | Design and responsive layout | Open the app and resize the window, or see [Design](#design) |
 | Booking form and validation | [Try the booking flow](#try-the-booking-flow) |
 | Edge cases and error messages | [Try the edge cases](#try-the-edge-cases) |
@@ -52,6 +54,34 @@ The app opens at [http://localhost:3000](http://localhost:3000). Step-by-step de
 - **Helpful messages for edge cases**: a failed save, a date with no times, a cleared date, and a visit to the confirmation page with no booking.
 - **Responsive layout**: designed for phones first and checked from 280px (the smallest phones) to 1920px wide, in portrait and landscape. On phones the navigation folds into a menu button; from 768px up the links are always shown, and from 1024px they sit beside the logo. Nothing scrolls sideways, and every link and button is at least 44px tall, so it's easy to tap.
 - **Accessible**: every field has a label, errors are read out by screen readers, and the whole flow works with the keyboard alone.
+
+## Screenshots
+
+All names, emails and bookings in these screenshots are fake test data.
+
+**Desktop**
+
+![Home page: hero with "Reserve a Table", and this week's specials](docs/screenshots/home-desktop.jpg)
+
+![Menu page with the Mains filter chosen, showing three dishes and their prices](docs/screenshots/menu-desktop.jpg)
+
+![My Reservations page listing two fake bookings, each with a Cancel button](docs/screenshots/my-reservations-desktop.jpg)
+
+**Phone**
+
+| Menu button opened | Booking form | Confirmation |
+| --- | --- | --- |
+| <img src="docs/screenshots/nav-mobile.jpg" alt="Phone view with the menu button opened and the six page links stacked" width="240" /> | <img src="docs/screenshots/booking-form-mobile.jpg" alt="Phone view of the booking form with seating, name, email and special request filled in" width="240" /> | <img src="docs/screenshots/confirmation-mobile.jpg" alt="Phone view of the Booking Confirmed page thanking Test Guest, with the date, time, guests, seating and request" width="240" /> |
+
+## Lighthouse
+
+Measured with [PageSpeed Insights](https://pagespeed.web.dev) (Lighthouse 13.6, **mobile**: an emulated mid-range phone on a slow 4G connection) on the live home page, November 8, 2026.
+
+| Performance | Accessibility | Best Practices | SEO |
+| --- | --- | --- | --- |
+| 85 | 100 | 100 | 100 |
+
+Performance is held back by one measure, **Largest Contentful Paint (4.2 s)**: the time until the biggest thing on screen, the hero photo, has loaded. The photo is large, and on a slow phone connection it takes a while. Everything else is in the green: first paint 1.5 s, no blocking time and no layout shift. Smaller, phone-sized versions of the photo would be the next improvement. Scores change a little from run to run.
 
 ## Tech stack
 
