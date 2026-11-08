@@ -44,7 +44,7 @@ The app opens at [http://localhost:3000](http://localhost:3000). Step-by-step de
 - **Home page** with a hero section, this week's specials, customer reviews and a short "about us" section.
 - **Menu page** that loads the dishes from a JSON file, with filter buttons for Starters, Mains, Desserts and Drinks, a loading message and a clear error if the menu can't be loaded.
 - **About page** with the restaurant's story and a link to book a table.
-- **No dead links**: every link in the navigation opens a real page. Order Online and Login show a "coming soon" page.
+- **No dead links**: every link opens a real page. There is no online ordering or login: with no server, both would be fake, so the site leaves them out. An old link to `/order-online` or `/login` shows the "Page not found" page.
 - **Booking form** with date, time, number of guests, occasion, seating preference (indoor, outdoor or no preference), full name, email and optional special requests (up to 200 characters).
 - **Available times change with the date** you pick.
 - **Validation with clear messages**: you can't pick a past date, book for fewer than 1 or more than 10 guests, or leave out your name or a valid email. Name and email errors only appear after you leave the field, so a fresh form isn't covered in red. The submit button stays disabled until everything is valid, with a note under it saying why.
@@ -233,7 +233,6 @@ src/
 │   ├── HomePage/
 │   ├── MenuPage/
 │   ├── AboutPage/
-│   ├── ComingSoonPage/
 │   ├── BookingPage/
 │   ├── ConfirmedBooking/
 │   ├── MyReservationsPage/
@@ -274,13 +273,13 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 - **Reservations** (Context and My Reservations page): adding, cancelling, sorting by date and time, the empty state, the "Reservation cancelled." message, and that booked times are hidden on the form.
 - **The whole booking journey** in one test: book a table, reload, see it on My Reservations, check its time is hidden, cancel it, and check the time is back.
 
-- **Navigation and page titles**: the nav has all six links in order and marks only the current page with `aria-current="page"`; the skip link is the first Tab stop and moves focus to the main content; every page has its own browser tab title.
+- **Navigation and page titles**: the nav has all four links in order and marks only the current page with `aria-current="page"`; the skip link is the first Tab stop and moves focus to the main content; every page has its own browser tab title.
 
 **Why fake the API and fix the date in tests:** a test that uses today's real date could pass today and fail tomorrow.
 
 ### Coverage
 
-**87 tests in 14 files, all passing.** Coverage measured with `CI=true npm test -- --coverage --watchAll=false`:
+**88 tests in 14 files, all passing.** Coverage measured with `CI=true npm test -- --coverage --watchAll=false`:
 
 | Statements | Branches | Functions | Lines |
 | --- | --- | --- | --- |
@@ -297,7 +296,7 @@ What isn't covered: `src/index.js` (it only starts the app in a real browser), t
 - **Autofill**: the name and email fields use `autocomplete="name"` and `autocomplete="email"` (WCAG 1.3.5), so browsers can fill them in.
 - **Named form**: the form has the name "Reserve a Table", so screen-reader users can jump straight to it.
 - **Button name**: the submit button's accessible name matches its visible text. **Why:** voice-control users say what they see ("click Make Your reservation"), so the names must match.
-- **Skip link**: the first `Tab` on any page shows a "Skip to main content" link. Pressing `Enter` moves focus past the logo and the six nav links to the page content (WCAG 2.4.1).
+- **Skip link**: the first `Tab` on any page shows a "Skip to main content" link. Pressing `Enter` moves focus past the logo and the nav links to the page content (WCAG 2.4.1).
 - **Page titles**: every page sets its own browser tab title, like "Menu | Little Lemon", so you know where you are from the tab or a screen reader (WCAG 2.4.2).
 - **Page changes**: the confirmation page also moves focus to its heading, so screen readers announce the new page.
 - **Urgent messages**: the failed-save message uses `role="alert"`, so screen readers read it out as soon as it appears.
@@ -329,7 +328,7 @@ There is no Figma wireframe. I skipped that step and built the pages from the co
 
 ## Known limitations
 
-- **Coming-soon pages**: Order Online and Login aren't built. Their links open a "coming soon" page instead.
+- **No online ordering or accounts**: ordering food and logging in both need a real server (orders, payments, accounts), so they're left out on purpose rather than shown as fake pages. Bookings work without an account.
 - **Sample data**: the menu, the About page story, the customer reviews and the contact details in the footer are made up.
 - **Bookings stay in this browser**: the course API doesn't save anything, so bookings are kept in this browser's `localStorage` only. Another browser or device won't see them, and clearing site data removes them. The course API still always says a booking "succeeded".
 - **Create React App is deprecated**: the React team stopped recommending Create React App in February 2025, and it no longer has active maintainers. It still builds and tests this project fine. Moving to [Vite](https://vite.dev) is a possible next step.

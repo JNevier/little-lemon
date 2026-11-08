@@ -29,7 +29,7 @@ test('every link on the home page and in the nav opens a real page, not the 404 
   global.fetch = jest.fn(() => new Promise(() => {}));
 
   // Collect every in-app address that the home page links to: the header nav, the footer nav,
-  // the hero and Specials buttons, and the "Order a delivery" links. A Set removes the repeats.
+  // and the hero and Specials buttons. A Set removes the repeats.
   const { unmount } = renderAppAt('/');
   const paths = new Set(
     screen
@@ -39,10 +39,13 @@ test('every link on the home page and in the nav opens a real page, not the 404 
   );
   unmount();
 
-  // Sanity check: we found the six nav addresses (so the test can't pass by finding nothing).
-  ['/', '/about', '/menu', '/reservations', '/order-online', '/login'].forEach((path) => {
+  // Sanity check: we found the four nav addresses (so the test can't pass by finding nothing).
+  ['/', '/about', '/menu', '/reservations'].forEach((path) => {
     expect(paths).toContain(path);
   });
+  // Order Online and Login were removed on purpose: nothing on the page links to them anymore.
+  expect(paths).not.toContain('/order-online');
+  expect(paths).not.toContain('/login');
 
   paths.forEach((path) => {
     const page = renderAppAt(path);
@@ -58,6 +61,15 @@ test('every link on the home page and in the nav opens a real page, not the 404 
 test('an unknown address still shows the 404 page', () => {
   renderAppAt('/no-such-page');
   expect(screen.getByRole('heading', { level: 1, name: 'Page not found' })).toBeInTheDocument();
+});
+
+test('the removed Order Online and Login pages fall through to the 404 page', () => {
+  // Old bookmarks or shared links to these addresses get the normal "Page not found" page.
+  ['/order-online', '/login'].forEach((path) => {
+    const page = renderAppAt(path);
+    expect(screen.getByRole('heading', { level: 1, name: 'Page not found' })).toBeInTheDocument();
+    page.unmount();
+  });
 });
 
 describe('skip link', () => {
@@ -86,7 +98,7 @@ describe('skip link', () => {
 test('every page has its own browser tab title', () => {
   // The Menu page fetches its dishes; this fake never answers, so no menu data is needed.
   global.fetch = jest.fn(() => new Promise(() => {}));
-  const paths = ['/', '/about', '/menu', '/reservations', '/confirmed', '/my-reservations', '/order-online', '/login', '/no-such-page'];
+  const paths = ['/', '/about', '/menu', '/reservations', '/confirmed', '/my-reservations', '/no-such-page'];
 
   const titles = paths.map((path) => {
     const page = renderAppAt(path);

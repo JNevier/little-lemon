@@ -13,7 +13,7 @@ function renderNavAt(path) {
   return screen.getByRole('navigation', { name: 'Main' });
 }
 
-test('has all six links, in order, pointing at the right pages', () => {
+test('has all four links, in order, pointing at the right pages', () => {
   const nav = renderNavAt('/');
 
   const links = within(nav).getAllByRole('link');
@@ -22,16 +22,12 @@ test('has all six links, in order, pointing at the right pages', () => {
     'About',
     'Menu',
     'Reservations',
-    'Order Online',
-    'Login',
   ]);
   expect(links.map((link) => link.getAttribute('href'))).toEqual([
     '/',
     '/about',
     '/menu',
     '/reservations',
-    '/order-online',
-    '/login',
   ]);
 });
 
