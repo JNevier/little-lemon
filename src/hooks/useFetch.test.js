@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import useFetch from './useFetch';
 
 // The test environment has no real fetch, and we don't want real network calls anyway.
@@ -80,4 +80,26 @@ test('aborts the request when the component goes away', () => {
 
   const signal = global.fetch.mock.calls[0][1].signal;
   expect(signal.aborted).toBe(true);
+});
+
+test('retry() loads the same url again after an error', async () => {
+  // The first call fails, the second one works (like a dropped connection that comes back).
+  global.fetch = jest
+    .fn()
+    .mockRejectedValueOnce(new Error('Network down'))
+    .mockResolvedValueOnce({ ok: true, json: async () => ['dish'] });
+
+  const { result } = renderHook(() => useFetch('/data/menu.json'));
+  await waitFor(() => expect(result.current.error).not.toBeNull());
+
+  // act() tells React a state change is happening, and waits for it before the next line.
+  act(() => result.current.retry());
+  // The error is cleared right away, and the hook is loading again.
+  expect(result.current.error).toBeNull();
+  expect(result.current.loading).toBe(true);
+
+  await waitFor(() => expect(result.current.loading).toBe(false));
+  expect(result.current.data).toEqual(['dish']);
+  expect(global.fetch).toHaveBeenCalledTimes(2);
+  expect(global.fetch.mock.calls[1][0]).toBe('/data/menu.json');
 });

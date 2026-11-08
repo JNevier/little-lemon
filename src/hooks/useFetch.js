@@ -2,11 +2,14 @@ import { useState, useEffect } from 'react';
 
 // A custom hook: a function whose name starts with "use" and that calls other hooks.
 // It lets any component load JSON from a URL with one line:
-//   const { data, loading, error } = useFetch('/data/menu.json');
+//   const { data, loading, error, retry } = useFetch('/data/menu.json');
 function useFetch(url) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Counts the "Try again" clicks. The number itself doesn't matter: changing it makes the effect
+  // below run again, which loads the same url a second time.
+  const [attempt, setAttempt] = useState(0);
 
   // useEffect runs after the component appears on screen, and again whenever `url` changes.
   // Loading data is a "side effect": it talks to the world outside React, so it goes here, not in the render.
@@ -48,9 +51,15 @@ function useFetch(url) {
     // In development, React Strict Mode runs every effect twice on purpose (run, clean up, run again)
     // to catch missing cleanups. So you'll see one cancelled request in the Network tab. That's expected.
     return () => controller.abort();
-  }, [url]);
+    // `attempt` is listed too, so retry() (which changes it) starts a new load.
+  }, [url, attempt]);
 
-  return { data, loading, error };
+  // Call this after an error (for example from a "Try again" button) to load the data again.
+  function retry() {
+    setAttempt((count) => count + 1);
+  }
+
+  return { data, loading, error, retry };
 }
 
 export default useFetch;
