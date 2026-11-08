@@ -103,12 +103,4 @@
   list-style: none;
 }
 
-/* A small dietary tag: green text on a light peach pill (about 5.2:1). */
-.tag {
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius);
-  background-color: var(--color-secondary-peach);
-  color: var(--color-primary-green);
-  font-size: var(--text-sm);
-  font-weight: 700;
-}
+/* The tags' look (.tag) is shared with the menu page, in index.css. */

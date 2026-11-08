@@ -1,16 +1,31 @@
-/* One dish: a light, rounded box, like the home page's specials. */
+/* One dish: a row with a thin line under it, like a printed menu. No card, so a long list stays calm. */
 .menu-item {
-  background-color: var(--color-light);
-  border-radius: var(--radius);
-  padding: 1rem;
+  padding: var(--space-5) 0;
+  border-bottom: 1px solid var(--color-light);
 }
 
-/* Name and price share one row. baseline lines up the bottoms of the letters. */
+/* A dish with a photo: the photo in a fixed 96px column on the left, the text taking the rest. */
+.menu-item-with-image {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+/* A square photo with rounded corners. object-fit: cover crops tall or wide photos to fill the square. */
+.menu-item-image {
+  display: block;
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+/* Name, dotted line, price, all in one row. align-items: baseline lines up the bottoms of the letters. */
 .menu-item-heading {
   display: flex;
-  justify-content: space-between;
   align-items: baseline;
-  gap: 1rem;
+  gap: var(--space-2);
 }
 
 /* The name's font comes from the global h3 rule in index.css. Remove the browser's gaps. */
@@ -19,14 +34,32 @@
   margin: 0;
 }
 
+/* The dotted "leader": flex: 1 makes it stretch across all the space between the name and the price.
+   min-width: 1rem keeps a few dots even when the name is long. */
+.menu-item-leader {
+  flex: 1;
+  min-width: 1rem;
+  border-bottom: 2px dotted rgb(73 94 87 / 0.35);
+}
+
 .menu-item-price {
-  font-weight: 500;
-  /* Green on the light box is about 6:1. */
+  font-weight: 700;
+  /* Green on white is about 7:1. */
   color: var(--color-primary-green);
   /* Keep "$12.99" on one line. */
   white-space: nowrap;
 }
 
 .menu-item-description {
-  margin: 0.5rem 0 0;
+  margin: var(--space-1) 0 0;
+}
+
+/* The tags sit in a row and wrap if needed. Their look (.tag) is shared, in index.css. */
+.menu-item-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
 }

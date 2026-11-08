@@ -55,39 +55,19 @@
   overflow: hidden;
 }
 
-.skeleton-block {
-  border-radius: var(--radius-sm);
-  background-color: var(--color-light);
-  animation: skeleton-pulse 1.4s ease-in-out infinite;
-}
+/* The grey blocks themselves (.skeleton-block) are shared with the menu page, in index.css.
+   Here they get the card's sizes and spacing. */
 
 /* The same height as a real card's photo. */
-.skeleton-image {
+.special-card-skeleton .skeleton-image {
   height: 12rem;
   border-radius: 0;
 }
 
-.skeleton-line {
-  height: 1rem;
+.special-card-skeleton .skeleton-line {
   margin: var(--space-5) var(--space-5) 0;
 }
 
-.skeleton-line-short {
-  width: 60%;
+.special-card-skeleton .skeleton-line-short {
   margin-top: var(--space-3);
-}
-
-/* NEW: @keyframes describes an animation step by step. This one fades the grey blocks
-   gently in and out, so the visitor can see something is still happening. */
-@keyframes skeleton-pulse {
-  50% {
-    opacity: 0.55;
-  }
-}
-
-/* No pulsing for people who turned on "Reduce motion": the grey shapes simply stay still. */
-@media (prefers-reduced-motion: reduce) {
-  .skeleton-block {
-    animation: none;
-  }
 }
