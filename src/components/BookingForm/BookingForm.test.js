@@ -1,4 +1,5 @@
 import { render, screen, fireEvent, within } from '@testing-library/react';
+import { formatLongDate } from '../../utils/dates';
 import BookingForm from './BookingForm';
 import { toInputDate } from '../../utils/dates';
 
@@ -52,19 +53,20 @@ describe('HTML5 validation attributes', () => {
 });
 
 describe('submit button and submission', () => {
-  test('the button is enabled for a valid form and disabled for an invalid one', () => {
+  test('the button is always enabled, and a wrong value shows its error next to the field', () => {
     setupForm();
-    const button = screen.getByRole('button', { name: 'Make Your reservation' });
+    const button = screen.getByRole('button', { name: 'Confirm reservation' });
     const guests = screen.getByLabelText('Number of guests');
 
     expect(button).toBeEnabled(); // the default values are all valid
 
+    // On purpose: the button stays enabled even when a value is wrong. Pressing it explains what to fix.
     fireEvent.change(guests, { target: { value: '0' } });
-    expect(button).toBeDisabled();
+    expect(button).toBeEnabled();
     expect(screen.getByText('Please enter a whole number from 1 to 10.')).toBeInTheDocument();
 
     fireEvent.change(guests, { target: { value: '4' } });
-    expect(button).toBeEnabled();
+    expect(screen.queryByText('Please enter a whole number from 1 to 10.')).not.toBeInTheDocument();
   });
 
   test('submitting a valid form calls submitForm once with the booking', () => {
@@ -73,7 +75,7 @@ describe('submit button and submission', () => {
     fireEvent.change(screen.getByLabelText('Number of guests'), { target: { value: '4' } });
     fireEvent.change(screen.getByLabelText('Occasion'), { target: { value: 'Anniversary' } });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Make Your reservation' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm reservation' }));
 
     expect(submitForm).toHaveBeenCalledTimes(1);
     // The booking now also carries the contact details and seating (the defaults here).
@@ -89,13 +91,13 @@ describe('submit button and submission', () => {
     });
   });
 
-  test('an invalid form is never sent, even if it gets submitted', () => {
+  test('an invalid form is never sent', () => {
     const submitForm = setupForm();
     fireEvent.change(screen.getByLabelText('Number of guests'), { target: { value: '0' } });
 
-    // Fire a submit event ourselves (a click can't: the button is disabled). It bubbles up to the
-    // form, so handleSubmit runs, and this tests the guard inside it.
-    fireEvent.submit(screen.getByRole('button', { name: 'Make Your reservation' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm reservation' }));
+    // A submit event fired straight at the form (as pressing Enter in a field does) is blocked too.
+    fireEvent.submit(screen.getByRole('form', { name: 'Reserve a Table' }));
 
     expect(submitForm).not.toHaveBeenCalled();
   });
@@ -136,7 +138,18 @@ describe('when no times are available', () => {
 
     expect(screen.getByText('No times are available on this date. Please choose another date.')).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'No times available' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Make Your reservation' })).toBeDisabled();
+  });
+
+  test('pressing the button lists the time problem in the error summary and sends nothing', () => {
+    const submitForm = jest.fn();
+    render(<BookingForm availableTimes={[]} dispatch={jest.fn()} submitForm={submitForm} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm reservation' }));
+
+    expect(within(screen.getByTestId('error-summary')).getByRole('link', {
+      name: 'No times are available on this date. Please choose another date.',
+    })).toBeInTheDocument();
+    expect(submitForm).not.toHaveBeenCalled();
   });
 });
 
@@ -173,7 +186,6 @@ describe('times already booked in this browser', () => {
     );
 
     expect(screen.getByText('No times are available on this date. Please choose another date.')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Make Your reservation' })).toBeDisabled();
   });
 });
 
@@ -196,16 +208,14 @@ describe('contact details and seating', () => {
     expect(email).toHaveAttribute('autocomplete', 'email');
   });
 
-  test('name and email errors are hidden on a fresh form, and the button explains why it is disabled', () => {
+  test('name and email errors are hidden on a fresh form, and there is no error summary yet', () => {
     renderEmptyForm();
 
     expect(screen.queryByText(/please enter your name/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/please enter a valid email/i)).not.toBeInTheDocument();
     expect(screen.getByLabelText('Full name')).toHaveAttribute('aria-invalid', 'false');
-
-    const button = screen.getByRole('button', { name: 'Make Your reservation' });
-    expect(button).toBeDisabled();
-    expect(button).toHaveAccessibleDescription('Fill in all required fields to enable the button.');
+    expect(screen.queryByTestId('error-summary')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Confirm reservation' })).toBeEnabled();
   });
 
   test('an error appears after leaving a field with a bad value, and goes away once fixed', () => {
@@ -228,9 +238,6 @@ describe('contact details and seating', () => {
     fireEvent.change(email, { target: { value: 'guest@example.com' } });
     expect(name).toHaveAttribute('aria-invalid', 'false');
     expect(email).not.toHaveAccessibleDescription();
-    const button = screen.getByRole('button', { name: 'Make Your reservation' });
-    expect(button).toBeEnabled();
-    expect(button).not.toHaveAccessibleDescription();
   });
 
   test('a field left with a good value never shows an error', () => {
@@ -268,15 +275,110 @@ describe('contact details and seating', () => {
 
     fireEvent.change(requests, { target: { value: '  A high chair, please.  ' } });
     fireEvent.click(screen.getByRole('radio', { name: 'Indoor' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Make Your reservation' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm reservation' }));
 
     expect(submitForm).toHaveBeenCalledWith(
       expect.objectContaining({ requests: 'A high chair, please.', seating: 'Indoor', name: 'Test Guest' })
     );
   });
 
-  test('the form says which fields are required', () => {
+  test('only the optional field is marked, and there are no stars or "required" note', () => {
     renderEmptyForm();
-    expect(screen.getByText('Fields marked * are required.')).toBeInTheDocument();
+    expect(screen.queryByText(/fields marked \* are required/i)).not.toBeInTheDocument();
+    expect(screen.getAllByText(/\(optional\)/)).toHaveLength(1);
+    expect(screen.getByLabelText('Special requests (optional)')).toBeInTheDocument();
+  });
+
+  test('each seating choice has a short description', () => {
+    renderEmptyForm();
+    expect(screen.getByRole('radio', { name: 'Indoor' })).toHaveAccessibleDescription('In the dining room');
+    expect(screen.getByRole('radio', { name: 'Outdoor' })).toHaveAccessibleDescription('On the terrace, weather permitting');
+    expect(screen.getByRole('radio', { name: 'No preference' })).toHaveAccessibleDescription('The first free table');
+  });
+});
+
+describe('layout and live summary', () => {
+  test('the fields are grouped in three steps', () => {
+    render(<BookingForm availableTimes={['17:00']} dispatch={jest.fn()} submitForm={jest.fn()} />);
+    ['When', 'Your table', 'Your details'].forEach((name) => {
+      expect(screen.getByRole('heading', { level: 2, name })).toBeInTheDocument();
+    });
+  });
+
+  test('the summary shows the booking and updates as the guest types', () => {
+    render(<BookingForm availableTimes={['17:00', '18:00']} dispatch={jest.fn()} submitForm={jest.fn()} />);
+    const summary = screen.getByRole('complementary', { name: 'Your reservation' });
+
+    // The starting values: today, the first time, 1 guest, no preference.
+    expect(within(summary).getByText(formatLongDate(toInputDate(new Date())))).toBeInTheDocument();
+    expect(within(summary).getByText('17:00')).toBeInTheDocument();
+    expect(within(summary).getByText('1 guest')).toBeInTheDocument();
+    expect(within(summary).getByText('No preference')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Choose time'), { target: { value: '18:00' } });
+    fireEvent.change(screen.getByLabelText('Number of guests'), { target: { value: '4' } });
+    fireEvent.click(screen.getByRole('radio', { name: 'Outdoor' }));
+    expect(within(summary).getByText('18:00')).toBeInTheDocument();
+    expect(within(summary).getByText('4 guests')).toBeInTheDocument();
+    expect(within(summary).getByText('Outdoor')).toBeInTheDocument();
+
+    // A wrong value isn't shown as if it were chosen.
+    fireEvent.change(screen.getByLabelText('Number of guests'), { target: { value: '0' } });
+    expect(within(summary).getByText('Not chosen yet')).toBeInTheDocument();
+    expect(within(summary).getByText(/we hold your table for 15 minutes/i)).toBeInTheDocument();
+  });
+});
+
+describe('error summary', () => {
+  function renderEmptyForm(submitForm = jest.fn()) {
+    render(<BookingForm availableTimes={['17:00', '18:00']} dispatch={jest.fn()} submitForm={submitForm} />);
+    return submitForm;
+  }
+
+  test('the form checks itself instead of the browser\'s pop-ups', () => {
+    renderEmptyForm();
+    expect(screen.getByRole('form', { name: 'Reserve a Table' })).toHaveAttribute('novalidate');
+  });
+
+  test('submitting with problems lists them, moves focus to the list, and sends nothing', () => {
+    const submitForm = renderEmptyForm();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm reservation' }));
+
+    const summary = screen.getByTestId('error-summary');
+    expect(summary).toHaveFocus();
+    expect(within(summary).getByRole('heading', { name: 'Please fix 2 problems' })).toBeInTheDocument();
+    // Each problem links to its field.
+    expect(within(summary).getByRole('link', { name: 'Please enter your name (at least 2 characters).' }))
+      .toHaveAttribute('href', '#res-name');
+    expect(within(summary).getByRole('link', { name: 'Please enter a valid email address, like name@example.com.' }))
+      .toHaveAttribute('href', '#res-email');
+    // The errors also show next to their fields, even though those fields were never left (blurred).
+    expect(screen.getByLabelText('Full name')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByLabelText('Email')).toHaveAccessibleDescription('Please enter a valid email address, like name@example.com.');
+    expect(submitForm).not.toHaveBeenCalled();
+  });
+
+  test('a link in the summary puts the cursor in its field', () => {
+    renderEmptyForm();
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm reservation' }));
+
+    fireEvent.click(screen.getByRole('link', { name: /please enter a valid email/i }));
+
+    expect(screen.getByLabelText('Email')).toHaveFocus();
+  });
+
+  test('the summary shrinks as problems are fixed and goes away when none are left', () => {
+    const submitForm = renderEmptyForm();
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm reservation' }));
+
+    fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'Test Guest' } });
+    expect(screen.getByRole('heading', { name: 'Please fix 1 problem' })).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'guest@example.com' } });
+    expect(screen.queryByTestId('error-summary')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm reservation' }));
+    expect(submitForm).toHaveBeenCalledTimes(1);
   });
 });

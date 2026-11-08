@@ -1,4 +1,10 @@
-/* Page padding so the text doesn't touch the screen edge on phones. */
-.booking-page {
-  padding: 2rem var(--page-gutter);
+/* The tabs sit on the header's bottom edge, so the header's bottom padding is removed. */
+.booking-page-header {
+  padding-bottom: 0;
+}
+
+/* The form area: page padding, and a light grey background so the white step cards stand out. */
+.booking-page-body {
+  padding: var(--space-6) var(--page-gutter) var(--section-space);
+  background-color: var(--color-light);
 }

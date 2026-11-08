@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { toInputDate } from '../../utils/dates';
 import {
   OCCASIONS,
@@ -11,7 +11,21 @@ import {
   isValidEmail,
   isValidSeating,
 } from './validation';
+import ReservationSummary from '../ReservationSummary/ReservationSummary';
+import restaurant from '../../data/restaurant';
 import './BookingForm.css';
+
+// A short line under each seating choice. Outside the component because it never changes.
+const SEATING_DESCRIPTIONS = {
+  Indoor: 'In the dining room',
+  Outdoor: 'On the terrace, weather permitting',
+  'No preference': 'The first free table',
+};
+
+// Turns "No preference" into "no-preference", for use in an id (ids can't contain spaces).
+function toId(text) {
+  return text.toLowerCase().replace(/\s+/g, '-');
+}
 
 // A controlled form: React state holds every field's value, and each input just shows it.
 // It gets the available times from Main, and reports date changes back with dispatch.
@@ -33,13 +47,19 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
   const [email, setEmail] = useState('');
   const [seating, setSeating] = useState('No preference');
   const [requests, setRequests] = useState('');
-  // NEW: the "touched" pattern. A field is touched once the user has left it (the blur event).
+  // The "touched" pattern. A field is touched once the user has left it (the blur event).
   // Name and email start empty, which is invalid; without this, a brand-new form would greet
   // the user with red error text before they've typed anything.
   const [touched, setTouched] = useState({ name: false, email: false });
+  // How many times the user has pressed "Confirm reservation" while something was wrong.
+  // After the first time, every error is shown (even on fields not touched yet), and each new
+  // attempt moves focus to the error summary again (see the effect below).
+  const [failedSubmits, setFailedSubmits] = useState(0);
   // Whether the last save failed. Unlike the field errors, it can't be worked out from the
   // fields: it's the result of a submit, so it has to be remembered in state.
   const [saveFailed, setSaveFailed] = useState(false);
+  // A handle on the error summary box, so focus can move there after a failed submit.
+  const errorSummaryRef = useRef(null);
 
   // When the date changes: update our own field AND tell Main, so it can work out the new times.
   function handleDateChange(e) {
@@ -86,10 +106,32 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
   // The form is valid only when every message is empty.
   const isFormValid = Object.values(errors).every((v) => v === '');
 
-  // Which name/email errors to SHOW: only for fields the user has already left.
-  // The button still uses `errors` above, so it stays disabled until everything is valid.
-  const shownNameError = touched.name ? errors.name : '';
-  const shownEmailError = touched.email ? errors.email : '';
+  // Which name/email errors to SHOW: only for fields the user has already left,
+  // or for every field once they've tried to submit.
+  const submitted = failedSubmits > 0;
+  const shownNameError = touched.name || submitted ? errors.name : '';
+  const shownEmailError = touched.email || submitted ? errors.email : '';
+
+  // The errors on screen right now, in the same order as the fields, each with the id of its field.
+  // The error summary lists these, and each item links to its field.
+  const shownErrors = [
+    { field: 'res-date', message: errors.date },
+    { field: 'res-time', message: errors.time },
+    { field: 'guests', message: errors.guests },
+    { field: 'occasion', message: errors.occasion },
+    { field: `seating-${toId(SEATING_OPTIONS[0])}`, message: errors.seating },
+    { field: 'res-name', message: shownNameError },
+    { field: 'res-email', message: shownEmailError },
+  ].filter((error) => error.message !== '');
+
+  // After each failed submit, move keyboard focus to the error summary, so screen readers read it out
+  // and keyboard users start right where the problems are listed.
+  // It runs after React has drawn the summary (on the first failed submit it doesn't exist before that).
+  useEffect(() => {
+    if (failedSubmits > 0) {
+      errorSummaryRef.current?.focus();
+    }
+  }, [failedSubmits]);
 
   // Marks one field as touched, keeping the others as they are.
   // { ...touched } copies the object; [field]: true then sets just that one key.
@@ -97,11 +139,20 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
     setTouched({ ...touched, [field]: true });
   }
 
+  // A link in the error summary: put the cursor in that field (a plain #link would only scroll to it).
+  function focusField(e, fieldId) {
+    e.preventDefault();
+    document.getElementById(fieldId)?.focus();
+  }
+
   function handleSubmit(e) {
     // Stop the browser's default submit, which would reload the page and wipe the state.
     e.preventDefault();
-    // A second guard: never send invalid data, even if a submit gets past the disabled button.
-    if (!isFormValid) return;
+    // Something is wrong: show every error and the summary, and don't send anything.
+    if (!isFormValid) {
+      setFailedSubmits((count) => count + 1);
+      return;
+    }
     // Build the booking from state, in the shape the API should get.
     const formData = {
       date: date,
@@ -122,166 +173,256 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
 
   return (
     // A name turns the form into a landmark that screen readers can jump to.
-    <form className="booking-form" aria-label={"Reserve a Table"} onSubmit={handleSubmit}>
-      {/* The * after a label comes from CSS (the "required" class), so labels keep their plain names. */}
-      <p className="booking-form-required-note">Fields marked * are required.</p>
+    // NEW: noValidate turns off the browser's own pop-up messages. The form checks itself and shows
+    // its messages on the page instead, in the same words and style everywhere. The required, min and max
+    // attributes stay: screen readers still announce "required", and phones still pick the right keyboard.
+    <form className="booking-form" aria-label="Reserve a Table" onSubmit={handleSubmit} noValidate>
+      {/* The error summary: only after a submit with problems, and only while there are problems left.
+          tabIndex={-1}: the code can focus it, but the Tab key skips it. */}
+      {submitted && shownErrors.length > 0 && (
+        <div
+          className="booking-form-errors"
+          ref={errorSummaryRef}
+          tabIndex={-1}
+          aria-labelledby="error-summary-title"
+          data-testid="error-summary"
+        >
+          <h2 id="error-summary-title" className="booking-form-errors-title">
+            {shownErrors.length === 1 ? 'Please fix 1 problem' : `Please fix ${shownErrors.length} problems`}
+          </h2>
+          <ul className="booking-form-errors-list">
+            {shownErrors.map((error) => (
+              <li key={error.field}>
+                <a href={`#${error.field}`} onClick={(e) => focusField(e, error.field)}>{error.message}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
-      <label htmlFor="res-date" className="required">Choose date</label>
-      <input
-        type="date"
-        id="res-date"
-        required
-        min={today}
-        value={date}
-        onChange={handleDateChange}
-        // Tells screen readers the field has a problem, and which text explains it.
-        aria-invalid={!!errors.date}
-        aria-describedby={errors.date ? "res-date-error" : undefined}
-      />
-      {errors.date && <p id="res-date-error" className="field-error">{errors.date}</p>}
+      <div className="booking-form-steps">
+        {/* Step 1. Each step is a white card with a numbered heading. The number is decoration
+            (aria-hidden), so screen readers hear just "When". */}
+        <div className="card booking-step">
+          <h2 className="booking-step-title">
+            <span className="booking-step-number" aria-hidden="true">1</span>
+            When
+          </h2>
 
-      <label htmlFor="res-time" className="required">Choose time</label>
-      <select
-        id="res-time"
-        required
-        value={selectedTime}
-        onChange={(e) => setTime(e.target.value)}
-        aria-invalid={!!errors.time}
-        aria-describedby={errors.time ? "res-time-error" : undefined}
-      >
-        {noTimes ? (
-          // One disabled option explains the empty list. Its value '' matches selectedTime,
-          // so the select stays controlled, and "required" still blocks the submit.
-          <option value="" disabled>
-            No times available
-          </option>
-        ) : (
-          // Each time is unique and stays the same between renders, so it makes a good key.
-          openTimes.map((t) => (
-            <option key={t} value={t}>{t}</option>
-          ))
-        )}
-      </select>
-      {errors.time && <p id="res-time-error" className="field-error">{errors.time}</p>}
-
-      <label htmlFor="guests" className="required">Number of guests</label>
-      <input
-        type="number"
-        id="guests"
-        required
-        min="1"
-        max="10"
-        value={guests}
-        onChange={(e) => setGuests(e.target.value)}
-        aria-invalid={!!errors.guests}
-        aria-describedby={errors.guests ? "guests-error" : undefined}
-      />
-      {errors.guests && <p id="guests-error" className="field-error">{errors.guests}</p>}
-
-      <label htmlFor="occasion" className="required">Occasion</label>
-      <select
-        id="occasion"
-        required
-        value={occasion}
-        onChange={(e) => setOccasion(e.target.value)}
-        aria-invalid={!!errors.occasion}
-        aria-describedby={errors.occasion ? "occasion-error" : undefined}
-      >
-        {/* Built from the same list the validator checks, so the two can't disagree. */}
-        {OCCASIONS.map((o) => (
-          <option key={o}>{o}</option>
-        ))}
-      </select>
-      {errors.occasion && <p id="occasion-error" className="field-error">{errors.occasion}</p>}
-
-      {/* A group of radio buttons goes in a fieldset; the legend is the group's name.
-          Screen readers say "Seating preference, group" and then each choice.
-          All three share name="seating", so only one can be picked, and the arrow keys move between them. */}
-      <fieldset className="booking-form-seating">
-        <legend className="required">Seating preference</legend>
-        {SEATING_OPTIONS.map((option) => (
-          <label key={option} className="booking-form-radio">
+          <div className="booking-field">
+            <label htmlFor="res-date">Choose date</label>
             <input
-              type="radio"
-              name="seating"
-              value={option}
-              checked={seating === option}
-              onChange={(e) => setSeating(e.target.value)}
+              type="date"
+              id="res-date"
               required
+              min={today}
+              value={date}
+              onChange={handleDateChange}
+              // Tells screen readers the field has a problem, and which text explains it.
+              aria-invalid={!!errors.date}
+              aria-describedby={errors.date ? 'res-date-error' : undefined}
             />
-            {option}
-          </label>
-        ))}
-      </fieldset>
+            {errors.date && <p id="res-date-error" className="field-error">{errors.date}</p>}
+          </div>
 
-      <label htmlFor="res-name" className="required">Full name</label>
-      <input
-        type="text"
-        id="res-name"
-        required
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        // onBlur runs when the user leaves the field (Tab away or click elsewhere).
-        onBlur={() => markTouched('name')}
-        // NEW: autocomplete tells the browser what this field is for, so it can offer to fill it in
-        // from the user's saved details. It saves typing, and helps people with memory or motor
-        // difficulties (WCAG 1.3.5 "Identify Input Purpose"). "name" means the person's full name.
-        autoComplete="name"
-        aria-invalid={!!shownNameError}
-        aria-describedby={shownNameError ? "res-name-error" : undefined}
-      />
-      {shownNameError && <p id="res-name-error" className="field-error">{shownNameError}</p>}
+          {/* Time and guests sit side by side on wider screens. */}
+          <div className="booking-field-row">
+            <div className="booking-field">
+              <label htmlFor="res-time">Choose time</label>
+              <select
+                id="res-time"
+                required
+                value={selectedTime}
+                onChange={(e) => setTime(e.target.value)}
+                aria-invalid={!!errors.time}
+                aria-describedby={errors.time ? 'res-time-error' : undefined}
+              >
+                {noTimes ? (
+                  // One disabled option explains the empty list. Its value '' matches selectedTime,
+                  // so the select stays controlled.
+                  <option value="" disabled>
+                    No times available
+                  </option>
+                ) : (
+                  // Each time is unique and stays the same between renders, so it makes a good key.
+                  openTimes.map((t) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))
+                )}
+              </select>
+              {errors.time && <p id="res-time-error" className="field-error">{errors.time}</p>}
+            </div>
 
-      <label htmlFor="res-email" className="required">Email</label>
-      <input
-        // type="email" brings up the keyboard with @ on phones.
-        type="email"
-        id="res-email"
-        required
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        onBlur={() => markTouched('email')}
-        // "email": the browser can offer the user's saved email address.
-        autoComplete="email"
-        aria-invalid={!!shownEmailError}
-        aria-describedby={shownEmailError ? "res-email-error" : undefined}
-      />
-      {shownEmailError && <p id="res-email-error" className="field-error">{shownEmailError}</p>}
+            <div className="booking-field">
+              <label htmlFor="guests">Number of guests</label>
+              <input
+                type="number"
+                id="guests"
+                required
+                min="1"
+                max="10"
+                value={guests}
+                onChange={(e) => setGuests(e.target.value)}
+                aria-invalid={!!errors.guests}
+                aria-describedby={errors.guests ? 'guests-error' : undefined}
+              />
+              {errors.guests && <p id="guests-error" className="field-error">{errors.guests}</p>}
+            </div>
+          </div>
+        </div>
 
-      <label htmlFor="res-requests">Special requests (optional)</label>
-      <textarea
-        id="res-requests"
-        rows="3"
-        // The browser stops typing after 200 characters.
-        maxLength={200}
-        value={requests}
-        onChange={(e) => setRequests(e.target.value)}
-        aria-describedby="res-requests-hint"
-      />
-      {/* Always shown, so the limit is known before typing. */}
-      <p id="res-requests-hint" className="field-hint">
-        For example a high chair or an allergy. Up to 200 characters ({requests.length}/200).
-      </p>
+        {/* Step 2 */}
+        <div className="card booking-step">
+          <h2 className="booking-step-title">
+            <span className="booking-step-number" aria-hidden="true">2</span>
+            Your table
+          </h2>
 
-      {/* Option B: the aria-label matches the visible text, so voice control ("click Make Your
-          reservation") still works and screen readers say what the button does. */}
-      <input
-        type="submit"
-        value="Make Your reservation"
-        aria-label={"Make Your reservation"}
-        disabled={!isFormValid}
-        // While the button is disabled, screen readers also read the hint below it, so users know why.
-        aria-describedby={isFormValid ? undefined : "submit-hint"}
-      />
-      {!isFormValid && (
-        <p id="submit-hint" className="field-hint">
-          Fill in all required fields to enable the button.
-        </p>
-      )}
-      {/* role="alert": screen readers announce it right away, without the user moving to it. */}
-      {saveFailed && (
-        <p role="alert" className="form-error">We couldn't save your booking. Please try again.</p>
-      )}
+          <div className="booking-field">
+            <label htmlFor="occasion">Occasion</label>
+            <select
+              id="occasion"
+              required
+              value={occasion}
+              onChange={(e) => setOccasion(e.target.value)}
+              aria-invalid={!!errors.occasion}
+              aria-describedby={errors.occasion ? 'occasion-error' : undefined}
+            >
+              {/* Built from the same list the validator checks, so the two can't disagree. */}
+              {OCCASIONS.map((o) => (
+                <option key={o}>{o}</option>
+              ))}
+            </select>
+            {errors.occasion && <p id="occasion-error" className="field-error">{errors.occasion}</p>}
+          </div>
+
+          {/* A group of radio buttons goes in a fieldset; the legend is the group's name.
+              Screen readers say "Seating preference, group" and then each choice.
+              All three share name="seating", so only one can be picked, and the arrow keys move between them.
+              Each choice LOOKS like a card, but it's still a real radio button inside a label. */}
+          <fieldset className="booking-seating">
+            <legend>Seating preference</legend>
+            <div className="booking-seating-options">
+              {SEATING_OPTIONS.map((option) => {
+                const id = `seating-${toId(option)}`;
+                return (
+                  <label key={option} className="seating-card" htmlFor={id}>
+                    <input
+                      type="radio"
+                      id={id}
+                      name="seating"
+                      value={option}
+                      checked={seating === option}
+                      onChange={(e) => setSeating(e.target.value)}
+                      // The radio's name is just the option ("Indoor"); the short line under it
+                      // is read as its description, after the name.
+                      aria-labelledby={`${id}-name`}
+                      aria-describedby={`${id}-description`}
+                    />
+                    <span id={`${id}-name`} className="seating-card-name">{option}</span>
+                    <span id={`${id}-description`} className="seating-card-description">
+                      {SEATING_DESCRIPTIONS[option]}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+            {errors.seating && <p className="field-error">{errors.seating}</p>}
+          </fieldset>
+        </div>
+
+        {/* Step 3 */}
+        <div className="card booking-step">
+          <h2 className="booking-step-title">
+            <span className="booking-step-number" aria-hidden="true">3</span>
+            Your details
+          </h2>
+
+          <div className="booking-field-row">
+            <div className="booking-field">
+              <label htmlFor="res-name">Full name</label>
+              <input
+                type="text"
+                id="res-name"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                // onBlur runs when the user leaves the field (Tab away or click elsewhere).
+                onBlur={() => markTouched('name')}
+                // autocomplete tells the browser what this field is for, so it can offer to fill it in
+                // from the user's saved details (WCAG 1.3.5 "Identify Input Purpose").
+                autoComplete="name"
+                aria-invalid={!!shownNameError}
+                aria-describedby={shownNameError ? 'res-name-error' : undefined}
+              />
+              {shownNameError && <p id="res-name-error" className="field-error">{shownNameError}</p>}
+            </div>
+
+            <div className="booking-field">
+              <label htmlFor="res-email">Email</label>
+              <input
+                // type="email" brings up the keyboard with @ on phones.
+                type="email"
+                id="res-email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onBlur={() => markTouched('email')}
+                // "email": the browser can offer the user's saved email address.
+                autoComplete="email"
+                aria-invalid={!!shownEmailError}
+                aria-describedby={shownEmailError ? 'res-email-error' : undefined}
+              />
+              {shownEmailError && <p id="res-email-error" className="field-error">{shownEmailError}</p>}
+            </div>
+          </div>
+
+          <div className="booking-field">
+            {/* The only optional field, so it's the only one marked. Every other field is required. */}
+            <label htmlFor="res-requests">Special requests (optional)</label>
+            <textarea
+              id="res-requests"
+              rows="3"
+              // The browser stops typing after 200 characters.
+              maxLength={200}
+              value={requests}
+              onChange={(e) => setRequests(e.target.value)}
+              aria-describedby="res-requests-hint"
+            />
+            {/* Always shown, so the limit is known before typing. */}
+            <p id="res-requests-hint" className="field-hint">
+              For example a high chair or an allergy. Up to 200 characters ({requests.length}/200).
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* The live summary: it updates as the guest fills in the form.
+          On wide screens it sits in a column on the right and stays in view while the form scrolls;
+          on phones it sits just above the button, as a last check before confirming. */}
+      <aside className="card booking-summary" aria-labelledby="booking-summary-title">
+        <h2 id="booking-summary-title" className="booking-summary-title">Your reservation</h2>
+        <ReservationSummary booking={{ date, time: selectedTime, guests, occasion, seating }} />
+        {/* SAMPLE DATA: the hours and address come from src/data/restaurant.js; the 15-minute hold is
+            a made-up house rule. */}
+        <div className="booking-summary-info">
+          <p>{restaurant.hours}. {restaurant.lastTable}.</p>
+          <p>{restaurant.street}, {restaurant.city}</p>
+          <p>We hold your table for 15 minutes after your booking time.</p>
+        </div>
+      </aside>
+
+      <div className="booking-form-actions">
+        {/* Always enabled: pressing it with a problem shows the error summary, which says exactly what to fix.
+            A disabled button can't say why it's disabled, and some people can't find out. */}
+        <button type="submit" className="button button-primary booking-form-submit">
+          Confirm reservation
+        </button>
+        {/* role="alert": screen readers announce it right away, without the user moving to it. */}
+        {saveFailed && (
+          <p role="alert" className="form-error">We couldn't save your booking. Please try again.</p>
+        )}
+      </div>
     </form>
   );
 }
