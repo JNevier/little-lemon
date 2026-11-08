@@ -12,6 +12,23 @@
 /* Links are blue by default, which is hard to read on green. "inherit" copies the footer's text color. */
 .footer a {
   color: inherit;
+  /* Big enough to tap with a finger: at least 44px tall. inline-block lets padding and min-height work. */
+  display: inline-block;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 0.75rem 0;
+}
+
+/* Keyboard focus ring. Yellow on the green footer is about 4.5:1 (outlines need 3:1). */
+.footer a:focus-visible {
+  outline: 3px solid var(--color-primary-yellow);
+  outline-offset: 2px;
+}
+
+/* The contact lines already have space between them from the links' padding,
+   so the paragraphs don't need their browser margins too. */
+.footer-contact p {
+  margin: 0;
 }
 
 /* Browsers show <address> in italics by default; this matches the rest of the footer. */
