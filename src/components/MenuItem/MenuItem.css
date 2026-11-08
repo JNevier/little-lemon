@@ -4,10 +4,13 @@
   border-bottom: 1px solid var(--color-light);
 }
 
-/* A dish with a photo: the photo in a fixed 96px column on the left, the text taking the rest. */
+/* A dish with a photo: the photo in a fixed column on the left, the text taking the rest.
+   minmax(0, 1fr): the text column may shrink below its longest line, so a long name can wrap
+   instead of pushing the row wider than a small phone's screen.
+   The photo is 64px on the narrowest phones and 96px from 360px up (see the media query below). */
 .menu-item-with-image {
   display: grid;
-  grid-template-columns: 96px 1fr;
+  grid-template-columns: 64px minmax(0, 1fr);
   gap: var(--space-4);
   align-items: start;
 }
@@ -15,8 +18,8 @@
 /* A square photo with rounded corners. object-fit: cover crops tall or wide photos to fill the square. */
 .menu-item-image {
   display: block;
-  width: 96px;
-  height: 96px;
+  width: 64px;
+  height: 64px;
   object-fit: cover;
   border-radius: var(--radius-sm);
 }
@@ -62,4 +65,16 @@
   margin: var(--space-3) 0 0;
   padding: 0;
   list-style: none;
+}
+
+/* 360px and up (most phones): a bigger photo, 96px. */
+@media (min-width: 360px) {
+  .menu-item-with-image {
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
+
+  .menu-item-image {
+    width: 96px;
+    height: 96px;
+  }
 }

@@ -102,7 +102,8 @@
 /* Mobile first: one dish per row. Remove the list's bullets and default spacing. */
 .menu-page-list {
   display: grid;
-  grid-template-columns: 1fr;
+  /* minmax(0, 1fr) instead of 1fr: the column may shrink to the screen, even below a dish's longest line. */
+  grid-template-columns: minmax(0, 1fr);
   column-gap: var(--space-8);
   margin: 0;
   padding: 0;
@@ -113,7 +114,7 @@
    doesn't leave a lonely card: the last column is simply one row shorter. */
 @media (min-width: 900px) {
   .menu-page-list {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
