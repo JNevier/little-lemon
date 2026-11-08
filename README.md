@@ -75,15 +75,15 @@ All names, emails and bookings in these screenshots are fake test data.
 
 ## Lighthouse
 
-Measured with [PageSpeed Insights](https://pagespeed.web.dev) (Lighthouse 13.6, **mobile**: an emulated mid-range phone on a slow 4G connection) on the live home page, November 8, 2026 (re-run after the hero photo change).
+Measured with [PageSpeed Insights](https://pagespeed.web.dev) (Lighthouse 13.6, **mobile**: an emulated mid-range phone on a slow 4G connection) on the live home page, November 8, 2026. These are from the second of two runs after the hero photo change.
 
 | Performance | Accessibility | Best Practices | SEO |
 | --- | --- | --- | --- |
-| 89 | 100 | 100 | 100 |
+| 91 | 100 | 100 | 100 |
 
-The first run scored 85 for Performance. The slow part was **Largest Contentful Paint**: the time until the biggest thing on screen, the hero photo, has loaded. Phones were downloading the full 288 KB photo. Now they get a smaller copy (133 KB, chosen by the browser with `srcset` and `sizes`), and the photo is marked `fetchpriority="high"` so it downloads first. That brought Largest Contentful Paint down from 4.2 s to 3.5 s and Performance up from 85 to 89.
+The first run scored 85 for Performance. The slow part was **Largest Contentful Paint**: the time until the biggest thing on screen, the hero photo, has loaded. Phones were downloading the full 288 KB photo. Now they get a smaller copy (133 KB, chosen by the browser with `srcset` and `sizes`), and the photo is marked `fetchpriority="high"` so it downloads first. That brought Largest Contentful Paint down from 4.2 s to 3.5 s, and Performance up from 85 to 89 and 91 in two runs.
 
-First paint (1.5 s), blocking time (0 ms) and layout shift (0) are all in the green. What's left is mostly the time it takes to download and run the app's JavaScript on a slow phone before the photo can appear. Scores change a few points from run to run.
+First paint (1.5 s), Speed Index (1.5 s), blocking time (0 ms) and layout shift (0) are all in the green. What's left is mostly the time it takes to download and run the app's JavaScript on a slow phone before the photo can appear. Scores change a few points from run to run.
 
 ## Tech stack
 
