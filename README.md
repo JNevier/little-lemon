@@ -37,6 +37,9 @@ The app opens at [http://localhost:3000](http://localhost:3000). Step-by-step de
 ## Features
 
 - **Home page** with a hero section, this week's specials, customer reviews and a short "about us" section.
+- **Menu page** that loads the dishes from a JSON file, with filter buttons for Starters, Mains, Desserts and Drinks, a loading message and a clear error if the menu can't be loaded.
+- **About page** with the restaurant's story and a link to book a table.
+- **No dead links**: every link in the navigation opens a real page. Order Online and Login show a "coming soon" page.
 - **Booking form** with date, time, number of guests and occasion.
 - **Available times change with the date** you pick.
 - **Validation with clear messages**: you can't pick a past date or book for fewer than 1 or more than 10 guests, and the submit button stays disabled until everything is valid.
@@ -48,7 +51,7 @@ The app opens at [http://localhost:3000](http://localhost:3000). Step-by-step de
 ## Tech stack
 
 - **React 19**: builds the user interface from components.
-- **React Router 7**: moves between pages (home, booking, confirmation) without reloading.
+- **React Router 7**: moves between pages (home, menu, about, booking, confirmation) without reloading.
 - **Create React App** (`react-scripts` 5): runs, tests and builds the project with no extra setup.
 - **Jest and React Testing Library**: unit tests that check the app the way a user sees it.
 - **Plain CSS** with CSS variables for the brand colours and fonts.
@@ -142,15 +145,21 @@ src/
 ├── index.js
 ├── index.css
 ├── api.js
+├── hooks/
+│   └── useFetch.js
 ├── components/
 │   ├── BookingForm/
 │   ├── Main/
+│   ├── MenuItem/
 │   ├── Header/
 │   ├── Nav/
 │   ├── Footer/
 │   └── ...
 ├── pages/
 │   ├── HomePage/
+│   ├── MenuPage/
+│   ├── AboutPage/
+│   ├── ComingSoonPage/
 │   ├── BookingPage/
 │   ├── ConfirmedBooking/
 │   └── NotFoundPage/
@@ -161,6 +170,8 @@ src/
 - `src/components/BookingForm/`: the booking form, its validation functions (`validation.js`) and their tests.
 - `src/components/Main/`: the page routes and the booking logic (available times and submitting a booking).
 - `src/pages/`: one folder per page the router can show.
+- `src/hooks/`: custom hooks. `useFetch(url)` loads JSON and returns `{ data, loading, error }`, and cancels the request if the page closes first.
+- `public/data/menu.json`: the sample menu. Files in `public/` are served as they are, so the app fetches it like a real API.
 - `src/utils/`: small helpers. `dates.js` converts between a date input's `YYYY-MM-DD` text and a JavaScript date, and checks that a date is complete.
 - `src/api.js`: the course's booking API (see [About the booking API](#about-the-booking-api)).
 - `src/index.css`: the global styles and the brand colours and fonts as CSS variables.
@@ -176,6 +187,9 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 - **The available-times logic** in `Main.js`, with the API replaced by a fake (a mock), so the results don't depend on today's date.
 - **Accessibility details**: each field is found by its label, the form has a name, errors are linked to their fields, and the confirmation page moves focus to its heading.
 - **Edge cases**: a failed save, a direct visit to the confirmation page, a date with no times, and a cleared date.
+- **Loading data** (`useFetch`): a successful load, an HTTP error, a network error, and a cancelled request that must not show an error. `fetch` is replaced by a fake in each test.
+- **The menu page**: the loading message, the dishes and their prices, the category filter and its pressed state, and the error message.
+- **Routing**: every in-app link on the home page and in the nav opens a real page, and an unknown address shows the 404 page.
 
 **Why fake the API and fix the date in tests:** a test that uses today's real date could pass today and fail tomorrow.
 
@@ -187,6 +201,7 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 - **Button name**: the submit button's accessible name matches its visible text. **Why:** voice-control users say what they see ("click Make Your reservation"), so the names must match.
 - **Page changes**: the confirmation page sets its own browser tab title and moves focus to its heading, so screen readers announce the new page.
 - **Urgent messages**: the failed-save message uses `role="alert"`, so screen readers read it out as soon as it appears.
+- **Menu filters**: the filter buttons use `aria-pressed`, so screen readers say which category is chosen. The loading message uses `role="status"` (read out politely) and a failed load uses `role="alert"`.
 - **Keyboard**: everything works with `Tab`, the arrow keys and `Enter`, and every control shows a visible focus ring.
 - **Semantic HTML**: one `<h1>` per page, headings in order, and the `header`, `nav`, `main` and `footer` landmarks.
 
@@ -212,8 +227,8 @@ There is no Figma wireframe. I skipped that step and built the pages from the co
 
 ## Known limitations
 
-- **Unbuilt pages**: the menu links to About, Menu, Order Online and Login, but those pages aren't built yet, so they show a "Page not found" page.
-- **Sample data**: the customer reviews and the contact details in the footer are made up.
+- **Coming-soon pages**: Order Online and Login aren't built. Their links open a "coming soon" page instead.
+- **Sample data**: the menu, the About page story, the customer reviews and the contact details in the footer are made up.
 - **No real bookings**: the course API doesn't save anything, so a booking is never stored and always "succeeds".
 - **Placeholder preview image**: the `og:image` link used for social-media previews points to a placeholder address until the site is deployed.
 
