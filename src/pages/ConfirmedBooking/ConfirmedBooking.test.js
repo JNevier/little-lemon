@@ -25,7 +25,7 @@ describe('after a real booking', () => {
 
   test('moves focus to the heading and sets the tab title', () => {
     setupPage({ booking });
-    expect(screen.getByRole('heading', { level: 1, name: 'Booking Confirmed' })).toHaveFocus();
+    expect(screen.getByRole('heading', { level: 1, name: "You're booked" })).toHaveFocus();
     expect(document.title).toBe('Booking Confirmed | Little Lemon');
   });
 });
@@ -47,12 +47,26 @@ describe('with contact details', () => {
     });
     expect(screen.getByText(/thank you, test guest!/i)).toBeInTheDocument();
     expect(screen.getByText('Outdoor')).toBeInTheDocument();
-    expect(screen.getByText('Your request: A high chair, please.')).toBeInTheDocument();
+    // The summary pairs each label with its value, so the request appears under "Request".
+    expect(screen.getByText('Request')).toBeInTheDocument();
+    expect(screen.getByText('A high chair, please.')).toBeInTheDocument();
+    // The email is private, so it isn't repeated on screen.
+    expect(screen.queryByText('guest@example.com')).not.toBeInTheDocument();
   });
 
   test('an older booking without a name still reads naturally', () => {
     setupPage({ booking });
     expect(screen.getByText(/^thank you! your table/i)).toBeInTheDocument();
     expect(screen.queryByText(/seating/i)).not.toBeInTheDocument();
+  });
+});
+
+describe('next steps', () => {
+  test('offers My Reservations first, then booking another table', () => {
+    setupPage({ booking });
+    expect(screen.getByRole('link', { name: 'View my reservations' })).toHaveAttribute('href', '/my-reservations');
+    expect(screen.getByRole('link', { name: 'View my reservations' })).toHaveClass('button-primary');
+    expect(screen.getByRole('link', { name: 'Book another table' })).toHaveAttribute('href', '/reservations');
+    expect(screen.getByRole('link', { name: 'Book another table' })).toHaveClass('button-secondary');
   });
 });
