@@ -297,19 +297,33 @@ main:focus {
   font-size: var(--text-lg);
 }
 
-/* The top of an inner page (Menu, About, Reserve): a warm peach band with the title and lead.
-   Dark text on peach is about 9.5:1. */
+/* The top of an inner page (Menu, About, Reserve, My Reservations): a brand-green band with the title
+   and lead, the same green as the home page hero, so every page starts the same way.
+   White on green is about 7:1 and light grey on green about 6:1. */
 .page-header {
   padding: var(--space-7) var(--page-gutter) var(--space-6);
-  background-color: var(--color-secondary-peach);
+  background-color: var(--color-primary-green);
+  color: var(--color-light);
 }
 
 .page-header h1 {
   margin-bottom: var(--space-3);
+  color: var(--color-white);
 }
 
 .page-header .lead {
   margin-bottom: 0;
+}
+
+/* The small label above the title: light grey, because the usual green eyebrow would vanish on green. */
+.page-header .eyebrow {
+  color: var(--color-light);
+}
+
+/* Links in the header (the reservation tabs): the usual green focus ring would vanish on green,
+   so it's yellow here (yellow on green is about 4.5:1; rings need 3:1). */
+.page-header a:focus-visible {
+  outline-color: var(--color-primary-yellow);
 }
 
 /* A white card with a soft shadow: content that should stand out from the page. */

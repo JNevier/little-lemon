@@ -9,7 +9,7 @@ function BookingPage({ availableTimes, dispatch, submitForm, reservations }) {
     <div className="booking-page">
       {/* React 19 moves this into the page's <head>, so the browser tab says where you are. */}
       <title>Reserve a Table | Little Lemon</title>
-      {/* A compact peach header: the title, one line, and the tabs to switch to My Reservations. */}
+      {/* A compact green header: the title, one line, and the tabs to switch to My Reservations. */}
       <div className="page-header booking-page-header">
         <h1>Reserve a Table</h1>
         <p className="lead">Pick a date, time and party size, and we'll save you a table at Little Lemon.</p>
