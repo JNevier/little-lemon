@@ -42,7 +42,7 @@ The app opens at [http://localhost:3000](http://localhost:3000). Step-by-step de
 ## Features
 
 - **Home page** with a hero (a "Reserve a Table" button, a "See the menu" button and the address and opening time), three reasons to visit ("Why Little Lemon"), this week's specials as photo cards, a short story about the owners, and a "Visit us" section with the address, hours and phone number. The specials come from the same `menu.json` file as the Menu page, so a dish's name, price and description are the same everywhere. Grey placeholder cards keep their space while they load, so the page doesn't jump.
-- **Menu page** that loads the dishes from a JSON file, with filter buttons for Starters, Mains, Desserts and Drinks, a loading message and a clear error if the menu can't be loaded.
+- **Menu page** that loads 13 dishes from a JSON file and lays them out like a printed menu: name, a dotted line, the price, a short description and dietary tags (Vegetarian, Vegan, Gluten-free, Contains nuts), with a photo for dishes that have one. "All" shows one section per category. The filter tabs stay at the top of the screen while you scroll, and the chosen filter is saved in the address (`/menu?category=Mains`), so the Back button and shared links work. Grey placeholder rows show while it loads, and if it can't load, a **Try again** button loads it again. The page ends with a "Reserve a Table" button.
 - **About page** with the restaurant's story and a link to book a table.
 - **No dead links**: every link opens a real page. There is no online ordering or login: with no server, both would be fake, so the site leaves them out. An old link to `/order-online` or `/login` shows the "Page not found" page.
 - **Booking form** with date, time, number of guests, occasion, seating preference (indoor, outdoor or no preference), full name, email and optional special requests (up to 200 characters).
@@ -100,13 +100,14 @@ No other libraries: no CSS framework, no form library and no state library. Form
 
 | Hook | Where | What it does there |
 | --- | --- | --- |
-| `useState` | Booking form, menu filter, phone menu, My Reservations | Remembers a value between renders, like a field's text or which filter is chosen. |
+| `useState` | Booking form, phone menu, My Reservations | Remembers a value between renders, like a field's text or which filter is chosen. |
 | `useReducer` | `Main.js` | Works out the available times when the date changes (the course's `initializeTimes` and `updateTimes`). |
 | `useEffect` | `useFetch`, `useLocalStorage`, `Header` | Runs code after the screen updates: loading the menu, saving bookings, closing the phone menu on a page change. |
-| `useRef` | `Header`, My Reservations | A direct handle on an element, to move keyboard focus back to the menu button or to the heading. |
+| `useRef` | `Header`, My Reservations, Menu page | A direct handle on an element, to move keyboard focus back to the menu button or to the heading, or to scroll the menu list back into view. |
 | `useContext` | `useReservations()` | Reads the saved reservations from any page without passing props down. |
 | `useNavigate`, `useLocation` | `Main.js`, `ConfirmedBooking`, `Header` | React Router hooks: go to the confirmation page in code, and read the current page. |
-| `useFetch` (custom) | Menu page | Loads JSON and returns `{ data, loading, error }`, and cancels the request if the page closes first. |
+| `useSearchParams` | Menu page | Reads and writes `?category=` in the address, so the chosen filter survives Back, reload and shared links. |
+| `useFetch` (custom) | Menu page, home page specials | Loads JSON and returns `{ data, loading, error, retry }`, and cancels the request if the page closes first. `retry()` loads it again. |
 | `useLocalStorage` (custom) | Reservations context | Like `useState`, but the value is also saved in the browser. |
 | `useReservations` (custom) | Main, My Reservations | Gives the saved reservations and the add and cancel functions. |
 
@@ -246,7 +247,7 @@ src/
 - `src/components/BookingForm/`: the booking form, its validation functions (`validation.js`) and their tests.
 - `src/components/Main/`: the page routes and the booking logic (available times and submitting a booking).
 - `src/pages/`: one folder per page the router can show.
-- `src/hooks/`: custom hooks. `useFetch(url)` loads JSON and returns `{ data, loading, error }`, and cancels the request if the page closes first. `useLocalStorage(key, initialValue)` works like `useState` but also saves the value in the browser.
+- `src/hooks/`: custom hooks. `useFetch(url)` loads JSON and returns `{ data, loading, error, retry }`, cancels the request if the page closes first, and loads again when `retry()` is called. `useLocalStorage(key, initialValue)` works like `useState` but also saves the value in the browser.
 - `src/context/`: `ReservationsContext.js` shares the saved reservations with any page through `useReservations()`, so they don't have to be passed down through every component.
 - `public/data/menu.json`: the sample menu. Files in `public/` are served as they are, so the app fetches it like a real API. Each dish has a name, category, price, description and dietary `tags`; dishes with `"featured": true` (and an `image`) appear in the home page's specials.
 - `src/data/restaurant.js`: the restaurant's sample address, hours, phone number and email, in one place. The home page and the footer both read it, so they can't disagree.
@@ -269,9 +270,9 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 - **The available-times logic** in `Main.js`, with the API replaced by a fake (a mock), so the results don't depend on today's date.
 - **Accessibility details**: each field is found by its label, the form has a name, errors are linked to their fields, and the confirmation page moves focus to its heading.
 - **Edge cases**: a failed save, a direct visit to the confirmation page, a date with no times, and a cleared date.
-- **Loading data** (`useFetch`): a successful load, an HTTP error, a network error, and a cancelled request that must not show an error. `fetch` is replaced by a fake in each test.
+- **Loading data** (`useFetch`): a successful load, an HTTP error, a network error, a cancelled request that must not show an error, and `retry()` loading again after an error. `fetch` is replaced by a fake in each test.
 - **The home page**: each section and its heading, the hero's two buttons, no invented reviews or star ratings, the loading skeleton, only the featured dishes with their photo, price and tags, a calm message with a menu link if the dishes can't load, and the Visit us details.
-- **The menu page**: the loading message, the dishes and their prices, the category filter and its pressed state, and the error message.
+- **The menu page**: the loading skeleton, the dishes and their prices, one section per category under "All", the filter's pressed state, the filter in the address (`?category=`), opening a shared link on a filter, an unknown category falling back to "All", tags and photos, the error message, **Try again** (and where focus goes), and the closing Reserve button.
 - **Routing**: every in-app link on the home page and in the nav opens a real page, and an unknown address shows the 404 page.
 - **The phone menu**: the button opens and closes the menu, `Escape` closes it and returns focus to the button, and moving to another page closes it.
 - **Saving in the browser** (`useLocalStorage`): reading, writing, broken saved data and blocked storage, none of which may crash the app. Each test starts with `localStorage.clear()`.
@@ -284,13 +285,13 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 
 ### Coverage
 
-**98 tests in 17 files, all passing.** Coverage measured with `CI=true npm test -- --coverage --watchAll=false`:
+**106 tests in 17 files, all passing.** Coverage measured with `CI=true npm test -- --coverage --watchAll=false`:
 
 | Statements | Branches | Functions | Lines |
 | --- | --- | --- | --- |
-| 98.68% | 91.79% | 99% | 98.63% |
+| 98.38% | 92.56% | 99.09% | 98.31% |
 
-What isn't covered: `src/index.js` (it only starts the app in a real browser), the course API's `submitAPI` (always replaced by a fake in tests), and a few branches in the booking form, the header and the menu page that only change an `aria-*` attribute or a fallback value.
+What isn't covered: `src/index.js` (it only starts the app in a real browser), the course API's `submitAPI` (always replaced by a fake in tests), a few branches in the booking form and the header that only change an `aria-*` attribute or a fallback value, and the menu page's scroll back to the top of the list (it only runs in a real browser, where the page can scroll; it was checked there).
 
 ## Accessibility
 
