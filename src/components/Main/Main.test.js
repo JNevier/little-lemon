@@ -3,6 +3,7 @@ import { MemoryRouter } from 'react-router';
 import Main, { initializeTimes, updateTimes } from './Main';
 import { fetchAPI, submitAPI } from '../../api';
 import { toInputDate } from '../../utils/dates';
+import { ReservationsProvider } from '../../context/ReservationsContext';
 
 // Replace the course API with a fake, so these tests don't depend on today's date.
 jest.mock('../../api');
@@ -42,9 +43,12 @@ test('updateTimes leaves the times alone for an action it does not know', () => 
 test('a booking that is not saved shows an error and stays on the form', () => {
   fetchAPI.mockReturnValue(['17:00', '18:00']);
   submitAPI.mockReturnValue(false);
+  // Main reads the saved reservations from Context, so it needs the provider around it (App.js has it).
   render(
     <MemoryRouter initialEntries={['/reservations']}>
-      <Main />
+      <ReservationsProvider>
+        <Main />
+      </ReservationsProvider>
     </MemoryRouter>
   );
 

@@ -5,7 +5,9 @@ import './BookingForm.css';
 
 // A controlled form: React state holds every field's value, and each input just shows it.
 // It gets the available times from Main, and reports date changes back with dispatch.
-function BookingForm({ availableTimes, dispatch, submitForm }) {
+// `reservations` are the bookings already saved in this browser. It's a plain prop (not Context),
+// so the form stays easy to test. "= []" is the default when no reservations are passed in.
+function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }) {
   // Today as 'YYYY-MM-DD': the earliest day you can book (no bookings in the past).
   const today = toInputDate(new Date());
 
@@ -26,13 +28,21 @@ function BookingForm({ availableTimes, dispatch, submitForm }) {
     dispatch({ type: 'DATE_CHANGED', date: e.target.value });
   }
 
+  // Hide the times this browser has already booked on the chosen date.
+  // Derived state: worked out from props and state on every render, never stored, so it can't go stale.
+  // Cancel a reservation and its time comes back on the next render.
+  const bookedTimes = reservations
+    .filter((reservation) => reservation.date === date)
+    .map((reservation) => reservation.time);
+  const openTimes = availableTimes.filter((t) => !bookedTimes.includes(t));
+
   // The times change with the date, so the time picked earlier may not exist anymore.
   // Work out the time to show during render: keep the picked one if it's still offered,
   // otherwise use the first offered time, or '' if there are none.
-  const selectedTime = availableTimes.includes(time) ? time : availableTimes[0] || '';
+  const selectedTime = openTimes.includes(time) ? time : openTimes[0] || '';
 
   // An empty list means nothing can be booked on this date (a real API might return that for a full day).
-  const noTimes = availableTimes.length === 0;
+  const noTimes = openTimes.length === 0;
 
   // Worked out first, so the time message can wait until the date is valid.
   const dateError = isValidDate(date, today) ? '' : 'Please choose today or a later date.';
@@ -47,7 +57,7 @@ function BookingForm({ availableTimes, dispatch, submitForm }) {
       ? ''
       : noTimes
         ? 'No times are available on this date. Please choose another date.'
-        : isValidTime(selectedTime, availableTimes) ? '' : 'Please choose an available time.',
+        : isValidTime(selectedTime, openTimes) ? '' : 'Please choose an available time.',
     guests: isValidGuests(guests) ? '' : 'Please enter a whole number from 1 to 10.',
     occasion: isValidOccasion(occasion) ? '' : 'Please choose an occasion.',
   };
@@ -106,7 +116,7 @@ function BookingForm({ availableTimes, dispatch, submitForm }) {
           </option>
         ) : (
           // Each time is unique and stays the same between renders, so it makes a good key.
-          availableTimes.map((t) => (
+          openTimes.map((t) => (
             <option key={t} value={t}>{t}</option>
           ))
         )}
