@@ -1,39 +1,69 @@
-/* Mobile first: one column, text on top and image below. */
+/* Mobile first: one column, text on top and the photo below, on the green band. */
 .call-to-action {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.5rem;
-  /* Top/bottom 2rem; left/right use the shared gutter, so the hero lines up with the rest of the page. */
-  padding: 2rem var(--page-gutter);
+  gap: var(--space-6);
+  padding: var(--space-7) var(--page-gutter);
   background-color: var(--color-primary-green);
   color: var(--color-light);
 }
 
-/* Only the h1 inside the hero gets the yellow brand color. */
+/* The biggest text on the site, in the brand yellow. Yellow on green is about 4.5:1, and at this size
+   it only needs 3:1. (Yellow text is never used on white: there it would be about 1.5:1.) */
 .call-to-action h1 {
-  color: var(--color-primary-yellow);
-  font-size: 3rem;
-  /* Remove the browser's default space so "Chicago" sits close under the title. */
   margin: 0;
+  font-size: var(--text-display);
+  line-height: 0.95;
+  color: var(--color-primary-yellow);
 }
 
-/* Keep "Chicago" close under the title, like a subtitle.
-   Style guide: subtitle is Markazi Text Regular, 40px on desktop, line height equal to its size. */
+/* "Chicago" sits close under the title, like a subtitle (Markazi Text Regular in the style guide). */
 .call-to-action-subtitle {
+  margin: 0 0 var(--space-5);
   font-family: var(--font-heading);
-  font-size: 2rem;
+  font-size: var(--text-h2);
   font-weight: 400;
   line-height: 1;
-  margin: 0;
+  color: var(--color-white);
 }
 
-/* Style guide: lead text (for the home page and calls to action) is 18px Medium. */
+/* The one-line introduction. Style guide: lead text is 18px Medium. */
 .call-to-action-lead {
-  font-size: 1.125rem;
+  margin: 0 0 var(--space-6);
+  max-width: 34ch;
+  font-size: var(--text-xl);
   font-weight: 500;
 }
 
-/* The "Reserve a Table" button is a LinkButton; its styles live in LinkButton/LinkButton.css. */
+/* The two buttons share a row and wrap onto two lines on narrow phones. */
+.call-to-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* flex: 1 1 auto lets each button grow to fill its line. On a phone, where they wrap,
+   both become full width, so they look like a neat stack instead of two odd widths. */
+.call-to-action-buttons .button {
+  flex: 1 1 auto;
+}
+
+/* The outline button is green by default, which would vanish on the green band.
+   Here it's light instead (light on green is about 6:1), and hover fills it with a see-through white. */
+.call-to-action .button-secondary {
+  border-color: var(--color-light);
+  color: var(--color-white);
+}
+
+.call-to-action .button-secondary:hover {
+  background-color: rgb(255 255 255 / 0.12);
+}
+
+/* The small address and hours line under the buttons. */
+.call-to-action-info {
+  margin: var(--space-5) 0 0;
+  font-size: var(--text-sm);
+}
 
 .call-to-action-image {
   display: block;
@@ -41,37 +71,37 @@
   width: 100%;
   /* The photo is tall (about 2:3). A fixed height with cover crops it to a sensible size instead of
      making the hero very tall. */
-  height: 20rem;
+  height: 18rem;
   object-fit: cover;
   /* When cropping, keep the lower-middle part of the photo, where the tray of food is. */
   object-position: center 65%;
   border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
 }
 
-/* Bigger screens (768px and up): text and image side by side, and the image hangs below the green band
-   into the white space under it (as in the course mock-up). */
+/* Bigger screens (768px and up): text on the left, the photo on the right.
+   The photo hangs below the green band into the white space under it (as in the course mock-up). */
 @media (min-width: 768px) {
   .call-to-action {
-    grid-template-columns: 1fr 1fr;
-    /* Text and image both start at the top, like the mock-up. */
-    align-items: start;
-    /* White space below the green band, for the image to hang into. */
-    margin-bottom: 6rem;
+    /* The text gets a little more room than the photo. */
+    grid-template-columns: 1.15fr 1fr;
+    align-items: center;
+    padding-bottom: var(--space-6);
+    /* Space below the band for the photo to hang into, so the next section starts under the photo. */
+    margin-bottom: var(--space-8);
   }
 
-  /* Style guide: display title is 64px. */
-  .call-to-action h1 {
-    font-size: 4rem;
-  }
-
-  .call-to-action-subtitle {
-    font-size: 2.5rem;
+  /* Side by side there's room, so the buttons keep their natural width. */
+  .call-to-action-buttons .button {
+    flex: none;
   }
 
   .call-to-action-image {
-    height: 24rem;
-    /* A negative bottom margin lets the image stick out 6rem below the band.
-       The band only grows to fit the image's height minus 6rem, so the rest hangs over the edge. */
-    margin-bottom: -6rem;
+    height: 26rem;
+    /* A negative bottom margin lets the photo stick out below the band: 4rem, minus the band's 2rem
+       bottom padding, so about 2rem hangs over the white below. */
+    margin-bottom: calc(-1 * var(--space-8));
+    /* align-self: end pins the photo to the bottom of the band, so the overhang is the same at every width. */
+    align-self: end;
   }
 }
