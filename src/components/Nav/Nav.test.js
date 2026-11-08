@@ -6,14 +6,14 @@ import Nav from './Nav';
 function renderNavAt(path) {
   render(
     <MemoryRouter initialEntries={[path]}>
-      <Nav label="Main" listClassName="nav-list" />
+      <Nav label="Main" />
     </MemoryRouter>
   );
   // The nav is a landmark named by its label, so screen readers can list it and jump to it.
   return screen.getByRole('navigation', { name: 'Main' });
 }
 
-test('has all four links, in order, pointing at the right pages', () => {
+test('has three page links and the "Reserve a Table" action, in order, pointing at the right pages', () => {
   const nav = renderNavAt('/');
 
   const links = within(nav).getAllByRole('link');
@@ -21,7 +21,7 @@ test('has all four links, in order, pointing at the right pages', () => {
     'Home',
     'About',
     'Menu',
-    'Reservations',
+    'Reserve a Table',
   ]);
   expect(links.map((link) => link.getAttribute('href'))).toEqual([
     '/',
@@ -47,4 +47,11 @@ test('marks only the current page with aria-current="page"', () => {
 test('marks Home as current on the home page', () => {
   const nav = renderNavAt('/');
   expect(within(nav).getByRole('link', { name: 'Home' })).toHaveAttribute('aria-current', 'page');
+});
+
+test('"Reserve a Table" is styled as the main (yellow) button, and the page links are not', () => {
+  const nav = renderNavAt('/');
+  // The shared button classes from index.css give it the yellow look.
+  expect(within(nav).getByRole('link', { name: 'Reserve a Table' })).toHaveClass('button', 'button-primary');
+  expect(within(nav).getByRole('link', { name: 'Menu' })).not.toHaveClass('button');
 });

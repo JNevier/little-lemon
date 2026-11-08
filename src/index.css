@@ -1,8 +1,14 @@
-/* Global styles: they apply to the whole app. Component styles live in each component's folder. */
+/* Global styles: they apply to the whole app. Component styles live in each component's folder.
+   This file holds the "design system": the shared colors, spacing, type sizes, shadows, buttons and
+   section layout that every page uses, so the whole site looks like one design. */
 
-/* Little Lemon brand colors and fonts, stored as CSS variables (custom properties).
-   Change a value here once and every place that uses it updates. */
+/* ---------------------------------------------------------------------------------------------
+   1. Design tokens: named values stored as CSS variables (custom properties).
+      Change a value here once and every place that uses it updates.
+   --------------------------------------------------------------------------------------------- */
 :root {
+  /* Little Lemon brand colors. Contrast ratios for every pair we use are checked by
+     scripts/check-contrast.js (run: node scripts/check-contrast.js). */
   --color-primary-green: #495e57;
   --color-primary-yellow: #f4ce14;
   --color-secondary-salmon: #ee9972;
@@ -11,34 +17,76 @@
   --color-dark: #333333;
   /* Pure white, for cards that sit on a light-grey band (light cards would disappear there). */
   --color-white: #ffffff;
+  /* A deep terracotta from the salmon family, for error marks. Salmon itself is too light on white (2.2:1);
+     this one is 5:1, so it's readable as a bar, an icon or even text. */
+  --color-error: #b8501f;
 
   --font-body: 'Karla', sans-serif;
   --font-heading: 'Markazi Text', serif;
 
+  /* Spacing scale: every margin, padding and gap picks one of these steps, so spacing has a rhythm
+     instead of random numbers. Each step is a bit bigger than the last. */
+  --space-1: 0.25rem; /* 4px */
+  --space-2: 0.5rem; /* 8px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem; /* 16px */
+  --space-5: 1.5rem; /* 24px */
+  --space-6: 2rem; /* 32px */
+  --space-7: 3rem; /* 48px */
+  --space-8: 4rem; /* 64px */
+
+  /* The space above and below each page section: 3rem on phones, 4rem from 768px (see below). */
+  --section-space: var(--space-7);
+
+  /* NEW: clamp(smallest, preferred, largest) picks a size that grows with the screen width ("vw" = 1% of
+     the screen width) but never goes below the smallest or above the largest. So headings shrink smoothly
+     on phones and grow on desktops, without a media query for every size. */
+  --text-sm: 0.875rem; /* 14px: small labels, hints */
+  --text-base: 1rem; /* 16px: body text (style guide) */
+  --text-lg: 1.125rem; /* 18px: lead paragraphs, card titles (style guide) */
+  --text-xl: 1.25rem; /* 20px */
+  --text-h2: clamp(2rem, 1.5rem + 2vw, 2.75rem); /* 32px on phones up to 44px */
+  --text-h1: clamp(2.5rem, 1.75rem + 3vw, 4rem); /* 40px on phones up to 64px (style guide display size) */
+  --text-display: clamp(3rem, 2rem + 4.5vw, 5rem); /* 48px up to 80px, for the home page hero only */
+
   /* Style guide: rounded corners are 16px on buttons, cards and images. */
   --radius: 1rem;
+  --radius-sm: 0.5rem;
+
+  /* Soft shadows give cards depth, so they lift off the page instead of being flat grey boxes.
+     The shadow color is our dark text color, very see-through, so shadows look warm, not black. */
+  --shadow-sm: 0 1px 2px rgb(51 51 51 / 0.08), 0 2px 6px rgb(51 51 51 / 0.06);
+  --shadow-md: 0 4px 12px rgb(51 51 51 / 0.1), 0 2px 4px rgb(51 51 51 / 0.06);
+  --shadow-lg: 0 12px 28px rgb(51 51 51 / 0.14), 0 4px 8px rgb(51 51 51 / 0.06);
+
+  /* One speed for every hover and focus change, so the whole site moves the same way. */
+  --transition: 180ms ease;
 
   /* The space between the page's content and the left/right edges of the screen.
      Header, every section and the footer use it, so their content lines up. */
   --page-gutter: 1rem;
 }
 
-/* Bigger screens (768px and up): a bigger gutter.
+/* Bigger screens (768px and up): a bigger gutter and more space between sections.
    max() picks the larger of two values: at least 2rem, OR whatever keeps the content
    64rem (1024px) wide and centered on wide screens. Backgrounds (like the green hero band)
    still stretch edge to edge, because the gutter is padding inside them. */
 @media (min-width: 768px) {
   :root {
     --page-gutter: max(2rem, calc((100vw - 64rem) / 2));
+    --section-space: var(--space-8);
   }
 }
 
+/* ---------------------------------------------------------------------------------------------
+   2. Base elements
+   --------------------------------------------------------------------------------------------- */
 body {
   /* Remove the browser's default space around the page. */
   margin: 0;
   font-family: var(--font-body);
   /* Style guide: paragraph text is 16px with 1.5 line height. */
-  font-size: 1rem;
+  font-size: var(--text-base);
   line-height: 1.5;
   color: var(--color-dark);
   /* Set the page color on purpose. Without it, some browsers and dark-mode settings paint the page dark,
@@ -62,35 +110,207 @@ p {
   max-width: 65ch;
 }
 
-/* Style guide: headlines use Markazi Text Medium, with line height equal to the font size. */
+/* Style guide: headlines use Markazi Text Medium, with line height close to the font size. */
 h1,
 h2 {
   font-family: var(--font-heading);
   font-weight: 500;
-  line-height: 1;
+  line-height: 1.05;
 }
 
-/* Section titles use the style guide's subtitle size (40px on desktop). */
+/* The page title is clearly the biggest thing on every page, then section titles.
+   Before, an h1 was the browser's default 32px, smaller than some h2s. */
+h1 {
+  font-size: var(--text-h1);
+  margin: 0 0 var(--space-4);
+}
+
 h2 {
-  font-size: 2rem;
+  font-size: var(--text-h2);
+  margin: 0 0 var(--space-4);
 }
 
 /* Every h3 on the site is a card title. Style guide: Karla, 18px, bold. */
 h3 {
   font-family: var(--font-body);
-  font-size: 1.125rem;
+  font-size: var(--text-lg);
   font-weight: 700;
 }
 
-/* Bigger screens (768px and up): the big type grows to the style guide's desktop size. */
-@media (min-width: 768px) {
-  h2 {
-    font-size: 2.5rem;
-  }
+/* Links in page text: brand green with a thin underline that thickens on hover.
+   Before, they used the browser's default blue. Components with their own link style (nav, buttons) override this. */
+a {
+  color: var(--color-primary-green);
+  text-decoration-thickness: 1px;
+  /* Moves the underline a little below the letters, so it doesn't cut through "g" or "y". */
+  text-underline-offset: 0.2em;
+  transition: text-decoration-thickness var(--transition), color var(--transition);
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* A clear keyboard focus ring for every link. Green on white is about 7:1 (rings need 3:1). */
+a:focus-visible {
+  outline: 3px solid var(--color-primary-green);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 /* <main> gets focus from the skip link, not from the user. It isn't a control,
    so it doesn't need a focus ring (the page simply continues from there). */
 main:focus {
   outline: none;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   3. Buttons: one look for every button and button-like link on the site.
+      .button-primary (yellow) is the ONE main action on a screen. Everything else is
+      .button-secondary (green outline) or a plain text link. Yellow means "act here".
+   --------------------------------------------------------------------------------------------- */
+.button {
+  /* inline-flex: the text (and an icon, if there is one) sit in a row, centered. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  /* The 44px includes padding and border, like a real button. 44px is easy to tap with a finger. */
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: var(--space-3) var(--space-5);
+  /* A border on every variant (transparent on primary), so all buttons are the same size. */
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: var(--text-base);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--transition), color var(--transition), box-shadow var(--transition),
+    transform var(--transition);
+}
+
+/* A tiny press-down when clicked, so it feels like a real button. */
+.button:active {
+  transform: translateY(1px);
+}
+
+/* Primary: yellow with dark text (about 8.2:1). Hover turns salmon (dark on salmon is about 5.7:1). */
+.button-primary {
+  background-color: var(--color-primary-yellow);
+  color: var(--color-dark);
+}
+
+.button-primary:hover {
+  background-color: var(--color-secondary-salmon);
+  box-shadow: var(--shadow-md);
+}
+
+/* Secondary: a green outline. Hover fills it with peach (green on peach is about 5.2:1). */
+.button-secondary {
+  background-color: transparent;
+  border-color: var(--color-primary-green);
+  color: var(--color-primary-green);
+}
+
+.button-secondary:hover {
+  background-color: var(--color-secondary-peach);
+}
+
+/* Buttons sit on white, grey, peach and green, so the focus ring has two colors:
+   a light inner ring that shows on green and a dark outer ring that shows on light backgrounds. */
+.button:focus-visible {
+  outline: 3px solid var(--color-dark);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--color-light);
+}
+
+/* ---------------------------------------------------------------------------------------------
+   4. Page sections: the same pattern on every page, so the rhythm is consistent.
+      <section class="section">
+        <p class="eyebrow">Small label</p>
+        <h2>Section title</h2>
+        <p class="lead">One or two sentences.</p>
+        ...content...
+      </section>
+   --------------------------------------------------------------------------------------------- */
+.section {
+  padding: var(--section-space) var(--page-gutter);
+}
+
+/* A grey band, used only to separate one section from the next. */
+.section-muted {
+  background-color: var(--color-light);
+}
+
+/* A small, spaced-out capital-letter label above a heading (an "eyebrow"). Green on white is about 7:1. */
+.eyebrow {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary-green);
+}
+
+/* The short paragraph under a heading: a little bigger than body text. Style guide: lead text is 18px. */
+.lead {
+  margin: 0 0 var(--space-5);
+  font-size: var(--text-lg);
+}
+
+/* The top of an inner page (Menu, About, Reserve): a warm peach band with the title and lead.
+   Dark text on peach is about 9.5:1. */
+.page-header {
+  padding: var(--space-7) var(--page-gutter) var(--space-6);
+  background-color: var(--color-secondary-peach);
+}
+
+.page-header h1 {
+  margin-bottom: var(--space-3);
+}
+
+.page-header .lead {
+  margin-bottom: 0;
+}
+
+/* A white card with a soft shadow: content that should stand out from the page. */
+.card {
+  background-color: var(--color-white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Hides text visually but keeps it for screen readers (for example a heading that the layout already
+   makes obvious to sighted users). The standard pattern: a 1px box with its content clipped away. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   5. Motion
+   --------------------------------------------------------------------------------------------- */
+/* NEW: prefers-reduced-motion is a setting in the operating system ("Reduce motion" on Mac and iPhone,
+   "Show animations: off" on Windows). Some people get dizzy or distracted by movement. When it's on,
+   we switch off every transition and animation on the site. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -43,9 +43,9 @@
   outline-offset: 2px;
 }
 
-/* The fetch error stands out with a salmon border. The text stays dark, so it's easy to read. */
+/* The fetch error stands out with a terracotta border (--color-error). The text stays dark, so it's easy to read. */
 .menu-page-error {
-  border-left: 4px solid var(--color-secondary-salmon);
+  border-left: 4px solid var(--color-error);
   padding-left: 0.75rem;
 }
 

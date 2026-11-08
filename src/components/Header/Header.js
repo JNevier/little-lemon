@@ -1,9 +1,9 @@
 import './Header.css';
 import { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import Nav from '../Nav/Nav';
 
-// On phones the six links take a third of the screen, so they hide behind a menu button.
+// On phones the links would take up a big part of the screen, so they hide behind a menu button.
 // From 768px up the CSS always shows the links and hides the button (see Header.css),
 // so `menuOpen` only matters on small screens.
 function Header() {
@@ -30,7 +30,11 @@ function Header() {
   return (
     // The key listener is on the whole header, so Escape works from the button or from any link.
     <header className="header" onKeyDown={handleKeyDown}>
-      <img className="header-logo" src="/images/logo-green-yellow-lemon.png" alt="Little Lemon logo" />
+      {/* The logo links to the home page, as on most websites. The image is the link's only content,
+          so its alt text is the link's name: it says where the link goes. */}
+      <Link to="/" className="header-logo-link">
+        <img className="header-logo" src="/images/logo-green-yellow-lemon.png" alt="Little Lemon home" />
+      </Link>
       <button
         type="button"
         className="header-menu-button"
@@ -52,7 +56,7 @@ function Header() {
       </button>
       {/* The class decides if the links show on phones: "header-menu-open" is added only when menuOpen is true. */}
       <div id="header-menu" className={menuOpen ? 'header-menu header-menu-open' : 'header-menu'}>
-        <Nav label="Main" listClassName="nav-list" />
+        <Nav label="Main" />
       </div>
     </header>
   );

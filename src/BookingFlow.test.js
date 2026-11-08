@@ -56,8 +56,8 @@ test('book a table, see it after a reload, cancel it, and get the time back', ()
   expect(within(rows[0]).getByText(/18:00/)).toBeInTheDocument();
 
   // 3. On the booking form, 18:00 is gone for that date.
-  // The header and footer both have a "Reservations" link; the first one is in the header.
-  fireEvent.click(screen.getAllByRole('link', { name: 'Reservations' })[0]);
+  // "Reserve a Table" can appear more than once on a page (header, empty state); the first one is in the header.
+  fireEvent.click(screen.getAllByRole('link', { name: 'Reserve a Table' })[0]);
   fireEvent.change(screen.getByLabelText('Choose date'), { target: { value: date } });
   expect(offeredTimes()).toEqual(['17:00']);
 
@@ -68,7 +68,7 @@ test('book a table, see it after a reload, cancel it, and get the time back', ()
   expect(screen.getByText("You don't have any reservations yet.")).toBeInTheDocument();
 
   // 5. Back on the form, 18:00 is offered again.
-  fireEvent.click(screen.getAllByRole('link', { name: 'Reservations' })[0]);
+  fireEvent.click(screen.getAllByRole('link', { name: 'Reserve a Table' })[0]);
   fireEvent.change(screen.getByLabelText('Choose date'), { target: { value: date } });
   expect(offeredTimes()).toEqual(['17:00', '18:00']);
 });
