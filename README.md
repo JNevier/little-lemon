@@ -40,9 +40,9 @@ The app opens at [http://localhost:3000](http://localhost:3000). Step-by-step de
 - **Menu page** that loads the dishes from a JSON file, with filter buttons for Starters, Mains, Desserts and Drinks, a loading message and a clear error if the menu can't be loaded.
 - **About page** with the restaurant's story and a link to book a table.
 - **No dead links**: every link in the navigation opens a real page. Order Online and Login show a "coming soon" page.
-- **Booking form** with date, time, number of guests and occasion.
+- **Booking form** with date, time, number of guests, occasion, seating preference (indoor, outdoor or no preference), full name, email and optional special requests (up to 200 characters).
 - **Available times change with the date** you pick.
-- **Validation with clear messages**: you can't pick a past date or book for fewer than 1 or more than 10 guests, and the submit button stays disabled until everything is valid.
+- **Validation with clear messages**: you can't pick a past date, book for fewer than 1 or more than 10 guests, or leave out your name or a valid email. Name and email errors only appear after you leave the field, so a fresh form isn't covered in red. The submit button stays disabled until everything is valid, with a note under it saying why.
 - **Confirmation page** that shows the booking's date, time and number of guests.
 - **My Reservations page**: every booking is saved in the browser (`localStorage`), so it's still there after a reload. Each one can be cancelled, and screen readers announce "Reservation cancelled."
 - **No double bookings**: a time you've already booked disappears from the time list for that date, and comes back if you cancel. (Demo rule: this browser can't book the same slot twice. With no real server, other visitors' bookings aren't known.)
@@ -125,11 +125,12 @@ You don't need it to try the app. `npm start` is enough.
 2. The date starts on today. Pick a later date with a different day of the month, and the list of times changes.
 3. Type `0` in **Number of guests**. A message appears under the field, and the **Make Your reservation** button turns faded and can't be clicked.
 4. Change it to a number from 1 to 10. The message goes away and the button works again.
-5. Choose a time and an occasion, then click **Make Your reservation** (or press `Enter` in the **Number of guests** field).
-6. You land on the **Booking Confirmed** page, which shows your date, time and number of guests.
-7. Click **View my reservations**. Your booking is listed. Reload the page: it's still there.
-8. Go back to **Reservations** and pick the same date. The time you booked is no longer in the list.
-9. On **My Reservations**, click **Cancel**. The booking disappears, and its time is offered again on the booking form.
+5. Choose a time and an occasion. Type your name, then type an email like `a@b` and press `Tab`: an error appears. Fix the email and the error goes away. Pick a seating preference (the arrow keys move between the choices).
+6. Click **Make Your reservation** (or press `Enter` in a text field).
+7. You land on the **Booking Confirmed** page, which thanks you by name and shows your date, time, number of guests and seating.
+8. Click **View my reservations**. Your booking is listed. Reload the page: it's still there.
+9. Go back to **Reservations** and pick the same date. The time you booked is no longer in the list.
+10. On **My Reservations**, click **Cancel**. The booking disappears, and its time is offered again on the booking form.
 
 ## Try the edge cases
 
@@ -192,8 +193,10 @@ Run the tests with `npm test -- --watchAll=false` (see [Run the tests](#run-the-
 
 Each test file sits next to the code it tests and ends in `.test.js`. The tests cover:
 
-- **The booking form**: the labels, the HTML validation attributes (`required`, `min`, `max`), the button being disabled or enabled, and that a valid booking is sent once with the right data while an invalid one is never sent.
-- **The validation functions**: valid and invalid values for each field, including the edges (for example 0, 1, 10 and 11 guests).
+- **The booking form**: the labels, the HTML validation attributes (`required`, `min`, `max`, `maxLength`), the `autocomplete` values, the button being disabled or enabled with its explanation, and that a valid booking is sent once with the right data while an invalid one is never sent.
+- **Errors after "touched"**: name and email errors are hidden on a fresh form, appear after leaving the field with a bad value, and disappear once it's fixed.
+- **The seating group**: found as a group named "Seating preference", one shared name for its radio buttons, and "No preference" picked first.
+- **The validation functions**: valid and invalid values for each field, including the edges (for example 0, 1, 10 and 11 guests; an empty name, only spaces and one letter; `a@b` and other email typos).
 - **The available-times logic** in `Main.js`, with the API replaced by a fake (a mock), so the results don't depend on today's date.
 - **Accessibility details**: each field is found by its label, the form has a name, errors are linked to their fields, and the confirmation page moves focus to its heading.
 - **Edge cases**: a failed save, a direct visit to the confirmation page, a date with no times, and a cleared date.
@@ -211,6 +214,9 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 
 - **Labels**: every field has a `<label>` connected to it, so clicking the label focuses the field and screen readers read the label out.
 - **Error messages**: an invalid field is marked with `aria-invalid` and linked to its message with `aria-describedby`, so a screen reader reads the problem when you reach the field.
+- **Required fields**: marked with a visible `*` (and a "Fields marked * are required." note). The star is added by CSS and hidden from screen readers, which already announce "required" from the `required` attribute.
+- **Grouped choices**: the seating radio buttons sit in a `<fieldset>` with a `<legend>`, so screen readers announce the group's name.
+- **Autofill**: the name and email fields use `autocomplete="name"` and `autocomplete="email"` (WCAG 1.3.5), so browsers can fill them in.
 - **Named form**: the form has the name "Reserve a Table", so screen-reader users can jump straight to it.
 - **Button name**: the submit button's accessible name matches its visible text. **Why:** voice-control users say what they see ("click Make Your reservation"), so the names must match.
 - **Page changes**: the confirmation page sets its own browser tab title and moves focus to its heading, so screen readers announce the new page.
