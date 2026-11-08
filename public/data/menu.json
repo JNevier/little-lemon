@@ -64,6 +64,18 @@
     ]
   },
   {
+    "id": "shakshuka",
+    "name": "Shakshuka",
+    "category": "Mains",
+    "price": 16.0,
+    "description": "Eggs baked in a spiced tomato and pepper sauce with feta, served with toasted sourdough.",
+    "tags": [
+      "Vegetarian"
+    ],
+    "image": "/images/shakshuka.jpg",
+    "imageAlt": "A pan of shakshuka with baked eggs, feta and herbs, with a slice of toast dipped into a yolk"
+  },
+  {
     "id": "lemon-dessert",
     "name": "Lemon Dessert",
     "category": "Desserts",
