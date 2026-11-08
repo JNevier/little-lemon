@@ -220,6 +220,17 @@ main:focus {
   background-color: var(--color-secondary-peach);
 }
 
+/* Danger: for an action that can't be undone, like "Yes, cancel". White on terracotta is about 5:1.
+   Hover adds a shadow (no color change), so the text contrast stays the same. */
+.button-danger {
+  background-color: var(--color-error);
+  color: var(--color-white);
+}
+
+.button-danger:hover {
+  box-shadow: var(--shadow-md);
+}
+
 /* Buttons sit on white, grey, peach and green, so the focus ring has two colors:
    a light inner ring that shows on green and a dark outer ring that shows on light backgrounds. */
 .button:focus-visible {

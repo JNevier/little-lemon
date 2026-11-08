@@ -1,0 +1,36 @@
+/* The two tabs sit at the bottom of the peach page header, like the menu's filter tabs. */
+.reservation-tabs {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+/* Each tab: dark text with a see-through bar under it. 48px tall, easy to tap. */
+.reservation-tab {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 var(--space-3);
+  border-bottom: 3px solid transparent;
+  color: var(--color-dark);
+  font-weight: 700;
+  text-decoration: none;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+/* The first tab's text lines up with the page title above it. */
+.reservation-tab:first-child {
+  padding-left: 0;
+}
+
+.reservation-tab:hover {
+  border-bottom-color: var(--color-secondary-salmon);
+  color: var(--color-primary-green);
+}
+
+/* The page you're on: a thick green bar (a shape, not only a color) and green text.
+   Green on peach is about 5.2:1. */
+.reservation-tab.active {
+  border-bottom-color: var(--color-primary-green);
+  color: var(--color-primary-green);
+}
