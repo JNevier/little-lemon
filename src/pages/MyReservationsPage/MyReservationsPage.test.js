@@ -70,3 +70,13 @@ test('cancelling the last reservation shows the empty message', () => {
   expect(screen.getByText("You don't have any reservations yet.")).toBeInTheDocument();
   expect(screen.getByRole('status')).toHaveTextContent('Reservation cancelled.');
 });
+
+test('shows the name and seating when a booking has them', () => {
+  localStorage.setItem(
+    'little-lemon-reservations',
+    JSON.stringify([{ ...saved[0], name: 'Test Guest', email: 'guest@example.com', seating: 'Indoor', requests: '' }])
+  );
+  renderPage();
+
+  expect(screen.getByText('Test Guest · Indoor')).toBeInTheDocument();
+});

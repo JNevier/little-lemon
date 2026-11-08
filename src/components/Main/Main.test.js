@@ -52,6 +52,9 @@ test('a booking that is not saved shows an error and stays on the form', () => {
     </MemoryRouter>
   );
 
+  // The form needs a name and email before it can be sent (fake details).
+  fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'Test Guest' } });
+  fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'guest@example.com' } });
   fireEvent.click(screen.getByRole('button', { name: 'Make Your reservation' }));
 
   expect(screen.getByRole('alert')).toHaveTextContent('We couldn\'t save your booking. Please try again.');

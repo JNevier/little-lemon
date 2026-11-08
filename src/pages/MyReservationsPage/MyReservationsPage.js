@@ -61,6 +61,13 @@ function MyReservationsPage() {
                   <p className="my-reservations-page-details">
                     {reservation.time} · {guestsText} · {reservation.occasion}
                   </p>
+                  {/* Name and seating, when the booking has them (older bookings don't).
+                      filter(Boolean) drops the empty ones, so there's never a stray " · ". */}
+                  {(reservation.name || reservation.seating) && (
+                    <p className="my-reservations-page-details">
+                      {[reservation.name, reservation.seating].filter(Boolean).join(' · ')}
+                    </p>
+                  )}
                 </div>
                 <button
                   type="button"

@@ -42,6 +42,9 @@ test('book a table, see it after a reload, cancel it, and get the time back', ()
   const firstVisit = renderAppAt('/reservations');
   fireEvent.change(screen.getByLabelText('Choose date'), { target: { value: date } });
   fireEvent.change(screen.getByLabelText('Choose time'), { target: { value: '18:00' } });
+  fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'Test Guest' } });
+  fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'guest@example.com' } });
+  fireEvent.click(screen.getByRole('radio', { name: 'Indoor' }));
   fireEvent.click(screen.getByRole('button', { name: 'Make Your reservation' }));
   expect(screen.getByRole('heading', { level: 1, name: 'Booking Confirmed' })).toBeInTheDocument();
 

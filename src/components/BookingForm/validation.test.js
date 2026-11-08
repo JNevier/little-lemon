@@ -1,4 +1,12 @@
-import { isValidDate, isValidTime, isValidGuests, isValidOccasion } from './validation';
+import {
+  isValidDate,
+  isValidTime,
+  isValidGuests,
+  isValidOccasion,
+  isValidName,
+  isValidEmail,
+  isValidSeating,
+} from './validation';
 
 // A fixed "today", so these tests give the same result on any day they run.
 const today = '2026-10-13';
@@ -51,5 +59,48 @@ describe('isValidOccasion', () => {
   test('rejects anything else', () => {
     expect(isValidOccasion('Graduation')).toBe(false);
     expect(isValidOccasion('')).toBe(false);
+  });
+});
+
+describe('isValidName', () => {
+  test('accepts a name of 2 or more characters', () => {
+    expect(isValidName('Al')).toBe(true);
+    expect(isValidName('Test Guest')).toBe(true);
+    // Spaces around the name don't matter.
+    expect(isValidName('  Jo  ')).toBe(true);
+  });
+
+  test('rejects an empty name, only spaces, or a single character', () => {
+    expect(isValidName('')).toBe(false);
+    expect(isValidName('   ')).toBe(false);
+    expect(isValidName('A')).toBe(false);
+    expect(isValidName(' A ')).toBe(false);
+  });
+});
+
+describe('isValidEmail', () => {
+  test('accepts a normal email address', () => {
+    expect(isValidEmail('guest@example.com')).toBe(true);
+    expect(isValidEmail('test.guest+table@mail.example.co.uk')).toBe(true);
+    expect(isValidEmail('  guest@example.com  ')).toBe(true);
+  });
+
+  test('rejects an empty field, spaces and common typos', () => {
+    ['', '   ', 'a@b', 'guest.example.com', 'guest@', '@example.com', 'guest @example.com'].forEach((email) => {
+      expect(isValidEmail(email)).toBe(false);
+    });
+  });
+});
+
+describe('isValidSeating', () => {
+  test('accepts the offered seating choices', () => {
+    ['Indoor', 'Outdoor', 'No preference'].forEach((seating) => {
+      expect(isValidSeating(seating)).toBe(true);
+    });
+  });
+
+  test('rejects anything else', () => {
+    expect(isValidSeating('Rooftop')).toBe(false);
+    expect(isValidSeating('')).toBe(false);
   });
 });

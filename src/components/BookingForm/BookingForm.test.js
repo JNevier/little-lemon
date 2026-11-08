@@ -1,13 +1,21 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import BookingForm from './BookingForm';
 import { toInputDate } from '../../utils/dates';
 
 // Renders the form with a fixed list of times and fake functions for Main's props.
 // It returns the fake submitForm so a test can check how it was called.
+// Name and email start empty (invalid), so the setup fills them with obviously fake details;
+// that way the other fields' defaults make a valid form, as before.
 function setupForm() {
   const submitForm = jest.fn();
   render(<BookingForm availableTimes={['17:00', '18:00']} dispatch={jest.fn()} submitForm={submitForm} />);
+  fillContactDetails();
   return submitForm;
+}
+
+function fillContactDetails() {
+  fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'Test Guest' } });
+  fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'guest@example.com' } });
 }
 
 test('renders the "Choose date" label', () => {
@@ -68,7 +76,17 @@ describe('submit button and submission', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Make Your reservation' }));
 
     expect(submitForm).toHaveBeenCalledTimes(1);
-    expect(submitForm).toHaveBeenCalledWith({ date: toInputDate(new Date()), time: '18:00', guests: 4, occasion: 'Anniversary' });
+    // The booking now also carries the contact details and seating (the defaults here).
+    expect(submitForm).toHaveBeenCalledWith({
+      date: toInputDate(new Date()),
+      time: '18:00',
+      guests: 4,
+      occasion: 'Anniversary',
+      seating: 'No preference',
+      name: 'Test Guest',
+      email: 'guest@example.com',
+      requests: '',
+    });
   });
 
   test('an invalid form is never sent, even if it gets submitted', () => {
@@ -156,5 +174,109 @@ describe('times already booked in this browser', () => {
 
     expect(screen.getByText('No times are available on this date. Please choose another date.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Make Your reservation' })).toBeDisabled();
+  });
+});
+
+describe('contact details and seating', () => {
+  // Renders the form without filling anything in, like a visitor opening the page.
+  function renderEmptyForm() {
+    render(<BookingForm availableTimes={['17:00', '18:00']} dispatch={jest.fn()} submitForm={jest.fn()} />);
+  }
+
+  test('name and email are required, typed fields with autocomplete', () => {
+    renderEmptyForm();
+    const name = screen.getByLabelText('Full name');
+    const email = screen.getByLabelText('Email');
+
+    expect(name).toHaveAttribute('type', 'text');
+    expect(name).toBeRequired();
+    expect(name).toHaveAttribute('autocomplete', 'name');
+    expect(email).toHaveAttribute('type', 'email');
+    expect(email).toBeRequired();
+    expect(email).toHaveAttribute('autocomplete', 'email');
+  });
+
+  test('name and email errors are hidden on a fresh form, and the button explains why it is disabled', () => {
+    renderEmptyForm();
+
+    expect(screen.queryByText(/please enter your name/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/please enter a valid email/i)).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Full name')).toHaveAttribute('aria-invalid', 'false');
+
+    const button = screen.getByRole('button', { name: 'Make Your reservation' });
+    expect(button).toBeDisabled();
+    expect(button).toHaveAccessibleDescription('Fill in all required fields to enable the button.');
+  });
+
+  test('an error appears after leaving a field with a bad value, and goes away once fixed', () => {
+    renderEmptyForm();
+    const name = screen.getByLabelText('Full name');
+    const email = screen.getByLabelText('Email');
+
+    // Only spaces, then leave the field (blur).
+    fireEvent.change(name, { target: { value: '   ' } });
+    fireEvent.blur(name);
+    expect(name).toHaveAttribute('aria-invalid', 'true');
+    expect(name).toHaveAccessibleDescription('Please enter your name (at least 2 characters).');
+
+    fireEvent.change(email, { target: { value: 'a@b' } });
+    fireEvent.blur(email);
+    expect(email).toHaveAccessibleDescription('Please enter a valid email address, like name@example.com.');
+
+    // Fix both: the errors go away and the button turns on.
+    fireEvent.change(name, { target: { value: 'Test Guest' } });
+    fireEvent.change(email, { target: { value: 'guest@example.com' } });
+    expect(name).toHaveAttribute('aria-invalid', 'false');
+    expect(email).not.toHaveAccessibleDescription();
+    const button = screen.getByRole('button', { name: 'Make Your reservation' });
+    expect(button).toBeEnabled();
+    expect(button).not.toHaveAccessibleDescription();
+  });
+
+  test('a field left with a good value never shows an error', () => {
+    renderEmptyForm();
+    const name = screen.getByLabelText('Full name');
+
+    fireEvent.change(name, { target: { value: 'Test Guest' } });
+    fireEvent.blur(name);
+
+    expect(screen.queryByText(/please enter your name/i)).not.toBeInTheDocument();
+  });
+
+  test('seating is a named group of radio buttons, with "No preference" picked first', () => {
+    renderEmptyForm();
+    const group = screen.getByRole('group', { name: 'Seating preference' });
+    const radios = within(group).getAllByRole('radio');
+
+    expect(radios.map((r) => r.value)).toEqual(['Indoor', 'Outdoor', 'No preference']);
+    // Sharing one name makes them one group: only one can be picked, and the arrow keys move between them.
+    radios.forEach((radio) => expect(radio).toHaveAttribute('name', 'seating'));
+    expect(within(group).getByRole('radio', { name: 'No preference' })).toBeChecked();
+
+    fireEvent.click(within(group).getByRole('radio', { name: 'Outdoor' }));
+    expect(within(group).getByRole('radio', { name: 'Outdoor' })).toBeChecked();
+    expect(within(group).getByRole('radio', { name: 'No preference' })).not.toBeChecked();
+  });
+
+  test('special requests are optional, limited to 200 characters and sent trimmed', () => {
+    const submitForm = setupForm();
+    const requests = screen.getByLabelText('Special requests (optional)');
+
+    expect(requests).not.toBeRequired();
+    expect(requests).toHaveAttribute('maxLength', '200');
+    expect(requests).toHaveAccessibleDescription(/up to 200 characters \(0\/200\)/i);
+
+    fireEvent.change(requests, { target: { value: '  A high chair, please.  ' } });
+    fireEvent.click(screen.getByRole('radio', { name: 'Indoor' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Make Your reservation' }));
+
+    expect(submitForm).toHaveBeenCalledWith(
+      expect.objectContaining({ requests: 'A high chair, please.', seating: 'Indoor', name: 'Test Guest' })
+    );
+  });
+
+  test('the form says which fields are required', () => {
+    renderEmptyForm();
+    expect(screen.getByText('Fields marked * are required.')).toBeInTheDocument();
   });
 });
