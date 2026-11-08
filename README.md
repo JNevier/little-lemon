@@ -5,8 +5,8 @@ A React web app for a small restaurant where you can pick a date, time and party
 ## About
 
 This is my capstone project for the Meta Front-End Developer course.
-It builds the home page and the table booking flow for Little Lemon, a fictional family-owned Mediterranean restaurant in Chicago that the course uses as its example business.
-The focus is a booking form that works, checks what you type, and is usable with a keyboard and a screen reader.
+It builds the website for Little Lemon, a fictional family-owned Mediterranean restaurant in Chicago that the course uses as its example business: a home page, a menu that loads its dishes and filters them, an About page, and a table booking flow.
+The focus is a booking form that works, checks what you type, and is usable with a keyboard and a screen reader. Bookings are saved in the browser, so you can see and cancel them on a My Reservations page.
 
 ## Quick start
 
@@ -53,10 +53,27 @@ The app opens at [http://localhost:3000](http://localhost:3000). Step-by-step de
 ## Tech stack
 
 - **React 19**: builds the user interface from components.
-- **React Router 7**: moves between pages (home, menu, about, booking, confirmation) without reloading.
+- **React Router 7**: moves between pages (home, menu, about, booking, confirmation, my reservations) without reloading.
 - **Create React App** (`react-scripts` 5): runs, tests and builds the project with no extra setup.
 - **Jest and React Testing Library**: unit tests that check the app the way a user sees it.
 - **Plain CSS** with CSS variables for the brand colours and fonts.
+- **Vercel** for hosting (see [Deployment](#deployment)).
+
+No other libraries: no CSS framework, no form library and no state library. Forms, validation and shared state are written by hand with React's own hooks.
+
+### React hooks used
+
+| Hook | Where | What it does there |
+| --- | --- | --- |
+| `useState` | Booking form, menu filter, phone menu, My Reservations | Remembers a value between renders, like a field's text or which filter is chosen. |
+| `useReducer` | `Main.js` | Works out the available times when the date changes (the course's `initializeTimes` and `updateTimes`). |
+| `useEffect` | `useFetch`, `useLocalStorage`, `Header` | Runs code after the screen updates: loading the menu, saving bookings, closing the phone menu on a page change. |
+| `useRef` | `Header`, My Reservations | A direct handle on an element, to move keyboard focus back to the menu button or to the heading. |
+| `useContext` | `useReservations()` | Reads the saved reservations from any page without passing props down. |
+| `useNavigate`, `useLocation` | `Main.js`, `ConfirmedBooking`, `Header` | React Router hooks: go to the confirmation page in code, and read the current page. |
+| `useFetch` (custom) | Menu page | Loads JSON and returns `{ data, loading, error }`, and cancels the request if the page closes first. |
+| `useLocalStorage` (custom) | Reservations context | Like `useState`, but the value is also saved in the browser. |
+| `useReservations` (custom) | Main, My Reservations | Gives the saved reservations and the add and cancel functions. |
 
 ## Getting started
 
@@ -118,6 +135,19 @@ npm run build
 
 This makes an optimised version of the app, ready to put on a web server, in a new `build` folder.
 You don't need it to try the app. `npm start` is enough.
+
+## Deployment
+
+The site is hosted on [Vercel](https://vercel.com), connected to this GitHub repository. Every push to `main` deploys a new version.
+
+| Vercel setting | Value |
+| --- | --- |
+| Framework preset | Create React App |
+| Branch | `main` |
+| Build command | `npm run build` |
+| Output directory | `build` |
+
+**Why there's a `vercel.json` file:** this is a single-page app. There's only one real page, `index.html`, and React Router draws the right screen for the address. Clicking a link works without it, but **reloading** `/menu` or opening a shared link to `/reservations` makes the server look for a file called `menu`, which doesn't exist, so it would show a 404 error. The rewrite in `vercel.json` tells Vercel: "for any address that isn't a real file, send `index.html`". Real files, like `/data/menu.json` and the images, are still served as they are.
 
 ## Try the booking flow
 
@@ -186,6 +216,7 @@ src/
 - `src/utils/`: small helpers. `dates.js` converts between a date input's `YYYY-MM-DD` text and a JavaScript date, and checks that a date is complete.
 - `src/api.js`: the course's booking API (see [About the booking API](#about-the-booking-api)).
 - `src/index.css`: the global styles and the brand colours and fonts as CSS variables.
+- `vercel.json`: tells Vercel to send `index.html` for every page address (see [Deployment](#deployment)).
 
 ## Testing
 
@@ -267,12 +298,14 @@ There is no Figma wireframe. I skipped that step and built the pages from the co
 - **Sample data**: the menu, the About page story, the customer reviews and the contact details in the footer are made up.
 - **Bookings stay in this browser**: the course API doesn't save anything, so bookings are kept in this browser's `localStorage` only. Another browser or device won't see them, and clearing site data removes them. The course API still always says a booking "succeeded".
 - **Placeholder preview image**: the `og:image` link used for social-media previews points to a placeholder address until the site is deployed.
+- **Create React App is deprecated**: the React team stopped recommending Create React App in February 2025, and it no longer has active maintainers. It still builds and tests this project fine. Moving to [Vite](https://vite.dev) is a possible next step.
+- **Demo-only double-booking check**: a booked time is hidden only in the browser that booked it. A real restaurant would need a server that knows every guest's bookings.
 
 ## Git workflow
 
 - Every feature or fix was built on its own branch (for example `feat/booking-form`).
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/), for example `feat(booking): add booking form with controlled fields`.
-- Each branch was merged into `main` through a pull request on GitHub.
+- Each branch was merged into `main` through a pull request on GitHub, with a short description of what changed and why.
 
 ## Author
 
