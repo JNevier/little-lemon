@@ -1,5 +1,5 @@
 import './ConfirmedBooking.css';
-import { useLocation } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import LinkButton from '../../components/LinkButton/LinkButton';
 import { formatLongDate } from '../../utils/dates';
 
@@ -39,6 +39,9 @@ function ConfirmedBooking() {
         <strong>{dateText}</strong> at <strong>{booking.time}</strong> for <strong>{guestsText}</strong>.
       </p>
       <LinkButton to="/">Back to Home</LinkButton>
+      <p>
+        <Link to="/my-reservations" className="confirmed-booking-link">View my reservations</Link>
+      </p>
     </section>
   );
 }

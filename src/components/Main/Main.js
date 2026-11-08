@@ -10,6 +10,7 @@ import NotFoundPage from '../../pages/NotFoundPage/NotFoundPage';
 import MenuPage from '../../pages/MenuPage/MenuPage';
 import AboutPage from '../../pages/AboutPage/AboutPage';
 import ComingSoonPage from '../../pages/ComingSoonPage/ComingSoonPage';
+import MyReservationsPage from '../../pages/MyReservationsPage/MyReservationsPage';
 
 // Builds the starting list of available times: the times for today,
 // because the date field also starts on today.
@@ -72,6 +73,7 @@ function Main() {
           }
         />
         <Route path="/confirmed" element={<ConfirmedBooking />} />
+        <Route path="/my-reservations" element={<MyReservationsPage />} />
         <Route path="/menu" element={<MenuPage />} />
         <Route path="/about" element={<AboutPage />} />
         {/* The same page twice, with a different title prop for each unbuilt feature. */}

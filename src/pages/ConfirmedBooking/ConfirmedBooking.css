@@ -8,3 +8,18 @@
 .confirmed-booking h1:focus {
   outline: none;
 }
+
+/* The link sits on its own line, so it gets a 44px-tall tap area like the buttons. */
+.confirmed-booking-link {
+  display: inline-block;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 0.75rem 0;
+  color: var(--color-primary-green);
+  font-weight: 700;
+}
+
+.confirmed-booking-link:focus-visible {
+  outline: 3px solid var(--color-primary-green);
+  outline-offset: 2px;
+}

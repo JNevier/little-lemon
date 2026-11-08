@@ -1,0 +1,72 @@
+/* Page padding so the text doesn't touch the screen edge on phones. */
+.my-reservations-page {
+  padding: 2rem var(--page-gutter);
+}
+
+/* The heading gets focus from code after a cancel, not from the user, so no focus ring is needed. */
+.my-reservations-page h1:focus {
+  outline: none;
+}
+
+/* The status message is bold so a sighted user notices it too. When empty it takes no space. */
+.my-reservations-page-status {
+  font-weight: 700;
+  margin: 0 0 1rem;
+}
+
+/* Remove the list's bullets and default spacing; rows are separated by a gap instead. */
+.my-reservations-page-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+/* One reservation: a light, rounded box. Mobile first: details on top, Cancel button underneath. */
+.my-reservations-page-item {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: var(--color-light);
+  border-radius: var(--radius);
+}
+
+/* The date is this row's heading. It uses the body font at card-title size, like the h3 cards. */
+.my-reservations-page-date {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.my-reservations-page-details {
+  margin: 0.25rem 0 0;
+}
+
+/* Cancel: an outlined button, so it doesn't look like the main yellow action. */
+.my-reservations-page-cancel {
+  min-height: 44px;
+  padding: 0.5rem 1.25rem;
+  border: 2px solid var(--color-primary-green);
+  border-radius: var(--radius);
+  background-color: var(--color-white);
+  color: var(--color-primary-green);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.my-reservations-page-cancel:hover {
+  /* Green text on peach is about 5.2:1. */
+  background-color: var(--color-secondary-peach);
+}
+
+.my-reservations-page-cancel:focus-visible {
+  outline: 3px solid var(--color-dark);
+  outline-offset: 2px;
+}
