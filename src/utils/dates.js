@@ -21,3 +21,12 @@ export function fromInputDate(text) {
 export function isInputDate(text) {
   return /^\d{4}-\d{2}-\d{2}$/.test(text);
 }
+
+// 'YYYY-MM-DD' -> "Friday, October 9, 2026"
+// Built from parts in local time (never new Date('YYYY-MM-DD')), so the day can't shift.
+// 'en-US' keeps the wording the same on every computer.
+export function formatLongDate(text) {
+  return fromInputDate(text).toLocaleDateString('en-US', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+  });
+}

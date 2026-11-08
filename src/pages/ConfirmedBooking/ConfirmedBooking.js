@@ -1,7 +1,7 @@
 import './ConfirmedBooking.css';
 import { useLocation } from 'react-router';
 import LinkButton from '../../components/LinkButton/LinkButton';
-import { fromInputDate } from '../../utils/dates';
+import { formatLongDate } from '../../utils/dates';
 
 // A section, not <main>: Main already wraps every page in the site's one <main>.
 function ConfirmedBooking() {
@@ -22,11 +22,8 @@ function ConfirmedBooking() {
     );
   }
 
-  // Built from parts in local time (never new Date('YYYY-MM-DD')), so the day can't shift.
-  // 'en-US' keeps the wording the same on every computer, e.g. "Friday, October 9, 2026".
-  const dateText = fromInputDate(booking.date).toLocaleDateString('en-US', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-  });
+  // e.g. "Friday, October 9, 2026". Shared with My Reservations, so both pages say it the same way.
+  const dateText = formatLongDate(booking.date);
   const guestsText = booking.guests === 1 ? '1 guest' : `${booking.guests} guests`;
 
   return (
