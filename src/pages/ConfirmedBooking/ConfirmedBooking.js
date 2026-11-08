@@ -23,7 +23,7 @@ function ConfirmedBooking() {
   // Direct visit: no booking was made, so don't claim one was.
   if (!booking) {
     return (
-      <div className="confirmed-booking">
+      <div className="confirmed-booking page-fill">
         {/* React 19 moves this into the page's <head>, so the browser tab says where you are. */}
         <title>No Booking Yet | Little Lemon</title>
         <div className="card confirmed-booking-card">
@@ -36,7 +36,7 @@ function ConfirmedBooking() {
   }
 
   return (
-    <div className="confirmed-booking">
+    <div className="confirmed-booking page-fill">
       {/* React 19 moves this into the page's <head>, so the browser tab says where you are. */}
       <title>Booking Confirmed | Little Lemon</title>
       <div className="card confirmed-booking-card">
