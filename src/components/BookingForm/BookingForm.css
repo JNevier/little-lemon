@@ -63,14 +63,14 @@
   cursor: not-allowed;
 }
 
-/* Error message under a field. Dark text for readable contrast; the salmon bar marks it as a warning
+/* Error message under a field. Dark text for readable contrast; the terracotta bar (--color-error) marks it as a warning
    (salmon text on white would be too faint to read). */
 .booking-form .field-error {
   margin: 0;
   padding-left: 0.5rem;
   font-size: 0.875rem;
   color: var(--color-dark);
-  border-left: 4px solid var(--color-secondary-salmon);
+  border-left: 4px solid var(--color-error);
 }
 
 /* Keep the gap before the next label when an error message sits between them. */
@@ -92,7 +92,7 @@
   padding: 0.5rem 0.75rem;
   font-weight: 700;
   color: var(--color-dark);
-  border-left: 4px solid var(--color-secondary-salmon);
+  border-left: 4px solid var(--color-error);
   background-color: var(--color-light);
 }
 
