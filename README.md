@@ -83,15 +83,21 @@ All names, emails and bookings in these screenshots are fake test data.
 
 ## Lighthouse
 
-Measured with [PageSpeed Insights](https://pagespeed.web.dev) (Lighthouse 13.6, **mobile**: an emulated mid-range phone on a slow 4G connection) on the live home page, November 8, 2026. These are from the second of two runs after the hero photo change, **before the UI redesign**; they will be measured again once the redesign is live.
+Measured with [PageSpeed Insights](https://pagespeed.web.dev) (Lighthouse 13.6, **mobile**: an emulated Moto G Power on a slow 4G connection) on the live home page, **November 9, 2026, after the UI redesign**.
 
 | Performance | Accessibility | Best Practices | SEO |
 | --- | --- | --- | --- |
 | 91 | 100 | 100 | 100 |
 
-The first run scored 85 for Performance. The slow part was **Largest Contentful Paint**: the time until the biggest thing on screen, the hero photo, has loaded. Phones were downloading the full 288 KB photo. Now they get a smaller copy (133 KB, chosen by the browser with `srcset` and `sizes`), and the photo is marked `fetchpriority="high"` so it downloads first. That brought Largest Contentful Paint down from 4.2 s to 3.5 s, and Performance up from 85 to 89 and 91 in two runs.
+| First Contentful Paint | Largest Contentful Paint | Total Blocking Time | Cumulative Layout Shift | Speed Index |
+| --- | --- | --- | --- | --- |
+| 1.5 s | 3.4 s | 0 ms | 0 | 1.5 s |
 
-First paint (1.5 s), Speed Index (1.5 s), blocking time (0 ms) and layout shift (0) are all in the green. What's left is mostly the time it takes to download and run the app's JavaScript on a slow phone before the photo can appear. Scores change a few points from run to run.
+The redesign added sections, components and styles, and the scores stayed the same as before it (91, 100, 100, 100 on November 8). Largest Contentful Paint even moved from 3.5 s to 3.4 s.
+
+**How the hero photo was sped up** (before the redesign): the first run scored 85 for Performance. The slow part was **Largest Contentful Paint**: the time until the biggest thing on screen, the hero photo, has loaded. Phones were downloading the full 288 KB photo. Now they get a smaller copy (133 KB, chosen by the browser with `srcset` and `sizes`), and the photo is marked `fetchpriority="high"` so it downloads first. That brought Largest Contentful Paint down from 4.2 s to 3.5 s, and Performance up from 85 to 91.
+
+Largest Contentful Paint (3.4 s) is the one metric not in the green yet. What's left is mostly the time it takes to download and run the app's JavaScript on a slow phone before the photo can appear. Scores change a few points from run to run.
 
 ## Tech stack
 
