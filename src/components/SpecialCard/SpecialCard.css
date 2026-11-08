@@ -4,8 +4,7 @@
   border-radius: var(--radius);
   /* Cut off the image's square corners so they follow the card's rounded corners. */
   overflow: hidden;
-  /* Stack the card's parts top to bottom as a flex column, so the delivery link can be pushed
-     to the bottom (see .special-card-order). */
+  /* Stack the card's parts top to bottom as a flex column. */
   display: flex;
   flex-direction: column;
 }
@@ -35,28 +34,6 @@
 }
 
 /* The card title's font, size and weight come from the global h3 rule in index.css. */
-
-/* The "Order a delivery" link at the bottom of the card, with its icon on the right. */
-.special-card-order {
-  /* inline-flex puts the text and the icon in a row and centers them vertically. */
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-height: 44px;
-  /* margin-top: auto takes all the leftover space in the card, which pushes the link to the bottom.
-     So the links line up across cards, however long each description is. */
-  margin: auto 1rem 1rem;
-  /* In a flex column, items stretch to full width by default; this keeps the link only as wide as its text. */
-  align-self: flex-start;
-  /* Green on the light card is about 6:1. */
-  color: var(--color-primary-green);
-  font-weight: 700;
-}
-
-.special-card-order:focus-visible {
-  outline: 3px solid var(--color-primary-green);
-  outline-offset: 2px;
-}
 
 /* Style guide: highlight text such as a price is 16px Medium. */
 .special-card-price {
