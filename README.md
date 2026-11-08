@@ -208,7 +208,19 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 - **Reservations** (Context and My Reservations page): adding, cancelling, sorting by date and time, the empty state, the "Reservation cancelled." message, and that booked times are hidden on the form.
 - **The whole booking journey** in one test: book a table, reload, see it on My Reservations, check its time is hidden, cancel it, and check the time is back.
 
+- **Navigation and page titles**: the nav has all six links in order and marks only the current page with `aria-current="page"`; the skip link is the first Tab stop and moves focus to the main content; every page has its own browser tab title.
+
 **Why fake the API and fix the date in tests:** a test that uses today's real date could pass today and fail tomorrow.
+
+### Coverage
+
+**87 tests in 14 files, all passing.** Coverage measured with `CI=true npm test -- --coverage --watchAll=false`:
+
+| Statements | Branches | Functions | Lines |
+| --- | --- | --- | --- |
+| 98.62% | 91.05% | 98.92% | 98.57% |
+
+What isn't covered: `src/index.js` (it only starts the app in a real browser), the course API's `submitAPI` (always replaced by a fake in tests), and a few branches in the booking form, the header and the menu page that only change an `aria-*` attribute or a fallback value.
 
 ## Accessibility
 
@@ -219,7 +231,9 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 - **Autofill**: the name and email fields use `autocomplete="name"` and `autocomplete="email"` (WCAG 1.3.5), so browsers can fill them in.
 - **Named form**: the form has the name "Reserve a Table", so screen-reader users can jump straight to it.
 - **Button name**: the submit button's accessible name matches its visible text. **Why:** voice-control users say what they see ("click Make Your reservation"), so the names must match.
-- **Page changes**: the confirmation page sets its own browser tab title and moves focus to its heading, so screen readers announce the new page.
+- **Skip link**: the first `Tab` on any page shows a "Skip to main content" link. Pressing `Enter` moves focus past the logo and the six nav links to the page content (WCAG 2.4.1).
+- **Page titles**: every page sets its own browser tab title, like "Menu | Little Lemon", so you know where you are from the tab or a screen reader (WCAG 2.4.2).
+- **Page changes**: the confirmation page also moves focus to its heading, so screen readers announce the new page.
 - **Urgent messages**: the failed-save message uses `role="alert"`, so screen readers read it out as soon as it appears.
 - **Menu filters**: the filter buttons use `aria-pressed`, so screen readers say which category is chosen. The loading message uses `role="status"` (read out politely) and a failed load uses `role="alert"`.
 - **Cancel buttons**: every row's button says "Cancel", but its full name says which booking it cancels (for example "Cancel reservation for Friday, October 9, 2026 at 18:00"). After a cancel, focus moves to the page heading, so keyboard users don't lose their place.
