@@ -43,7 +43,8 @@ The app opens at [http://localhost:3000](http://localhost:3000). Step-by-step de
 
 - **Home page** with a hero (a "Reserve a Table" button, a "See the menu" button and the address and opening time), three reasons to visit ("Why Little Lemon"), this week's specials as photo cards, a short story about the owners, and a "Visit us" section with the address, hours and phone number. The specials come from the same `menu.json` file as the Menu page, so a dish's name, price and description are the same everywhere. Grey placeholder cards keep their space while they load, so the page doesn't jump.
 - **Menu page** that loads 13 dishes from a JSON file and lays them out like a printed menu: name, a dotted line, the price, a short description and dietary tags (Vegetarian, Vegan, Gluten-free, Contains nuts), with a photo for dishes that have one. "All" shows one section per category. The filter tabs stay at the top of the screen while you scroll, and the chosen filter is saved in the address (`/menu?category=Mains`), so the Back button and shared links work. Grey placeholder rows show while it loads, and if it can't load, a **Try again** button loads it again. The page ends with a "Reserve a Table" button.
-- **About page** with the restaurant's story and a link to book a table.
+- **About page**: "Our story" with two overlapping photos of the owners, three values ("What we believe", different from the home page's points), short bios of Mario and Adrian, and a green "Come hungry" panel with a Reserve button.
+- **404 page** in the same style, with links back home, to the menu and to the booking form.
 - **No dead links**: every link opens a real page. There is no online ordering or login: with no server, both would be fake, so the site leaves them out. An old link to `/order-online` or `/login` shows the "Page not found" page.
 - **Booking form** in three numbered steps: **When** (date, time, number of guests), **Your table** (occasion, and seating as three choice cards: indoor, outdoor or no preference) and **Your details** (full name, email and optional special requests, up to 200 characters). Tabs at the top switch between **Book a table** and **My reservations**.
 - **Live summary**: a "Your reservation" card shows the date, time, guests, occasion and seating as you fill in the form, with the opening hours, the address and the 15-minute hold. On wide screens it sits in a column on the right and stays in view while you scroll; on phones it sits just above the button.
@@ -248,6 +249,7 @@ src/
 - `src/components/`: reusable pieces of the page. Each folder holds a component, its CSS and, where there is one, its test.
 - `src/components/BookingForm/`: the booking form, its validation functions (`validation.js`) and their tests.
 - `src/components/ReservationSummary/`: the booking details as label/value pairs, shared by the booking form's live summary and the confirmation page. `src/components/ReservationTabs/`: the "Book a table" / "My reservations" tabs.
+- `src/components/FeatureList/`: a row of points with an icon, a title and a sentence, used by "Why Little Lemon" on the home page and "What we believe" on About. `src/components/Icons/`: the small inline-SVG line icons (no icon library).
 - `src/components/Main/`: the page routes and the booking logic (available times and submitting a booking).
 - `src/pages/`: one folder per page the router can show.
 - `src/hooks/`: custom hooks. `useFetch(url)` loads JSON and returns `{ data, loading, error, retry }`, cancels the request if the page closes first, and loads again when `retry()` is called. `useLocalStorage(key, initialValue)` works like `useState` but also saves the value in the browser.
@@ -279,6 +281,8 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 - **The home page**: each section and its heading, the hero's two buttons, no invented reviews or star ratings, the loading skeleton, only the featured dishes with their photo, price and tags, a calm message with a menu link if the dishes can't load, and the Visit us details.
 - **The menu page**: the loading skeleton, the dishes and their prices, one section per category under "All", the filter's pressed state, the filter in the address (`?category=`), opening a shared link on a filter, an unknown category falling back to "All", tags and photos, the error message, **Try again** (and where focus goes), and the closing Reserve button.
 - **Routing**: every in-app link on the home page and in the nav opens a real page, and an unknown address shows the 404 page.
+- **The About page**: its sections in order, no repeated "Little Lemon / Chicago" block, both owner photos with descriptions, three values that differ from the home page's, both owners with their roles, and the closing Reserve button.
+- **The 404 page**: its heading and tab title, and links to Home (the main button), the menu and the booking form.
 - **The phone menu**: the button opens and closes the menu, `Escape` closes it and returns focus to the button, and moving to another page closes it.
 - **Saving in the browser** (`useLocalStorage`): reading, writing, broken saved data and blocked storage, none of which may crash the app. Each test starts with `localStorage.clear()`.
 - **Reservations** (Context and My Reservations page): adding, cancelling, sorting by date and time, Upcoming and Past (most recent past first, no Cancel on past ones), the empty states, the tabs with `aria-current`, Cancel asking first, **Keep it** returning focus to Cancel, **Yes, cancel** with the "Reservation cancelled." message, and that booked times are hidden on the form.
@@ -290,11 +294,11 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 
 ### Coverage
 
-**119 tests in 17 files, all passing.** Coverage measured with `CI=true npm test -- --coverage --watchAll=false`:
+**126 tests in 19 files, all passing.** Coverage measured with `CI=true npm test -- --coverage --watchAll=false`:
 
 | Statements | Branches | Functions | Lines |
 | --- | --- | --- | --- |
-| 98.63% | 92.13% | 99.24% | 98.57% |
+| 98.67% | 92.13% | 99.27% | 98.61% |
 
 What isn't covered: `src/index.js` (it only starts the app in a real browser), the course API's `submitAPI` (always replaced by a fake in tests), a few branches in the booking form and the header that only change an `aria-*` attribute or a fallback value, and the menu page's scroll back to the top of the list (it only runs in a real browser, where the page can scroll; it was checked there).
 
@@ -350,7 +354,8 @@ The shared look lives in [`src/index.css`](src/index.css), so every page uses th
 - **Type scale**: Markazi Text for headings, Karla for text. Page titles and section titles grow with the screen using `clamp()`, from 40px to 64px for page titles.
 - **Depth**: soft shadows (`--shadow-sm`, `--shadow-md`, `--shadow-lg`) instead of flat grey boxes.
 - **Cards**: white, rounded and lightly shadowed on a grey band. A card you can click (like a home page special) lifts a little on hover and when it has keyboard focus.
-- **Icons**: three small line icons drawn as inline SVG in the component (a book, a leaf and a lemon), so there's no icon library.
+- **Icons**: six small line icons drawn as inline SVG in `src/components/Icons/` (a book, a leaf, a lemon, a plate, two arrows in a circle, two people), so there's no icon library.
+- **Page frame**: the header, page and footer form one column at least as tall as the screen, so on a short page (like the 404 page) the footer sits at the bottom instead of leaving a white strip under it.
 - **Motion**: hover and focus changes take 180ms, and all motion is switched off when the visitor's system asks for reduced motion (`prefers-reduced-motion`).
 
 ### Colour contrast
@@ -385,7 +390,7 @@ Every text and background pair is checked against WCAG 2.1 AA by a small script 
 ## Known limitations
 
 - **No online ordering or accounts**: ordering food and logging in both need a real server (orders, payments, accounts), so they're left out on purpose rather than shown as fake pages. Bookings work without an account.
-- **Sample data**: Little Lemon is a fictional restaurant. The menu (dishes, prices and dietary tags), the About page and home page story, the three "Why Little Lemon" highlights, and the address, opening hours, phone number and email (in `src/data/restaurant.js`) are made up. There are no customer reviews, ratings or awards, because they would have to be invented. The phone number uses the 555-01xx range kept for fiction, and the email uses the reserved `.example` domain, so neither can reach a real person. The opening hours (daily, 5 pm to midnight, last table at 11:30 pm) match the times the booking form offers. The "we hold your table for 15 minutes" rule is made up too.
+- **Sample data**: Little Lemon is a fictional restaurant. The menu (dishes, prices and dietary tags), the About page and home page story, the three "Why Little Lemon" highlights, the three About page values, Mario's and Adrian's bios and roles, and the address, opening hours, phone number and email (in `src/data/restaurant.js`) are made up. There are no customer reviews, ratings or awards, because they would have to be invented. The phone number uses the 555-01xx range kept for fiction, and the email uses the reserved `.example` domain, so neither can reach a real person. The opening hours (daily, 5 pm to midnight, last table at 11:30 pm) match the times the booking form offers. The "we hold your table for 15 minutes" rule is made up too.
 - **Bookings stay in this browser**: the course API doesn't save anything, so bookings are kept in this browser's `localStorage` only. Another browser or device won't see them, and clearing site data removes them. The course API still always says a booking "succeeded".
 - **Create React App is deprecated**: the React team stopped recommending Create React App in February 2025, and it no longer has active maintainers. It still builds and tests this project fine. Moving to [Vite](https://vite.dev) is a possible next step.
 - **Demo-only double-booking check**: a booked time is hidden only in the browser that booked it. A real restaurant would need a server that knows every guest's bookings.

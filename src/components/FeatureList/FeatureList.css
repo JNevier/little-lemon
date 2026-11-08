@@ -1,5 +1,5 @@
-/* Mobile first: the three highlights stacked. A list, so the browser's bullets and indent are reset. */
-.highlights-list {
+/* Mobile first: the points stacked. A list, so the browser's bullets and indent are reset. */
+.feature-list {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-6);
@@ -9,7 +9,7 @@
 }
 
 /* The icon sits in a peach circle. Green on peach is about 5.2:1 (icons need 3:1). */
-.highlights-icon {
+.feature-list-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -20,17 +20,17 @@
   color: var(--color-primary-green);
 }
 
-.highlights-title {
+.feature-list-title {
   margin: var(--space-4) 0 var(--space-2);
 }
 
-.highlights-text {
+.feature-list-text {
   margin: 0;
 }
 
-/* Bigger screens (768px and up): the three highlights side by side. */
+/* Bigger screens (768px and up): the three points side by side. */
 @media (min-width: 768px) {
-  .highlights-list {
+  .feature-list {
     grid-template-columns: repeat(3, 1fr);
   }
 }

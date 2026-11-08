@@ -158,6 +158,30 @@ a:focus-visible {
   border-radius: 2px;
 }
 
+/* The page frame: header, main and footer in one column at least as tall as the screen.
+   main (flex: 1) takes the spare height, so on a short page (like the 404 page) the footer sits at the
+   bottom of the screen instead of leaving an empty white strip under it.
+   100vh is the screen height; NEW: 100dvh is the same, but it updates when a phone's address bar
+   slides away. The second line wins in browsers that know dvh; the others keep 100vh. */
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* main is a column too, so a short page's own wrapper can grow to fill it (see .page-fill). */
+main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+/* Added to a short page's wrapper (404, confirmation) so its grey band reaches down to the footer. */
+.page-fill {
+  flex: 1;
+}
+
 /* <main> gets focus from the skip link, not from the user. It isn't a control,
    so it doesn't need a focus ring (the page simply continues from there). */
 main:focus {
