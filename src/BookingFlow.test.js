@@ -80,6 +80,20 @@ test('a direct visit to /confirmed still says no booking was made', () => {
   expect(screen.getByRole('heading', { level: 1, name: "You haven't made a booking yet" })).toBeInTheDocument();
 });
 
+test('a bad entry in the saved list ([null]) does not blank the booking pages', () => {
+  fetchAPI.mockReturnValue(['17:00']);
+  localStorage.setItem('little-lemon-reservations', '[null]');
+
+  const myPage = renderAppAt('/my-reservations');
+  expect(screen.getByRole('heading', { level: 1, name: 'My Reservations' })).toBeInTheDocument();
+  expect(screen.getByText("You don't have any reservations yet.")).toBeInTheDocument();
+  myPage.unmount();
+
+  renderAppAt('/reservations');
+  expect(screen.getByRole('heading', { level: 1, name: 'Reserve a Table' })).toBeInTheDocument();
+  expect(screen.getByRole('form', { name: 'Reserve a Table' })).toBeInTheDocument();
+});
+
 test('broken saved data does not crash the app', () => {
   fetchAPI.mockReturnValue(['17:00']);
   localStorage.setItem('little-lemon-reservations', '{broken');
