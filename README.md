@@ -90,21 +90,29 @@ All names, emails and bookings in these screenshots are fake test data.
 
 ## Lighthouse
 
-Measured with [PageSpeed Insights](https://pagespeed.web.dev) (Lighthouse 13.6, **mobile**: an emulated Moto G Power on a slow 4G connection) on the live home page, **November 9, 2026, after the UI redesign**.
+Measured with [PageSpeed Insights](https://pagespeed.web.dev) (Lighthouse 13.6, **mobile**: an emulated Moto G Power on a slow 4G connection) on the live home page, **November 9, 2026, after the fix sprint** (changing a reservation, the booking rules, the error boundary and smaller menu images).
 
 | Performance | Accessibility | Best Practices | SEO |
 | --- | --- | --- | --- |
-| 91 | 100 | 100 | 100 |
+| 90 | 100 | 100 | 100 |
 
 | First Contentful Paint | Largest Contentful Paint | Total Blocking Time | Cumulative Layout Shift | Speed Index |
 | --- | --- | --- | --- | --- |
-| 1.5 s | 3.4 s | 0 ms | 0 | 1.5 s |
+| 1.5 s | 3.4 s | 0 ms | 0 | 4.1 s |
 
-The redesign added sections, components and styles, and the scores stayed the same as before it (91, 100, 100, 100 on November 8). Largest Contentful Paint even moved from 3.5 s to 3.4 s.
+Earlier runs on the live home page:
+
+| Date | After | Performance | Accessibility | Best Practices | SEO | Largest Contentful Paint | Speed Index |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| November 8, 2026 | Smaller hero photos | 91 | 100 | 100 | 100 | 3.5 s | 1.5 s |
+| November 9, 2026 | UI redesign | 91 | 100 | 100 | 100 | 3.4 s | 1.5 s |
+| November 9, 2026 | Fix sprint | 90 | 100 | 100 | 100 | 3.4 s | 4.1 s |
+
+Accessibility, Best Practices and SEO have stayed at 100, and Performance at 90 or above. On the home page the fix sprint only made the header logo smaller (the other smaller images are on the Menu page), so the higher Speed Index in this run is most likely the normal variation between Lighthouse runs on a slow, throttled connection. It will be checked again in a later run.
 
 **How the hero photo was sped up** (before the redesign): the first run scored 85 for Performance. The slow part was **Largest Contentful Paint**: the time until the biggest thing on screen, the hero photo, has loaded. Phones were downloading the full 288 KB photo. Now they get a smaller copy (133 KB, chosen by the browser with `srcset` and `sizes`), and the photo is marked `fetchpriority="high"` so it downloads first. That brought Largest Contentful Paint down from 4.2 s to 3.5 s, and Performance up from 85 to 91.
 
-Largest Contentful Paint (3.4 s) is the one metric not in the green yet. What's left is mostly the time it takes to download and run the app's JavaScript on a slow phone before the photo can appear. Scores change a few points from run to run.
+Largest Contentful Paint (3.4 s) and, in the latest run, Speed Index (4.1 s) are the metrics not in the green yet. What's left is mostly the time it takes to download and run the app's JavaScript on a slow phone before the photo can appear. Scores change a few points from run to run.
 
 ## Tech stack
 
@@ -428,19 +436,10 @@ Every text and background pair is checked against WCAG 2.1 AA by a small script 
 
 Little Lemon is the fictional restaurant from the [Meta Front-End Developer Professional Certificate](https://www.coursera.org/professional-certificates/meta-front-end-developer) on Coursera, and this site is my capstone project for it. All names, prices, addresses, phone numbers and the story are made up (see **Sample data** under [Known limitations](#known-limitations)).
 
-**Photos.** The photos on this site are not mine. Some came with the course's starter files, and the rest were found online through Google Images. **Credits to the owners of the photos.** Where a photo file names its author, the name is listed below. If you own one of these photos and would like it credited differently or taken down, please [open an issue](https://github.com/JNevier/little-lemon/issues).
-
-| Photo | Used on | Author named in the file |
-| --- | --- | --- |
-| Home page hero (`restauranfood*.jpg`) | Home | Inna Pankratieva |
-| Mario and Adrian (`mario-and-adrian-a.jpg`, `mario-and-adrian-b.jpg`) | About, Home | jacoblund |
-| Grilled Sea Bass (`grilled-fish.jpg`) | Menu | Karen Sheer |
-| Hummus Plate (`hummus-plate.jpg`) | Menu | Arx0nt |
-| All other photos | Home, Menu | Not named in the file |
+**Images.** All photographs and images on this site belong to their respective owners and are used here only for this non-commercial student portfolio project. If you own one of these images and would like it credited differently or removed, please [open an issue](https://github.com/JNevier/little-lemon/issues).
 
 | What | Source | Licence |
 | --- | --- | --- |
-| Logo and lemon images | The course's Little Lemon brand files | Course material |
 | Booking API (`fetchAPI`, `submitAPI` in `src/api.js`) | The course | Course material |
 | Fonts: Markazi Text and Karla | [Google Fonts](https://fonts.google.com) | SIL Open Font License 1.1 |
 | Icons (`src/components/Icons/Icons.js`) | Drawn for this project | Part of this project |
