@@ -5,13 +5,27 @@ import { formatPrice } from '../../utils/price';
 // with the description and dietary tags underneath. A dish with a photo shows it on the left.
 // It's an <li> because the menu page shows the dishes as a list.
 // `tags = []`: a dish without tags still works (the default value is used when tags is missing).
-function MenuItem({ name, price, description, tags = [], image, imageAlt }) {
+function MenuItem({ name, price, description, tags = [], image, imageAlt, thumbnail }) {
   return (
     // A second class when there's a photo, so the CSS can make room for it.
     <li className={image ? 'menu-item menu-item-with-image' : 'menu-item'}>
       {image && (
         // loading="lazy": most dishes are further down the page, so their photos wait until they're needed.
-        <img className="menu-item-image" src={image} alt={imageAlt} width="96" height="96" loading="lazy" />
+        // The photo is shown only 96px wide, so the browser gets a small 200x200 copy (thumbnail) first.
+        // srcSet lists both files with their widths, and sizes="96px" says how wide the photo is shown:
+        // on most screens (even sharp phone screens at 2x, which need 192px) the browser picks the small
+        // copy; only a very sharp screen (3x, 288px) picks the full photo. Without a thumbnail, the full
+        // photo is used, as before. ("640w" is roughly the full photos' width; it only helps the browser choose.)
+        <img
+          className="menu-item-image"
+          src={thumbnail ?? image}
+          srcSet={thumbnail ? `${thumbnail} 200w, ${image} 640w` : undefined}
+          sizes={thumbnail ? '96px' : undefined}
+          alt={imageAlt}
+          width="96"
+          height="96"
+          loading="lazy"
+        />
       )}
       <div className="menu-item-text">
         <div className="menu-item-heading">

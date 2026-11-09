@@ -33,7 +33,9 @@ function Header() {
       {/* The logo links to the home page, as on most websites. The image is the link's only content,
           so its alt text is the link's name: it says where the link goes. */}
       <Link to="/" className="header-logo-link">
-        <img className="header-logo" src="/images/logo-green-yellow-lemon.png" alt="Little Lemon home" />
+        {/* A 360px-wide copy of the logo: it's shown at most 180px wide, so 360px is sharp on 2x screens,
+            and much smaller to download than the 2000px original. */}
+        <img className="header-logo" src="/images/logo-green-yellow-lemon-360.png" alt="Little Lemon home" />
       </Link>
       <button
         type="button"

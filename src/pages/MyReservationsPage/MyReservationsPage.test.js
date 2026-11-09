@@ -170,3 +170,11 @@ test('upcoming bookings have a Change link with a name that says which booking; 
   expect(screen.getAllByRole('link', { name: /^Change reservation/ })).toHaveLength(1);
   expect(within(screen.getByRole('region', { name: 'Past' })).queryByRole('link', { name: /change/i })).not.toBeInTheDocument();
 });
+
+test('the page is marked to fill the height down to the footer, even when the list is short', () => {
+  // The white strip itself can only be measured in a real browser (checked there at 1280x900);
+  // this checks the page carries the class that makes it stretch.
+  renderPage();
+  expect(screen.getByRole('heading', { level: 1, name: 'My Reservations' }).closest('.my-reservations-page'))
+    .toHaveClass('page-fill');
+});

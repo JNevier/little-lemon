@@ -163,7 +163,9 @@ function MyReservationsPage() {
   }
 
   return (
-    <div className="my-reservations-page">
+    // page-fill: the page takes all the height between the header and the footer (see index.css),
+    // so a short list doesn't leave a white strip above the footer.
+    <div className="my-reservations-page page-fill">
       {/* React 19 moves this into the page's <head>, so the browser tab says where you are. */}
       <title>My Reservations | Little Lemon</title>
       <div className="page-header my-reservations-page-header">

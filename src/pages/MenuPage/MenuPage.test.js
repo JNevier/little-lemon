@@ -178,3 +178,18 @@ test('ends with a Reserve a Table call to action', () => {
 
   expect(screen.getByRole('link', { name: 'Reserve a Table' })).toHaveAttribute('href', '/reservations');
 });
+
+test('a dish with a small copy of its photo loads that copy at 96px, with the full photo as a sharper option', async () => {
+  mockMenuReply([
+    {
+      id: 'shakshuka', name: 'Shakshuka', category: 'Mains', price: 16, description: 'Eggs.', tags: [],
+      image: '/images/shakshuka.jpg', thumbnail: '/images/shakshuka-200.jpg', imageAlt: 'A pan of shakshuka',
+    },
+  ]);
+  renderMenu();
+
+  const photo = await screen.findByRole('img', { name: 'A pan of shakshuka' });
+  expect(photo).toHaveAttribute('src', '/images/shakshuka-200.jpg');
+  expect(photo).toHaveAttribute('srcset', '/images/shakshuka-200.jpg 200w, /images/shakshuka.jpg 640w');
+  expect(photo).toHaveAttribute('sizes', '96px');
+});

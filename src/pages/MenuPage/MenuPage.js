@@ -129,6 +129,7 @@ function MenuPage() {
                     tags={item.tags}
                     image={item.image}
                     imageAlt={item.imageAlt}
+                  thumbnail={item.thumbnail}
                   />
                 ))}
               </ul>
