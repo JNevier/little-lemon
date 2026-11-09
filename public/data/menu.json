@@ -105,7 +105,9 @@
     "tags": [
       "Vegetarian",
       "Contains nuts"
-    ]
+    ],
+    "image": "/images/baklava.jpg",
+    "imageAlt": "Squares of baklava topped with crushed pistachios on a white plate"
   },
   {
     "id": "orange-cake",
