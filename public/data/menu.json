@@ -20,7 +20,9 @@
     "description": "Creamy chickpea hummus with warm pita and a drizzle of lemon oil.",
     "tags": [
       "Vegan"
-    ]
+    ],
+    "image": "/images/hummus-plate.jpg",
+    "imageAlt": "A wooden bowl of hummus topped with chickpeas, paprika and herbs, with pita bread"
   },
   {
     "id": "greek-salad",
@@ -43,7 +45,9 @@
     "description": "Whole sea bass grilled with lemon and herbs, served with roast potatoes.",
     "tags": [
       "Gluten-free"
-    ]
+    ],
+    "image": "/images/grilled-fish.jpg",
+    "imageAlt": "A grilled fillet of sea bass on roasted aubergine with cherry tomatoes and basil"
   },
   {
     "id": "lamb-souvlaki",
@@ -51,7 +55,9 @@
     "category": "Mains",
     "price": 21.5,
     "description": "Marinated lamb skewers with tzatziki, rice and a small salad.",
-    "tags": []
+    "tags": [],
+    "image": "/images/lamb-souvlaki.jpg",
+    "imageAlt": "Grilled lamb skewers sprinkled with parsley, served with flatbread and tzatziki"
   },
   {
     "id": "vegetable-moussaka",
@@ -61,7 +67,9 @@
     "description": "Layers of aubergine, potato and lentils under a golden bechamel.",
     "tags": [
       "Vegetarian"
-    ]
+    ],
+    "image": "/images/vegetable-moussaka.jpg",
+    "imageAlt": "A square slice of moussaka showing layers of aubergine and tomato sauce under a golden topping"
   },
   {
     "id": "shakshuka",
@@ -97,7 +105,9 @@
     "tags": [
       "Vegetarian",
       "Contains nuts"
-    ]
+    ],
+    "image": "/images/baklava.jpg",
+    "imageAlt": "Squares of baklava topped with crushed pistachios on a white plate"
   },
   {
     "id": "orange-cake",
@@ -107,7 +117,9 @@
     "description": "A moist cake made with olive oil and fresh orange zest.",
     "tags": [
       "Vegetarian"
-    ]
+    ],
+    "image": "/images/orange-cake.jpg",
+    "imageAlt": "A slice of orange cake with white frosting and dried orange slices"
   },
   {
     "id": "lemonade",
@@ -117,7 +129,9 @@
     "description": "Squeezed to order, with a sprig of mint.",
     "tags": [
       "Vegan"
-    ]
+    ],
+    "image": "/images/lemonade.jpg",
+    "imageAlt": "A glass jar of lemonade with lemon slices, ice and mint, next to whole lemons"
   },
   {
     "id": "mint-tea",
@@ -127,7 +141,9 @@
     "description": "Hot green tea with fresh mint leaves.",
     "tags": [
       "Vegan"
-    ]
+    ],
+    "image": "/images/mint-tea.jpg",
+    "imageAlt": "A cup of tea with fresh mint leaves on a saucer"
   },
   {
     "id": "greek-coffee",
@@ -137,6 +153,8 @@
     "description": "Strong, finely ground coffee brewed in a small pot.",
     "tags": [
       "Vegan"
-    ]
+    ],
+    "image": "/images/greek-coffee.jpg",
+    "imageAlt": "A small cup of strong coffee with foam on top, next to a glass of water and lokum sweets"
   }
 ]
