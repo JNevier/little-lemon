@@ -62,6 +62,31 @@ test('a booking that is not saved shows an error and stays on the form', () => {
   expect(screen.getByRole('heading', { level: 1, name: 'Reserve a Table' })).toBeInTheDocument();
 });
 
+test('a change that is not saved shows an error, stays on the form and keeps the old booking', () => {
+  fetchAPI.mockReturnValue(['17:00', '18:00']);
+  submitAPI.mockReturnValue(false);
+  // A fake saved booking, three days ahead so it can be changed.
+  const date = new Date();
+  date.setDate(date.getDate() + 3);
+  const saved = { id: 'b1', date: toInputDate(date), time: '17:00', guests: 2, occasion: 'Birthday', name: 'Test Guest', email: 'guest@example.com' };
+  localStorage.setItem('little-lemon-reservations', JSON.stringify([saved]));
+  render(
+    <MemoryRouter initialEntries={['/reservations/b1/edit']}>
+      <ReservationsProvider>
+        <Main />
+      </ReservationsProvider>
+    </MemoryRouter>
+  );
+
+  fireEvent.change(screen.getByLabelText('Choose time'), { target: { value: '18:00' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+  expect(screen.getByRole('alert')).toHaveTextContent("We couldn't save your booking. Please try again.");
+  expect(screen.getByRole('heading', { level: 1, name: 'Change your reservation' })).toBeInTheDocument();
+  expect(JSON.parse(localStorage.getItem('little-lemon-reservations'))).toEqual([saved]);
+  localStorage.clear();
+});
+
 test('updateTimes gives no times for a cleared or incomplete date, without asking the API', () => {
   ['', '2026-10', '2026-1-5'].forEach((date) => {
     const result = updateTimes(['17:00'], { type: 'DATE_CHANGED', date });

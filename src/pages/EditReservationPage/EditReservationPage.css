@@ -1,0 +1,39 @@
+/* The heading gets focus from code (so screen readers announce the page), not from the user,
+   so it doesn't need a focus ring. */
+.edit-reservation-page h1:focus {
+  outline: none;
+}
+
+/* "Back to my reservations" in the green header: light text (about 6:1 on green), 44px tall, easy to tap.
+   Its focus ring is yellow there (see .page-header a:focus-visible in index.css). */
+.edit-reservation-page-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  margin-top: var(--space-4);
+  color: var(--color-light);
+  font-weight: 700;
+}
+
+.edit-reservation-page-back:hover {
+  color: var(--color-white);
+}
+
+/* The form area: page padding on a light grey band, so the white step cards stand out (as on the booking page). */
+.edit-reservation-page-body {
+  padding: var(--space-6) var(--page-gutter) var(--section-space);
+  background-color: var(--color-light);
+}
+
+/* A booking that can't be changed: one white card on the grey band, like the confirmation page. */
+.edit-reservation-page.page-fill {
+  padding: var(--section-space) var(--page-gutter);
+  background-color: var(--color-light);
+}
+
+.edit-reservation-page-card {
+  max-width: 36rem;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5);
+}
