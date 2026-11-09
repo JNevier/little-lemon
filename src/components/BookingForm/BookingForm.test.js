@@ -19,6 +19,15 @@ function fillContactDetails() {
   fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'guest@example.com' } });
 }
 
+test('when it appears, it asks Main for the times of the date it shows (today)', () => {
+  // Main keeps the times in a reducer that lives longer than the form. Without this, coming back
+  // to the form could show today's date with the times of a date picked earlier.
+  const dispatch = jest.fn();
+  render(<BookingForm availableTimes={['17:00']} dispatch={dispatch} submitForm={jest.fn()} />);
+
+  expect(dispatch).toHaveBeenCalledWith({ type: 'DATE_CHANGED', date: toInputDate(new Date()) });
+});
+
 test('renders the "Choose date" label', () => {
   setupForm();
   expect(screen.getByText('Choose date')).toBeInTheDocument();

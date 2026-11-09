@@ -35,9 +35,13 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
   // Today as 'YYYY-MM-DD': the earliest day you can book (no bookings in the past).
   const today = toInputDate(new Date());
 
-  // One piece of state per field.
-  // Starts on today, so the date shown matches the times Main loaded for today.
-  const [date, setDate] = useState(today);
+  // The date the form starts on. useState keeps this first value for as long as the form is on screen,
+  // even if the form stays open past midnight, so the effect below always asks about the date the field
+  // started with.
+  const [startDate] = useState(today);
+
+  // One piece of state per field. The date starts on startDate (today).
+  const [date, setDate] = useState(startDate);
   const [time, setTime] = useState('17:00');
   // Kept as a string, like every input value; it's turned into a number only when it's used.
   const [guests, setGuests] = useState('1');
@@ -123,6 +127,20 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
     { field: 'res-name', message: shownNameError },
     { field: 'res-email', message: shownEmailError },
   ].filter((error) => error.message !== '');
+
+  // NEW: syncing two pieces of state when a component appears.
+  // The date lives here, in the form, but the list of times lives in Main's reducer, which stays on screen
+  // while you visit other pages. Every time the form appears, its date starts again on today, but Main may
+  // still hold the times of a date you picked earlier (for example after "Book another table", or after
+  // going to the Menu and back). Two pieces of state that must agree didn't.
+  // So when the form appears, it tells Main which date it shows, and Main loads that date's times.
+  // It reuses the same DATE_CHANGED action as the date field, so updateTimes doesn't change.
+  // (Another way would be to move the date up into Main, but that would mean passing the date and
+  // its setter down through BookingPage and changing more code.)
+  // [dispatch, startDate]: both stay the same while the form is open, so this runs once when it appears.
+  useEffect(() => {
+    dispatch({ type: 'DATE_CHANGED', date: startDate });
+  }, [dispatch, startDate]);
 
   // After each failed submit, move keyboard focus to the error summary, so screen readers read it out
   // and keyboard users start right where the problems are listed.
