@@ -1,0 +1,18 @@
+/* The same look as the 404 and confirmation pages: one white card on a light grey band. */
+.error-boundary {
+  padding: var(--section-space) var(--page-gutter);
+  background-color: var(--color-light);
+}
+
+.error-boundary-card {
+  max-width: 36rem;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5);
+}
+
+/* The two actions share a row and wrap on narrow phones. */
+.error-boundary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
