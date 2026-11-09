@@ -46,5 +46,5 @@ test('has no social links to generic sites', () => {
 
 test('credits the owners of the photos', () => {
   const footer = renderFooter();
-  expect(within(footer).getByText(/Credits to the owners of the photos/)).toBeInTheDocument();
+  expect(within(footer).getByText(/Photos © their respective owners/)).toBeInTheDocument();
 });
