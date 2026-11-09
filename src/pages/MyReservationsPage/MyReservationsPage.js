@@ -1,5 +1,6 @@
 import './MyReservationsPage.css';
 import { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router';
 import { useReservations } from '../../context/ReservationsContext';
 import { formatLongDate, fromInputDate, toInputDate } from '../../utils/dates';
 import LinkButton from '../../components/LinkButton/LinkButton';
@@ -14,7 +15,7 @@ function byDateThenTime(a, b) {
 }
 
 // One booking as a card: a date badge, the full date, the time, small "chips" for the details,
-// and the name. Upcoming bookings can be cancelled, with a "Are you sure?" step first.
+// and the name. Upcoming bookings can be changed, or cancelled with a "Are you sure?" step first.
 function ReservationCard({ reservation, isPast, isConfirming, onAskCancel, onKeep, onConfirmCancel }) {
   const { id, date, time, guests, occasion, seating, name } = reservation;
   const dateText = formatLongDate(date);
@@ -63,17 +64,29 @@ function ReservationCard({ reservation, isPast, isConfirming, onAskCancel, onKee
               </div>
             </div>
           ) : (
-            <button
-              type="button"
-              id={`cancel-${id}`}
-              className="button button-secondary"
-              // Every card has a "Cancel" button, so the label adds which booking it cancels.
-              // It starts with the visible word "Cancel", so voice control ("click Cancel") still works.
-              aria-label={`Cancel reservation for ${dateText} at ${time}`}
-              onClick={() => onAskCancel(id)}
-            >
-              Cancel
-            </button>
+            // Two actions side by side: Change (a link, because it opens another page) and Cancel (a button).
+            <div className="reservation-card-buttons">
+              <Link
+                to={`/reservations/${id}/edit`}
+                className="button button-secondary"
+                // Every card has a "Change" link, so the label says which booking it changes.
+                // It starts with the visible word "Change", so voice control ("click Change") still works.
+                aria-label={`Change reservation for ${dateText} at ${time}`}
+              >
+                Change
+              </Link>
+              <button
+                type="button"
+                id={`cancel-${id}`}
+                className="button button-secondary"
+                // Every card has a "Cancel" button, so the label adds which booking it cancels.
+                // It starts with the visible word "Cancel", so voice control ("click Cancel") still works.
+                aria-label={`Cancel reservation for ${dateText} at ${time}`}
+                onClick={() => onAskCancel(id)}
+              >
+                Cancel
+              </button>
+            </div>
           )}
         </div>
       )}

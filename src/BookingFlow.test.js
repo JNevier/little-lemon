@@ -129,3 +129,45 @@ describe('the time list always matches the date the form shows', () => {
     delete global.fetch;
   });
 });
+
+test('change a booking: same booking, new time, and its old time is free again', () => {
+  fetchAPI.mockReturnValue(['17:00', '18:00', '19:00']);
+  submitAPI.mockReturnValue(true);
+  const date = tomorrow();
+
+  // 1. Book tomorrow at 18:00.
+  renderAppAt('/reservations');
+  fireEvent.change(screen.getByLabelText('Choose date'), { target: { value: date } });
+  fireEvent.change(screen.getByLabelText('Choose time'), { target: { value: '18:00' } });
+  fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'Test Guest' } });
+  fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'guest@example.com' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Confirm reservation' }));
+  const [booked] = JSON.parse(localStorage.getItem('little-lemon-reservations'));
+
+  // 2. My Reservations, then Change.
+  fireEvent.click(screen.getByRole('link', { name: 'View my reservations' }));
+  fireEvent.click(screen.getByRole('link', { name: /^Change reservation for .* at 18:00$/ }));
+  expect(screen.getByRole('heading', { level: 1, name: 'Change your reservation' })).toBeInTheDocument();
+  expect(screen.getByLabelText('Choose date')).toHaveValue(date);
+  expect(screen.getByLabelText('Choose time')).toHaveValue('18:00');
+
+  // 3. Move it to 19:00 and save.
+  fireEvent.change(screen.getByLabelText('Choose time'), { target: { value: '19:00' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+  expect(screen.getByRole('heading', { level: 1, name: 'Reservation updated' })).toBeInTheDocument();
+
+  // 4. Still one booking, with the same id, now at 19:00.
+  const stored = JSON.parse(localStorage.getItem('little-lemon-reservations'));
+  expect(stored).toHaveLength(1);
+  expect(stored[0].id).toBe(booked.id);
+  expect(stored[0].time).toBe('19:00');
+  fireEvent.click(screen.getByRole('link', { name: 'View my reservations' }));
+  const rows = screen.getAllByRole('listitem').filter((row) => row.classList.contains('reservation-card'));
+  expect(rows).toHaveLength(1);
+  expect(within(rows[0]).getByText('19:00')).toBeInTheDocument();
+
+  // 5. On a new booking for that date, 18:00 is free again and 19:00 is taken.
+  fireEvent.click(screen.getByRole('link', { name: 'Book a table' }));
+  fireEvent.change(screen.getByLabelText('Choose date'), { target: { value: date } });
+  expect(offeredTimes()).toEqual(['17:00', '18:00']);
+});

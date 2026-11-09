@@ -159,3 +159,14 @@ test('a booking with "No special occasion" gets no occasion pill', () => {
   expect(details).toHaveTextContent('2 guestsIndoor');
   expect(details).not.toHaveTextContent('No special occasion');
 });
+
+test('upcoming bookings have a Change link with a name that says which booking; past ones don\'t', () => {
+  save([saved[2], ...past]);
+  renderPage();
+
+  const change = screen.getByRole('link', { name: 'Change reservation for Friday, October 9, 2099 at 18:00' });
+  expect(change).toHaveAttribute('href', '/reservations/a/edit');
+  // Only one Change link: the two past bookings have none.
+  expect(screen.getAllByRole('link', { name: /^Change reservation/ })).toHaveLength(1);
+  expect(within(screen.getByRole('region', { name: 'Past' })).queryByRole('link', { name: /change/i })).not.toBeInTheDocument();
+});
