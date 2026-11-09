@@ -32,34 +32,52 @@ function toId(text) {
 // It gets the available times from Main, and reports date changes back with dispatch.
 // `reservations` are the bookings already saved in this browser. It's a plain prop (not Context),
 // so the form stays easy to test. "= []" is the default when no reservations are passed in.
-function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }) {
+// The same form is used to change a booking. Three optional props make that possible, and their
+// defaults keep the "new booking" form exactly as it was:
+// - initialValues: a saved booking to start from (empty {} for a new booking)
+// - submitLabel: the button text ("Save changes" instead of "Confirm reservation")
+// - formLabel: the form's name for screen readers ("Change your reservation" instead of "Reserve a Table")
+function BookingForm({
+  availableTimes,
+  dispatch,
+  submitForm,
+  reservations = [],
+  initialValues = {},
+  submitLabel = 'Confirm reservation',
+  formLabel = 'Reserve a Table',
+}) {
   // Today as 'YYYY-MM-DD': the earliest day you can book (no bookings in the past).
   const today = toInputDate(new Date());
   // The last day you can book: today plus the booking window (90 days, set in src/data/restaurant.js).
   const lastDay = addDays(today, restaurant.bookingWindowDays);
 
-  // The date the form starts on. useState keeps this first value for as long as the form is on screen,
-  // even if the form stays open past midnight, so the effect below always asks about the date the field
-  // started with.
-  const [startDate] = useState(today);
+  // The date the form starts on: the booking's own date when changing one, otherwise today.
+  // useState keeps this first value for as long as the form is on screen, even if the form stays open
+  // past midnight, so the effect below always asks about the date the field started with.
+  // NEW: "??" (nullish coalescing) means "use the left side, unless it's missing (null or undefined)".
+  const [startDate] = useState(initialValues.date ?? today);
 
-  // One piece of state per field. The date starts on startDate (today).
+  // One piece of state per field. NEW: a controlled form with initial values: each field starts from
+  // the saved booking when there is one, and from the usual default when there isn't. useState only
+  // reads its starting value once, when the form appears; after that, typing changes the state as usual.
   const [date, setDate] = useState(startDate);
-  const [time, setTime] = useState('17:00');
+  const [time, setTime] = useState(initialValues.time ?? '17:00');
   // Kept as a string, like every input value; it's turned into a number only when it's used.
-  const [guests, setGuests] = useState('1');
+  // A saved booking stores guests as a number (4), so String() turns it back into input text ('4').
+  const [guests, setGuests] = useState(String(initialValues.guests ?? 1));
   // Most bookings are just dinner, so "No special occasion" is the starting choice.
-  const [occasion, setOccasion] = useState(NO_OCCASION);
-  // Contact details and extras. Name and email start empty: the guest has to type them.
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [seating, setSeating] = useState('No preference');
-  const [requests, setRequests] = useState('');
+  const [occasion, setOccasion] = useState(initialValues.occasion ?? NO_OCCASION);
+  // Contact details and extras. For a new booking, name and email start empty: the guest has to type them.
+  // Older saved bookings may not have these fields, so each one falls back to its usual default.
+  const [name, setName] = useState(initialValues.name ?? '');
+  const [email, setEmail] = useState(initialValues.email ?? '');
+  const [seating, setSeating] = useState(initialValues.seating ?? 'No preference');
+  const [requests, setRequests] = useState(initialValues.requests ?? '');
   // The "touched" pattern. A field is touched once the user has left it (the blur event).
   // Name and email start empty, which is invalid; without this, a brand-new form would greet
   // the user with red error text before they've typed anything.
   const [touched, setTouched] = useState({ name: false, email: false });
-  // How many times the user has pressed "Confirm reservation" while something was wrong.
+  // How many times the user has pressed the button ("Confirm reservation" or "Save changes") while something was wrong.
   // After the first time, every error is shown (even on fields not touched yet), and each new
   // attempt moves focus to the error summary again (see the effect below).
   const [failedSubmits, setFailedSubmits] = useState(0);
@@ -220,7 +238,7 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
     // NEW: noValidate turns off the browser's own pop-up messages. The form checks itself and shows
     // its messages on the page instead, in the same words and style everywhere. The required, min and max
     // attributes stay: screen readers still announce "required", and phones still pick the right keyboard.
-    <form className="booking-form" aria-label="Reserve a Table" onSubmit={handleSubmit} noValidate>
+    <form className="booking-form" aria-label={formLabel} onSubmit={handleSubmit} noValidate>
       {/* The error summary: only after a submit with problems, and only while there are problems left.
           tabIndex={-1}: the code can focus it, but the Tab key skips it. */}
       {submitted && shownErrors.length > 0 && (
@@ -465,7 +483,7 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
         {/* Always enabled: pressing it with a problem shows the error summary, which says exactly what to fix.
             A disabled button can't say why it's disabled, and some people can't find out. */}
         <button type="submit" className="button button-primary booking-form-submit">
-          Confirm reservation
+          {submitLabel}
         </button>
         {/* role="alert": screen readers announce it right away, without the user moving to it. */}
         {saveFailed && (
