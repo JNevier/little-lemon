@@ -8,8 +8,17 @@
   outline: none;
 }
 
+/* The page is a column: the green header, then the grey bookings area. The page itself stretches
+   down to the footer (page-fill), and flex: 1 below lets the grey area take that extra height,
+   so the grey reaches the footer even with one booking or none. */
+.my-reservations-page {
+  display: flex;
+  flex-direction: column;
+}
+
 /* The bookings area: page padding on a light grey band, so the white cards stand out. */
 .my-reservations-page-body {
+  flex: 1;
   padding: var(--space-5) var(--page-gutter) var(--section-space);
   background-color: var(--color-light);
 }
