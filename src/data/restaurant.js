@@ -14,6 +14,9 @@ const restaurant = {
   phone: '(312) 555-0123',
   phoneLink: 'tel:+13125550123',
   email: 'hello@littlelemon.example',
+  // How far ahead a table can be booked, in days (a made-up house rule, like the 15-minute hold).
+  // The booking form's date field and its error message both read this one number.
+  bookingWindowDays: 90,
 };
 
 export default restaurant;

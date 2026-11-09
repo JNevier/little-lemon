@@ -2,17 +2,24 @@
 // "Pure" means the same input always gives the same answer and nothing else is changed,
 // which makes them easy to test.
 
+// The choice for a booking that isn't for anything special. It comes first and is the default,
+// because most bookings are just dinner. Pages that show a booking leave it out (it isn't news).
+export const NO_OCCASION = 'No special occasion';
+
 // The occasions the form offers. The form builds its options from this same list.
-export const OCCASIONS = ['Birthday', 'Anniversary'];
+export const OCCASIONS = [NO_OCCASION, 'Birthday', 'Anniversary'];
 
 // The seating choices the form offers as radio buttons. Same idea as OCCASIONS.
 export const SEATING_OPTIONS = ['Indoor', 'Outdoor', 'No preference'];
 
-// A 'YYYY-MM-DD' date that is today or later. "today" is passed in, so tests can use a fixed day.
-export function isValidDate(date, today) {
+// A 'YYYY-MM-DD' date from today up to lastDay. Both days are passed in, so tests can use fixed days.
+// lastDay is optional: without it, any later date is fine (as before).
+// 'YYYY-MM-DD' text compares in date order as plain text, so >= and <= work.
+export function isValidDate(date, today, lastDay) {
   // The exact shape a date input gives: 4 digits, dash, 2 digits, dash, 2 digits.
   const looksLikeDate = /^\d{4}-\d{2}-\d{2}$/.test(date);
-  return looksLikeDate && date >= today;
+  const notTooFar = lastDay === undefined || date <= lastDay;
+  return looksLikeDate && date >= today && notTooFar;
 }
 
 // One of the times the API offered for that day.
