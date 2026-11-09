@@ -22,6 +22,16 @@ describe('isValidDate', () => {
     expect(isValidDate('', today)).toBe(false);
     expect(isValidDate('2026-1-14', today)).toBe(false);
   });
+
+  test('with a last day: accepts up to that day and rejects the day after', () => {
+    // Oct 13 + 90 days = Jan 11, 2027.
+    const lastDay = '2027-01-11';
+    expect(isValidDate('2027-01-11', today, lastDay)).toBe(true);
+    expect(isValidDate('2027-01-12', today, lastDay)).toBe(false);
+    expect(isValidDate('2999-01-01', today, lastDay)).toBe(false);
+    // The past is still rejected.
+    expect(isValidDate('2026-10-12', today, lastDay)).toBe(false);
+  });
 });
 
 describe('isValidTime', () => {
@@ -52,6 +62,7 @@ describe('isValidGuests', () => {
 
 describe('isValidOccasion', () => {
   test('accepts the offered occasions', () => {
+    expect(isValidOccasion('No special occasion')).toBe(true);
     expect(isValidOccasion('Birthday')).toBe(true);
     expect(isValidOccasion('Anniversary')).toBe(true);
   });

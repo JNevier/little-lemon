@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { toInputDate } from '../../utils/dates';
+import { toInputDate, addDays, isPastTime } from '../../utils/dates';
 import {
+  NO_OCCASION,
   OCCASIONS,
   SEATING_OPTIONS,
   isValidDate,
@@ -34,6 +35,8 @@ function toId(text) {
 function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }) {
   // Today as 'YYYY-MM-DD': the earliest day you can book (no bookings in the past).
   const today = toInputDate(new Date());
+  // The last day you can book: today plus the booking window (90 days, set in src/data/restaurant.js).
+  const lastDay = addDays(today, restaurant.bookingWindowDays);
 
   // The date the form starts on. useState keeps this first value for as long as the form is on screen,
   // even if the form stays open past midnight, so the effect below always asks about the date the field
@@ -45,7 +48,8 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
   const [time, setTime] = useState('17:00');
   // Kept as a string, like every input value; it's turned into a number only when it's used.
   const [guests, setGuests] = useState('1');
-  const [occasion, setOccasion] = useState('Birthday');
+  // Most bookings are just dinner, so "No special occasion" is the starting choice.
+  const [occasion, setOccasion] = useState(NO_OCCASION);
   // Contact details and extras. Name and email start empty: the guest has to type them.
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -59,6 +63,10 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
   // After the first time, every error is shown (even on fields not touched yet), and each new
   // attempt moves focus to the error summary again (see the effect below).
   const [failedSubmits, setFailedSubmits] = useState(0);
+  // True when the guest pressed the button just after their chosen time passed (the form was left open).
+  // Cleared as soon as they pick another time or date. Remembered in state, because it's the result
+  // of a submit, not something that can be worked out from the fields.
+  const [timePassed, setTimePassed] = useState(false);
   // Whether the last save failed. Unlike the field errors, it can't be worked out from the
   // fields: it's the result of a submit, so it has to be remembered in state.
   const [saveFailed, setSaveFailed] = useState(false);
@@ -68,6 +76,7 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
   // When the date changes: update our own field AND tell Main, so it can work out the new times.
   function handleDateChange(e) {
     setDate(e.target.value);
+    setTimePassed(false);
     dispatch({ type: 'DATE_CHANGED', date: e.target.value });
   }
 
@@ -77,7 +86,10 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
   const bookedTimes = reservations
     .filter((reservation) => reservation.date === date)
     .map((reservation) => reservation.time);
-  const openTimes = availableTimes.filter((t) => !bookedTimes.includes(t));
+  // Also hide times that have already passed today (at 21:10, 17:00 to 21:00 are gone). isPastTime only
+  // ever hides times on today's date. This is derived state too, worked out on every render, so the
+  // course's updateTimes stays exactly as it was.
+  const openTimes = availableTimes.filter((t) => !bookedTimes.includes(t) && !isPastTime(date, t));
 
   // The times change with the date, so the time picked earlier may not exist anymore.
   // Work out the time to show during render: keep the picked one if it's still offered,
@@ -88,7 +100,12 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
   const noTimes = openTimes.length === 0;
 
   // Worked out first, so the time message can wait until the date is valid.
-  const dateError = isValidDate(date, today) ? '' : 'Please choose today or a later date.';
+  // Two different problems, two different messages: a date in the past, or one too far ahead.
+  const dateError = !isValidDate(date, today)
+    ? 'Please choose today or a later date.'
+    : !isValidDate(date, today, lastDay)
+      ? `We take bookings up to ${restaurant.bookingWindowDays} days ahead.`
+      : '';
 
   // Worked out from state on every render, never stored, so it can't go stale.
   // An empty message means "this field is fine".
@@ -100,7 +117,9 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
       ? ''
       : noTimes
         ? 'No times are available on this date. Please choose another date.'
-        : isValidTime(selectedTime, openTimes) ? '' : 'Please choose an available time.',
+        : timePassed
+          ? 'The time you chose has just passed. Please choose another time.'
+          : isValidTime(selectedTime, openTimes) ? '' : 'Please choose an available time.',
     guests: isValidGuests(guests) ? '' : 'Please enter a whole number from 1 to 10.',
     occasion: isValidOccasion(occasion) ? '' : 'Please choose an occasion.',
     seating: isValidSeating(seating) ? '' : 'Please choose a seating preference.',
@@ -171,6 +190,13 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
       setFailedSubmits((count) => count + 1);
       return;
     }
+    // Check the clock once more: if the form was left open, the chosen time may have passed since the
+    // list was drawn. Then nothing is sent; the next render drops that time and the message explains why.
+    if (isPastTime(date, selectedTime)) {
+      setTimePassed(true);
+      setFailedSubmits((count) => count + 1);
+      return;
+    }
     // Build the booking from state, in the shape the API should get.
     const formData = {
       date: date,
@@ -234,6 +260,8 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
               id="res-date"
               required
               min={today}
+              // The latest day the date picker allows. Typing a later date by hand still shows the error.
+              max={lastDay}
               value={date}
               onChange={handleDateChange}
               // Tells screen readers the field has a problem, and which text explains it.
@@ -251,7 +279,10 @@ function BookingForm({ availableTimes, dispatch, submitForm, reservations = [] }
                 id="res-time"
                 required
                 value={selectedTime}
-                onChange={(e) => setTime(e.target.value)}
+                onChange={(e) => {
+                  setTime(e.target.value);
+                  setTimePassed(false);
+                }}
                 aria-invalid={!!errors.time}
                 aria-describedby={errors.time ? 'res-time-error' : undefined}
               >

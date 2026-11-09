@@ -150,3 +150,12 @@ test('shows the name and seating when a booking has them', () => {
   expect(screen.getByText('Booked for Test Guest')).toBeInTheDocument();
   expect(within(cards()[0]).getByRole('list', { name: 'Details' })).toHaveTextContent('Indoor');
 });
+
+test('a booking with "No special occasion" gets no occasion pill', () => {
+  save([{ ...saved[0], occasion: 'No special occasion', seating: 'Indoor' }]);
+  renderPage();
+
+  const details = within(cards()[0]).getByRole('list', { name: 'Details' });
+  expect(details).toHaveTextContent('2 guestsIndoor');
+  expect(details).not.toHaveTextContent('No special occasion');
+});
