@@ -10,7 +10,8 @@
     ],
     "image": "/images/bruschetta.jpg",
     "imageAlt": "Toasted bread topped with chopped tomatoes, basil and shaved cheese",
-    "featured": true
+    "featured": true,
+    "thumbnail": "/images/bruschetta-200.jpg"
   },
   {
     "id": "hummus-plate",
@@ -22,7 +23,8 @@
       "Vegan"
     ],
     "image": "/images/hummus-plate.jpg",
-    "imageAlt": "A wooden bowl of hummus topped with chickpeas, paprika and herbs, with pita bread"
+    "imageAlt": "A wooden bowl of hummus topped with chickpeas, paprika and herbs, with pita bread",
+    "thumbnail": "/images/hummus-plate-200.jpg"
   },
   {
     "id": "greek-salad",
@@ -35,7 +37,8 @@
     ],
     "image": "/images/greek-salad.png",
     "imageAlt": "A bowl of Greek salad with feta, olives, tomatoes and cucumber",
-    "featured": true
+    "featured": true,
+    "thumbnail": "/images/greek-salad-200.jpg"
   },
   {
     "id": "grilled-fish",
@@ -47,7 +50,8 @@
       "Gluten-free"
     ],
     "image": "/images/grilled-fish.jpg",
-    "imageAlt": "A grilled fillet of sea bass on roasted aubergine with cherry tomatoes and basil"
+    "imageAlt": "A grilled fillet of sea bass on roasted aubergine with cherry tomatoes and basil",
+    "thumbnail": "/images/grilled-fish-200.jpg"
   },
   {
     "id": "lamb-souvlaki",
@@ -57,7 +61,8 @@
     "description": "Marinated lamb skewers with tzatziki, rice and a small salad.",
     "tags": [],
     "image": "/images/lamb-souvlaki.jpg",
-    "imageAlt": "Grilled lamb skewers sprinkled with parsley, served with flatbread and tzatziki"
+    "imageAlt": "Grilled lamb skewers sprinkled with parsley, served with flatbread and tzatziki",
+    "thumbnail": "/images/lamb-souvlaki-200.jpg"
   },
   {
     "id": "vegetable-moussaka",
@@ -69,7 +74,8 @@
       "Vegetarian"
     ],
     "image": "/images/vegetable-moussaka.jpg",
-    "imageAlt": "A square slice of moussaka showing layers of aubergine and tomato sauce under a golden topping"
+    "imageAlt": "A square slice of moussaka showing layers of aubergine and tomato sauce under a golden topping",
+    "thumbnail": "/images/vegetable-moussaka-200.jpg"
   },
   {
     "id": "shakshuka",
@@ -81,7 +87,8 @@
       "Vegetarian"
     ],
     "image": "/images/shakshuka.jpg",
-    "imageAlt": "A pan of shakshuka with baked eggs, feta and herbs, with a slice of toast dipped into a yolk"
+    "imageAlt": "A pan of shakshuka with baked eggs, feta and herbs, with a slice of toast dipped into a yolk",
+    "thumbnail": "/images/shakshuka-200.jpg"
   },
   {
     "id": "lemon-dessert",
@@ -94,7 +101,8 @@
     ],
     "image": "/images/lemon-dessert.png",
     "imageAlt": "A slice of lemon dessert topped with toasted meringue and a bright yellow filling",
-    "featured": true
+    "featured": true,
+    "thumbnail": "/images/lemon-dessert-200.jpg"
   },
   {
     "id": "baklava",
@@ -107,7 +115,8 @@
       "Contains nuts"
     ],
     "image": "/images/baklava.jpg",
-    "imageAlt": "Squares of baklava topped with crushed pistachios on a white plate"
+    "imageAlt": "Squares of baklava topped with crushed pistachios on a white plate",
+    "thumbnail": "/images/baklava-200.jpg"
   },
   {
     "id": "orange-cake",
@@ -119,7 +128,8 @@
       "Vegetarian"
     ],
     "image": "/images/orange-cake.jpg",
-    "imageAlt": "A slice of orange cake with white frosting and dried orange slices"
+    "imageAlt": "A slice of orange cake with white frosting and dried orange slices",
+    "thumbnail": "/images/orange-cake-200.jpg"
   },
   {
     "id": "lemonade",
@@ -131,7 +141,8 @@
       "Vegan"
     ],
     "image": "/images/lemonade.jpg",
-    "imageAlt": "A glass jar of lemonade with lemon slices, ice and mint, next to whole lemons"
+    "imageAlt": "A glass jar of lemonade with lemon slices, ice and mint, next to whole lemons",
+    "thumbnail": "/images/lemonade-200.jpg"
   },
   {
     "id": "mint-tea",
@@ -143,7 +154,8 @@
       "Vegan"
     ],
     "image": "/images/mint-tea.jpg",
-    "imageAlt": "A cup of tea with fresh mint leaves on a saucer"
+    "imageAlt": "A cup of tea with fresh mint leaves on a saucer",
+    "thumbnail": "/images/mint-tea-200.jpg"
   },
   {
     "id": "greek-coffee",
@@ -155,6 +167,7 @@
       "Vegan"
     ],
     "image": "/images/greek-coffee.jpg",
-    "imageAlt": "A small cup of strong coffee with foam on top, next to a glass of water and lokum sweets"
+    "imageAlt": "A small cup of strong coffee with foam on top, next to a glass of water and lokum sweets",
+    "thumbnail": "/images/greek-coffee-200.jpg"
   }
 ]
