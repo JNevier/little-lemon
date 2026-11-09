@@ -38,6 +38,7 @@ The app opens at [http://localhost:3000](http://localhost:3000). Step-by-step de
 | Accessibility and semantic HTML | [Accessibility](#accessibility) |
 | Git history | [Git workflow](#git-workflow) |
 | Code and comments | [Project structure](#project-structure) |
+| Where the photos, fonts and code come from | [Credits](#credits) |
 
 ## Features
 
@@ -75,7 +76,9 @@ All names, emails and bookings in these screenshots are fake test data.
 
 ![Booking page: the When and Your table steps filled in on the left, and the Your reservation summary on the right showing Friday, November 20, 2026 at 19:00 for 4 guests, outdoor](docs/screenshots/booking-desktop.jpg)
 
-![My Reservations page: Upcoming bookings with date badges and detail pills, one showing the Cancel this reservation question with Yes, cancel and Keep it, and a Past section below](docs/screenshots/my-reservations-desktop.jpg)
+![My Reservations page: two Upcoming bookings with date badges, detail pills and Change and Cancel buttons, and a Past section below](docs/screenshots/my-reservations-desktop.jpg)
+
+![Change your reservation page: the same form filled in with the booking for Friday, November 20, 2026 at 19:00 for 4 guests, with a Back to my reservations link and the Your reservation summary](docs/screenshots/edit-reservation-desktop.jpg)
 
 ![About page: the Our story header, and the story next to two overlapping photos of Mario and Adrian in the kitchen](docs/screenshots/about-desktop.jpg)
 
@@ -269,7 +272,8 @@ src/
 - `src/components/BookingForm/`: the booking form, its validation functions (`validation.js`) and their tests.
 - `src/components/ReservationSummary/`: the booking details as label/value pairs, shared by the booking form's live summary and the confirmation page. `src/components/ReservationTabs/`: the "Book a table" / "My reservations" tabs.
 - `src/components/FeatureList/`: a row of points with an icon, a title and a sentence, used by "Why Little Lemon" on the home page and "What we believe" on About. `src/components/Icons/`: the small inline-SVG line icons (no icon library).
-- `src/components/Main/`: the page routes and the booking logic (available times and submitting a booking).
+- `src/components/Main/`: the page routes (`/`, `/menu`, `/about`, `/reservations`, `/reservations/:id/edit`, `/confirmed`, `/my-reservations`, and a 404 for anything else) and the booking logic (available times, and submitting or changing a booking).
+- `src/components/ErrorBoundary/`: the safety net around the pages that shows "Something went wrong" instead of a blank page.
 - `src/pages/`: one folder per page the router can show. `EditReservationPage` reuses the booking form to change a saved booking.
 - `src/hooks/`: custom hooks. `useFetch(url)` loads JSON and returns `{ data, loading, error, retry }`, cancels the request if the page closes first, and loads again when `retry()` is called. `useLocalStorage(key, initialValue)` works like `useState` but also saves the value in the browser, and picks up changes that other open tabs save.
 - `src/context/`: `ReservationsContext.js` shares the saved reservations with any page through `useReservations()`, so they don't have to be passed down through every component.
@@ -297,6 +301,9 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 - **The available-times logic** in `Main.js`, with the API replaced by a fake (a mock), so the results don't depend on today's date.
 - **Accessibility details**: each field is found by its label, the form has a name, errors are linked to their fields, and the confirmation page moves focus to its heading and offers **View my reservations** (primary) and **Book another table** (secondary).
 - **Edge cases**: a failed save, a direct visit to the confirmation page, a date with no times, and a cleared date.
+- **Booking rules**: the form asks for the times of its own date whenever it appears (also after **Book another table** or a visit to another page); times that have passed today are hidden and checked again at submit (tested with a fixed clock, `jest.useFakeTimers()`); "No special occasion" is the default; the 90th day is accepted and the 91st is not.
+- **Changing a booking**: the form starts from a saved booking, the booking's own time stays available while other bookings' times are hidden, saving keeps the same id, a failed save keeps the old booking, unknown and past bookings show a message, and the confirmation says "Reservation updated".
+- **Resilience**: saved entries that aren't real bookings (`[null]`) are skipped without blanking a page, the error boundary shows its fallback and recovers on the next page, and a booking saved in another tab (a `StorageEvent`) is kept.
 - **Loading data** (`useFetch`): a successful load, an HTTP error, a network error, a cancelled request that must not show an error, and `retry()` loading again after an error. `fetch` is replaced by a fake in each test.
 - **The home page**: each section and its heading, the hero's two buttons, no invented reviews or star ratings, the loading skeleton, only the featured dishes with their photo, price and tags, a calm message with a menu link if the dishes can't load, and the Visit us details.
 - **The menu page**: the loading skeleton, the dishes and their prices, one section per category under "All", the filter's pressed state, the filter in the address (`?category=`), opening a shared link on a filter, an unknown category falling back to "All", tags and photos, the error message, **Try again** (and where focus goes), and the closing Reserve button.
@@ -304,7 +311,7 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 - **The About page**: its sections in order, no repeated "Little Lemon / Chicago" block, both owner photos with descriptions, three values that differ from the home page's, both owners with their roles, and the closing Reserve button.
 - **The 404 page**: its heading and tab title, and links to Home (the main button), the menu and the booking form.
 - **The phone menu**: the button opens and closes the menu, `Escape` closes it and returns focus to the button, and moving to another page closes it.
-- **Saving in the browser** (`useLocalStorage`): reading, writing, broken saved data and blocked storage, none of which may crash the app. Each test starts with `localStorage.clear()`.
+- **Saving in the browser** (`useLocalStorage`): reading, writing, broken saved data and blocked storage, none of which may crash the app, and picking up changes saved in another tab. Each test starts with `localStorage.clear()`.
 - **Reservations** (Context and My Reservations page): adding, cancelling, sorting by date and time, Upcoming and Past (most recent past first, no Cancel on past ones), the empty states, the tabs with `aria-current`, Cancel asking first, **Keep it** returning focus to Cancel, **Yes, cancel** with the "Reservation cancelled." message, and that booked times are hidden on the form.
 - **The whole booking journey** in one test: book a table, reload, see it on My Reservations, check its time is hidden, switch with the tab, cancel it (and confirm), and check the time is back.
 
@@ -314,13 +321,13 @@ Each test file sits next to the code it tests and ends in `.test.js`. The tests 
 
 ### Coverage
 
-**126 tests in 19 files, all passing.** Coverage measured with `CI=true npm test -- --coverage --watchAll=false`:
+**173 tests in 21 files, all passing.** Coverage measured with `CI=true npm test -- --coverage --watchAll=false`:
 
 | Statements | Branches | Functions | Lines |
 | --- | --- | --- | --- |
-| 98.67% | 92.13% | 99.27% | 98.61% |
+| 98.63% | 95.68% | 98.75% | 98.57% |
 
-What isn't covered: `src/index.js` (it only starts the app in a real browser), the course API's `submitAPI` (always replaced by a fake in tests), a few branches in the booking form and the header that only change an `aria-*` attribute or a fallback value, and the menu page's scroll back to the top of the list (it only runs in a real browser, where the page can scroll; it was checked there).
+What isn't covered: `src/index.js` (it only starts the app in a real browser), the course API's `submitAPI` (always replaced by a fake in tests), a few branches in the booking form and the header that only change an `aria-*` attribute or a fallback value, the menu page's scroll back to the top of the list, and the error page's **Reload** button (both only work in a real browser, where they were checked).
 
 ## Accessibility
 
