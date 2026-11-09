@@ -53,6 +53,28 @@ test('cancelReservation removes only that reservation', () => {
   expect(result.current.reservations).toEqual([second]);
 });
 
+test('updateReservation changes one booking in place and keeps its id', () => {
+  const { result } = renderReservations();
+  act(() => {
+    result.current.addReservation(booking);
+    result.current.addReservation({ ...booking, time: '19:00' });
+  });
+  const [first, second] = result.current.reservations;
+
+  act(() => {
+    // Even if the changes carry a different id, the booking keeps its own.
+    result.current.updateReservation(first.id, { time: '20:30', guests: 4, id: 'something-else' });
+  });
+
+  const [updated, untouched] = result.current.reservations;
+  expect(updated).toEqual({ ...first, time: '20:30', guests: 4 });
+  expect(updated.id).toBe(first.id);
+  // The other booking is exactly as it was, and the order is kept.
+  expect(untouched).toEqual(second);
+  // The change is saved in the browser too.
+  expect(JSON.parse(localStorage.getItem('little-lemon-reservations'))).toEqual([updated, second]);
+});
+
 test('ignores saved data that is not a list', () => {
   localStorage.setItem('little-lemon-reservations', JSON.stringify({ not: 'a list' }));
   const { result } = renderReservations();

@@ -40,8 +40,20 @@ export function ReservationsProvider({ children }) {
     setSaved((current) => asList(current).filter((reservation) => reservation.id !== id));
   }
 
+  // Changes one booking in place: the same id, with the new details on top of the old ones.
+  // { ...old, ...changes, id } copies the old booking, overwrites every field that changed,
+  // and puts the id back last, so a change can never give the booking a different id.
+  // map() returns a new list in the same order, with only that one entry replaced.
+  function updateReservation(id, changes) {
+    setSaved((current) =>
+      asList(current).map((reservation) =>
+        reservation.id === id ? { ...reservation, ...changes, id } : reservation
+      )
+    );
+  }
+
   // Everything inside the provider can read this value with useReservations().
-  const value = { reservations, addReservation, cancelReservation };
+  const value = { reservations, addReservation, cancelReservation, updateReservation };
   return <ReservationsContext.Provider value={value}>{children}</ReservationsContext.Provider>;
 }
 
