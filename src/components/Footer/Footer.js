@@ -66,7 +66,11 @@ function Footer() {
             ))}
           </ul>
         </nav>
-        <p className="footer-copyright">© 2026 Little Lemon · A fictional restaurant</p>
+        {/* The photos on this site belong to the people who took them, not to Little Lemon.
+            The README's Credits section has the details. */}
+        <p className="footer-copyright">
+          © 2026 Little Lemon · A fictional restaurant · Credits to the owners of the photos
+        </p>
       </div>
     </footer>
   );
