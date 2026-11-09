@@ -5,6 +5,7 @@ import { formatLongDate, fromInputDate, toInputDate } from '../../utils/dates';
 import LinkButton from '../../components/LinkButton/LinkButton';
 import ReservationTabs from '../../components/ReservationTabs/ReservationTabs';
 import { formatGuests } from '../../components/ReservationSummary/ReservationSummary';
+import { NO_OCCASION } from '../../components/BookingForm/validation';
 
 // Puts reservations in order: earliest date first, and on the same date, earliest time first.
 // 'YYYY-MM-DD' and 'HH:MM' text sorts in the right order when compared as plain text.
@@ -33,9 +34,10 @@ function ReservationCard({ reservation, isPast, isConfirming, onAskCancel, onKee
       <div className="reservation-card-body">
         <h3 className="reservation-card-date">{dateText}</h3>
         <p className="reservation-card-time">{time}</p>
-        {/* The details as small pills. filter(Boolean) drops missing ones (older bookings have no seating). */}
+        {/* The details as small pills. filter(Boolean) drops missing ones (older bookings have no seating).
+            "No special occasion" becomes null first, so it's dropped too: only real occasions get a pill. */}
         <ul className="reservation-card-chips" aria-label="Details">
-          {[formatGuests(guests), occasion, seating].filter(Boolean).map((detail) => (
+          {[formatGuests(guests), occasion === NO_OCCASION ? null : occasion, seating].filter(Boolean).map((detail) => (
             <li key={detail} className="tag">{detail}</li>
           ))}
         </ul>

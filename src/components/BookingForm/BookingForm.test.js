@@ -391,3 +391,114 @@ describe('error summary', () => {
     expect(submitForm).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('occasion', () => {
+  test('"No special occasion" comes first and is chosen at the start', () => {
+    render(<BookingForm availableTimes={['17:00']} dispatch={jest.fn()} submitForm={jest.fn()} />);
+    const occasion = screen.getByLabelText('Occasion');
+
+    expect([...occasion.options].map((o) => o.value)).toEqual(['No special occasion', 'Birthday', 'Anniversary']);
+    expect(occasion).toHaveValue('No special occasion');
+  });
+
+  test('the summary leaves out "No special occasion", and shows a real occasion once chosen', () => {
+    render(<BookingForm availableTimes={['17:00']} dispatch={jest.fn()} submitForm={jest.fn()} />);
+    const summary = screen.getByRole('complementary', { name: 'Your reservation' });
+
+    expect(within(summary).queryByText('Occasion')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Occasion'), { target: { value: 'Birthday' } });
+    expect(within(summary).getByText('Birthday')).toBeInTheDocument();
+  });
+
+  test('a booking is sent with "No special occasion" when nothing else is picked', () => {
+    const submitForm = setupForm();
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm reservation' }));
+    expect(submitForm).toHaveBeenCalledWith(expect.objectContaining({ occasion: 'No special occasion' }));
+  });
+});
+
+describe('times that have already passed today', () => {
+  // NEW: fake timers. jest.setSystemTime moves the computer's clock, as far as the code can tell,
+  // so "now" is the same every time the test runs. useRealTimers puts the real clock back afterwards.
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  function setClock(hours, minutes) {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date(2026, 10, 9, hours, minutes));
+  }
+
+  test('at 21:10, earlier times are not offered for today', () => {
+    setClock(21, 10);
+    render(<BookingForm availableTimes={['17:00', '21:00', '21:30', '22:00']} dispatch={jest.fn()} submitForm={jest.fn()} />);
+
+    const offered = [...screen.getByLabelText('Choose time').options].map((o) => o.value);
+    expect(offered).toEqual(['21:30', '22:00']);
+  });
+
+  test('late in the evening, today says no times are left', () => {
+    setClock(23, 40);
+    render(<BookingForm availableTimes={['17:00', '23:30']} dispatch={jest.fn()} submitForm={jest.fn()} />);
+
+    expect(screen.getByText('No times are available on this date. Please choose another date.')).toBeInTheDocument();
+  });
+
+  test('another date keeps all its times', () => {
+    setClock(21, 10);
+    render(<BookingForm availableTimes={['17:00', '21:00']} dispatch={jest.fn()} submitForm={jest.fn()} />);
+    fireEvent.change(screen.getByLabelText('Choose date'), { target: { value: '2026-11-10' } });
+
+    const offered = [...screen.getByLabelText('Choose time').options].map((o) => o.value);
+    expect(offered).toEqual(['17:00', '21:00']);
+  });
+
+  test('if the chosen time passes while the form is open, the booking is not sent', () => {
+    // It's 18:55, so 19:00 and 20:00 are both still open.
+    setClock(18, 55);
+    const submit = jest.fn();
+    render(<BookingForm availableTimes={['19:00', '20:00']} dispatch={jest.fn()} submitForm={submit} />);
+    fillContactDetails();
+    expect(screen.getByLabelText('Choose time')).toHaveValue('19:00');
+
+    // The guest waits; now it's 19:05 and 19:00 has passed.
+    jest.setSystemTime(new Date(2026, 10, 9, 19, 5));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm reservation' }));
+
+    expect(submit).not.toHaveBeenCalled();
+    expect(within(screen.getByTestId('error-summary')).getByRole('link', {
+      name: 'The time you chose has just passed. Please choose another time.',
+    })).toBeInTheDocument();
+    // 19:00 is gone from the list; the next time is shown instead.
+    expect(screen.getByLabelText('Choose time')).toHaveValue('20:00');
+  });
+});
+
+describe('booking window', () => {
+  test('the date field allows up to 90 days ahead', () => {
+    render(<BookingForm availableTimes={['17:00']} dispatch={jest.fn()} submitForm={jest.fn()} />);
+    const lastDay = new Date();
+    lastDay.setDate(lastDay.getDate() + 90);
+    expect(screen.getByLabelText('Choose date')).toHaveAttribute('max', toInputDate(lastDay));
+  });
+
+  test('the 90th day is fine, the 91st shows the limit in the error summary', () => {
+    const submitForm = setupForm();
+    const day = (n) => {
+      const d = new Date();
+      d.setDate(d.getDate() + n);
+      return toInputDate(d);
+    };
+    const date = screen.getByLabelText('Choose date');
+
+    fireEvent.change(date, { target: { value: day(90) } });
+    expect(date).toHaveAttribute('aria-invalid', 'false');
+
+    fireEvent.change(date, { target: { value: day(91) } });
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm reservation' }));
+    expect(within(screen.getByTestId('error-summary')).getByRole('link', {
+      name: 'We take bookings up to 90 days ahead.',
+    })).toBeInTheDocument();
+    expect(submitForm).not.toHaveBeenCalled();
+  });
+});

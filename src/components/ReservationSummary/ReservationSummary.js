@@ -1,6 +1,6 @@
 import './ReservationSummary.css';
 import { formatLongDate, isInputDate } from '../../utils/dates';
-import { isValidGuests } from '../BookingForm/validation';
+import { isValidGuests, NO_OCCASION } from '../BookingForm/validation';
 
 // "1 guest" or "4 guests". Shared with My Reservations, so every page says it the same way.
 export function formatGuests(guests) {
@@ -35,7 +35,8 @@ function ReservationSummary({ booking }) {
         <dt>Guests</dt>
         <dd>{isValidGuests(guests) ? formatGuests(guests) : <NotChosen />}</dd>
       </div>
-      {occasion && (
+      {/* "No special occasion" isn't news, so it isn't listed. Birthdays and anniversaries are. */}
+      {occasion && occasion !== NO_OCCASION && (
         <div className="reservation-summary-row">
           <dt>Occasion</dt>
           <dd>{occasion}</dd>
