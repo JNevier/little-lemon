@@ -42,7 +42,7 @@
     "name": "Grilled Sea Bass",
     "category": "Mains",
     "price": 24.0,
-    "description": "Whole sea bass grilled with lemon and herbs, served with roast potatoes.",
+    "description": "Grilled sea bass fillet on roasted aubergine, with cherry tomatoes and basil.",
     "tags": [
       "Gluten-free"
     ],
@@ -101,7 +101,7 @@
     "name": "Baklava",
     "category": "Desserts",
     "price": 6.5,
-    "description": "Thin layers of pastry with walnuts and honey syrup.",
+    "description": "Thin layers of pastry with pistachios and honey syrup.",
     "tags": [
       "Vegetarian",
       "Contains nuts"
