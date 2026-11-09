@@ -52,7 +52,8 @@ The app opens at [http://localhost:3000](http://localhost:3000). Step-by-step de
 - **Occasion**: "No special occasion" (the default), Birthday or Anniversary. Only a real occasion is shown on the summary and on My Reservations.
 - **Validation with clear messages**: you can't pick a past date or one more than 90 days ahead ("We take bookings up to 90 days ahead."), book for fewer than 1 or more than 10 guests, or leave out your name or a valid email. Name and email errors only appear after you leave the field (or press the button), so a fresh form isn't covered in red. The **Confirm reservation** button is always enabled: pressing it with a problem shows an error summary at the top that lists each problem, links to its field, and gets keyboard focus. Only the optional field is marked "(optional)"; every other field is required.
 - **Confirmation page**: a check mark, "You're booked", the same summary as beside the form, and two next steps: **View my reservations** and **Book another table**.
-- **My Reservations page**: every booking is saved in the browser (`localStorage`), so it's still there after a reload. Bookings are split into **Upcoming** and **Past**, each card with a date badge, the time, small pills for guests, occasion and seating, and the name. **Cancel** asks first ("Cancel this reservation?" **Yes, cancel** / **Keep it**), and screen readers announce "Reservation cancelled." Past bookings are kept as a record and can't be cancelled.
+- **My Reservations page**: every booking is saved in the browser (`localStorage`), so it's still there after a reload. Bookings are split into **Upcoming** and **Past**, each card with a date badge, the time, small pills for guests, occasion and seating, and the name. **Cancel** asks first ("Cancel this reservation?" **Yes, cancel** / **Keep it**), and screen readers announce "Reservation cancelled." Past bookings are kept as a record and can't be cancelled or changed.
+- **Change a reservation**: each upcoming booking has a **Change** link. It opens the same three-step form at `/reservations/<id>/edit`, filled in with that booking, with a **Save changes** button. Saving updates the same booking (same id) and shows **Reservation updated**. The booking's own time stays available while you change it. An unknown or past booking shows a short message with a link back, never a blank page.
 - **No double bookings**: a time you've already booked disappears from the time list for that date, and comes back if you cancel. (Demo rule: this browser can't book the same slot twice. With no real server, other visitors' bookings aren't known.)
 - **Helpful messages for edge cases**: a failed save, a date with no times, a cleared date, and a visit to the confirmation page with no booking.
 - **Responsive layout**: designed for phones first and checked from 280px (the smallest phones) to 1920px wide, in portrait and landscape. On phones the navigation folds into a menu button; from 768px up the logo, the links and the Reserve a Table button share one row. Nothing scrolls sideways, and every link and button is at least 44px tall, so it's easy to tap (the footer's phone and email links are smaller only when the pointer is a mouse). On the narrowest phones (under 320px) the menu's filter tabs scroll sideways inside their own bar.
@@ -103,7 +104,7 @@ Largest Contentful Paint (3.4 s) is the one metric not in the green yet. What's 
 ## Tech stack
 
 - **React 19**: builds the user interface from components.
-- **React Router 7**: moves between pages (home, menu, about, booking, confirmation, my reservations) without reloading.
+- **React Router 7**: moves between pages (home, menu, about, booking, change a booking, confirmation, my reservations) without reloading.
 - **Create React App** (`react-scripts` 5): runs, tests and builds the project with no extra setup.
 - **Jest and React Testing Library**: unit tests that check the app the way a user sees it.
 - **Plain CSS** with CSS variables for the brand colours and fonts.
@@ -121,6 +122,7 @@ No other libraries: no CSS framework, no form library and no state library. Form
 | `useRef` | `Header`, booking form, My Reservations, Menu page | A direct handle on an element, to move keyboard focus (to the menu button, the error summary or a heading), or to scroll the menu list back into view. |
 | `useContext` | `useReservations()` | Reads the saved reservations from any page without passing props down. |
 | `useNavigate`, `useLocation` | `Main.js`, `ConfirmedBooking`, `Header` | React Router hooks: go to the confirmation page in code, and read the current page. |
+| `useParams` | Change page | Reads the booking's id from the address `/reservations/<id>/edit`. |
 | `useSearchParams` | Menu page | Reads and writes `?category=` in the address, so the chosen filter survives Back, reload and shared links. |
 | `useFetch` (custom) | Menu page, home page specials | Loads JSON and returns `{ data, loading, error, retry }`, and cancels the request if the page closes first. `retry()` loads it again. |
 | `useLocalStorage` (custom) | Reservations context | Like `useState`, but the value is also saved in the browser. |
@@ -211,7 +213,8 @@ The site is hosted on [Vercel](https://vercel.com) at **[littlelemon-chicago.ver
 7. You land on the **You're booked** page, which thanks you by name and shows your date, time, number of guests, occasion and seating.
 8. Click **View my reservations**. Your booking is listed. Reload the page: it's still there.
 9. Click the **Book a table** tab and pick the same date. The time you booked is no longer in the list.
-10. On **My Reservations**, click **Cancel**, then **Yes, cancel**. The booking disappears, and its time is offered again on the booking form. (**Keep it** leaves the booking as it was.)
+10. On **My Reservations**, click **Change**, pick another time and click **Save changes**. You see **Reservation updated**, and the card shows the new time.
+11. Click **Cancel**, then **Yes, cancel**. The booking disappears, and its time is offered again on the booking form. (**Keep it** leaves the booking as it was.)
 
 ## Try the edge cases
 
@@ -255,6 +258,7 @@ src/
 │   ├── BookingPage/
 │   ├── ConfirmedBooking/
 │   ├── MyReservationsPage/
+│   ├── EditReservationPage/
 │   └── NotFoundPage/
 └── utils/
 ```
@@ -264,7 +268,7 @@ src/
 - `src/components/ReservationSummary/`: the booking details as label/value pairs, shared by the booking form's live summary and the confirmation page. `src/components/ReservationTabs/`: the "Book a table" / "My reservations" tabs.
 - `src/components/FeatureList/`: a row of points with an icon, a title and a sentence, used by "Why Little Lemon" on the home page and "What we believe" on About. `src/components/Icons/`: the small inline-SVG line icons (no icon library).
 - `src/components/Main/`: the page routes and the booking logic (available times and submitting a booking).
-- `src/pages/`: one folder per page the router can show.
+- `src/pages/`: one folder per page the router can show. `EditReservationPage` reuses the booking form to change a saved booking.
 - `src/hooks/`: custom hooks. `useFetch(url)` loads JSON and returns `{ data, loading, error, retry }`, cancels the request if the page closes first, and loads again when `retry()` is called. `useLocalStorage(key, initialValue)` works like `useState` but also saves the value in the browser.
 - `src/context/`: `ReservationsContext.js` shares the saved reservations with any page through `useReservations()`, so they don't have to be passed down through every component.
 - `public/images/`: the photos and logos. The dish photos are resized with macOS `sips` (for example `bruschetta.jpg` went from a 1920px, 404 KB PNG to an 800px, 76 KB JPEG, and `shakshuka.jpg` from 313 KB to 75 KB), so they load quickly on phones. Every dish on the menu has a photo. The new dish photos are at most 640px on their longer side, and each one is 30–90 KB.
