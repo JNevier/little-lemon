@@ -43,3 +43,8 @@ test('has no social links to generic sites', () => {
     .filter((link) => link.getAttribute('href').startsWith('http'));
   expect(external).toHaveLength(0);
 });
+
+test('credits the owners of the photos', () => {
+  const footer = renderFooter();
+  expect(within(footer).getByText(/Credits to the owners of the photos/)).toBeInTheDocument();
+});

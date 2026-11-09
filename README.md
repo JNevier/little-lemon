@@ -417,6 +417,28 @@ Every text and background pair is checked against WCAG 2.1 AA by a small script 
 - **Create React App is deprecated**: the React team stopped recommending Create React App in February 2025, and it no longer has active maintainers. It still builds and tests this project fine. Moving to [Vite](https://vite.dev) is a possible next step.
 - **Demo-only double-booking check**: a booked time is hidden only in the browser that booked it. A real restaurant would need a server that knows every guest's bookings.
 
+## Credits
+
+Little Lemon is the fictional restaurant from the [Meta Front-End Developer Professional Certificate](https://www.coursera.org/professional-certificates/meta-front-end-developer) on Coursera, and this site is my capstone project for it. All names, prices, addresses, phone numbers and the story are made up (see **Sample data** under [Known limitations](#known-limitations)).
+
+**Photos.** The photos on this site are not mine. Some came with the course's starter files, and the rest were found online through Google Images. **Credits to the owners of the photos.** Where a photo file names its author, the name is listed below. If you own one of these photos and would like it credited differently or taken down, please [open an issue](https://github.com/JNevier/little-lemon/issues).
+
+| Photo | Used on | Author named in the file |
+| --- | --- | --- |
+| Home page hero (`restauranfood*.jpg`) | Home | Inna Pankratieva |
+| Mario and Adrian (`mario-and-adrian-a.jpg`, `mario-and-adrian-b.jpg`) | About, Home | jacoblund |
+| Grilled Sea Bass (`grilled-fish.jpg`) | Menu | Karen Sheer |
+| Hummus Plate (`hummus-plate.jpg`) | Menu | Arx0nt |
+| All other photos | Home, Menu | Not named in the file |
+
+| What | Source | Licence |
+| --- | --- | --- |
+| Logo and lemon images | The course's Little Lemon brand files | Course material |
+| Booking API (`fetchAPI`, `submitAPI` in `src/api.js`) | The course | Course material |
+| Fonts: Markazi Text and Karla | [Google Fonts](https://fonts.google.com) | SIL Open Font License 1.1 |
+| Icons (`src/components/Icons/Icons.js`) | Drawn for this project | Part of this project |
+| React, React Router, Create React App, Jest, React Testing Library, and their dependencies | npm | MIT |
+
 ## Git workflow
 
 - Every feature or fix was built on its own branch (for example `feat/booking-form`).
