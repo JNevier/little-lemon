@@ -10,6 +10,7 @@ import NotFoundPage from '../../pages/NotFoundPage/NotFoundPage';
 import MenuPage from '../../pages/MenuPage/MenuPage';
 import AboutPage from '../../pages/AboutPage/AboutPage';
 import MyReservationsPage from '../../pages/MyReservationsPage/MyReservationsPage';
+import EditReservationPage from '../../pages/EditReservationPage/EditReservationPage';
 
 // Builds the starting list of available times: the times for today,
 // because the date field also starts on today.
@@ -41,7 +42,7 @@ function Main() {
   // A function that changes the page from code, like clicking a link. Hooks go at the top level.
   const navigate = useNavigate();
   // The bookings saved in this browser, from the ReservationsProvider in App.js.
-  const { reservations, addReservation } = useReservations();
+  const { reservations, addReservation, updateReservation } = useReservations();
 
   // Sends the booking to the API. If it's accepted, show the confirmation page.
   // Returns whether it was saved, so the form can tell the user when it wasn't.
@@ -52,6 +53,17 @@ function Main() {
       addReservation(formData);
       // Carry the booking to the next page, so it can show what was booked.
       navigate('/confirmed', { state: { booking: formData } });
+    }
+    return saved;
+  }
+
+  // Saves the changes to an existing booking: the same steps as submitForm, but it updates the booking
+  // with this id instead of adding a new one, and tells the confirmation page it was an update.
+  function updateForm(id, formData) {
+    const saved = submitAPI(formData);
+    if (saved) {
+      updateReservation(id, formData);
+      navigate('/confirmed', { state: { booking: formData, updated: true } });
     }
     return saved;
   }
@@ -69,6 +81,18 @@ function Main() {
               availableTimes={availableTimes}
               dispatch={dispatch}
               submitForm={submitForm}
+              reservations={reservations}
+            />
+          }
+        />
+        {/* ":id" is a variable part of the address: /reservations/abc-123/edit changes the booking abc-123. */}
+        <Route
+          path="/reservations/:id/edit"
+          element={
+            <EditReservationPage
+              availableTimes={availableTimes}
+              dispatch={dispatch}
+              updateForm={updateForm}
               reservations={reservations}
             />
           }

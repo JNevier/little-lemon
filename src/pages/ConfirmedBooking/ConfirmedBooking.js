@@ -19,6 +19,9 @@ function ConfirmedBooking() {
   // The booking that Main sent with navigate(). Typing /confirmed into the address bar sends nothing.
   const location = useLocation();
   const booking = location.state?.booking;
+  // true when the guest changed an existing booking (Main sends updated: true), false for a new one.
+  // "=== true" keeps it false for anything else, including a direct visit with no state at all.
+  const updated = location.state?.updated === true;
 
   // Direct visit: no booking was made, so don't claim one was.
   if (!booking) {
@@ -38,17 +41,17 @@ function ConfirmedBooking() {
   return (
     <div className="confirmed-booking page-fill">
       {/* React 19 moves this into the page's <head>, so the browser tab says where you are. */}
-      <title>Booking Confirmed | Little Lemon</title>
+      <title>{updated ? 'Reservation Updated | Little Lemon' : 'Booking Confirmed | Little Lemon'}</title>
       <div className="card confirmed-booking-card">
         <CheckIcon />
         {/* tabIndex={-1}: code can focus the heading, but it isn't added to the Tab order.
             The ref callback runs when the h1 appears and moves focus there, so screen readers
             announce the new page. */}
-        <h1 tabIndex={-1} ref={(heading) => heading?.focus()}>You're booked</h1>
+        <h1 tabIndex={-1} ref={(heading) => heading?.focus()}>{updated ? 'Reservation updated' : "You're booked"}</h1>
         {/* Bookings made before the form asked for a name don't have one, so the name is optional here. */}
         <p className="lead">
-          Thank you{booking.name ? `, ${booking.name}` : ''}! Your table at Little Lemon is reserved.
-          We look forward to seeing you.
+          Thank you{booking.name ? `, ${booking.name}` : ''}!{' '}
+          {updated ? 'Your changes are saved.' : 'Your table at Little Lemon is reserved.'} We look forward to seeing you.
         </p>
         {/* The same summary as beside the booking form, so the guest sees exactly what they chose.
             (It doesn't show the email: that's private, and the guest just typed it.) */}

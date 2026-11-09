@@ -70,3 +70,22 @@ describe('next steps', () => {
     expect(screen.getByRole('link', { name: 'Book another table' })).toHaveClass('button-secondary');
   });
 });
+
+describe('after changing a booking', () => {
+  test('says "Reservation updated", with its own tab title and the same summary and next steps', () => {
+    setupPage({ booking: { ...booking, name: 'Test Guest' }, updated: true });
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Reservation updated' })).toHaveFocus();
+    expect(document.title).toBe('Reservation Updated | Little Lemon');
+    expect(screen.getByText(/your changes are saved/i)).toBeInTheDocument();
+    expect(screen.getByText('Friday, October 9, 2026')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'View my reservations' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Book another table' })).toBeInTheDocument();
+  });
+
+  test('a new booking still says "You\'re booked"', () => {
+    setupPage({ booking });
+    expect(screen.getByRole('heading', { level: 1, name: "You're booked" })).toBeInTheDocument();
+    expect(screen.queryByText(/your changes are saved/i)).not.toBeInTheDocument();
+  });
+});

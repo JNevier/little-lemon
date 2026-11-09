@@ -502,3 +502,58 @@ describe('booking window', () => {
     expect(submitForm).not.toHaveBeenCalled();
   });
 });
+
+describe('starting from a saved booking (used to change a booking)', () => {
+  test('without initialValues, the form starts as a new booking with the usual button', () => {
+    render(<BookingForm availableTimes={['17:00']} dispatch={jest.fn()} submitForm={jest.fn()} />);
+    expect(screen.getByRole('form', { name: 'Reserve a Table' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Confirm reservation' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Full name')).toHaveValue('');
+  });
+
+  test('with initialValues, every field starts filled in, and the label and button can change', () => {
+    const dispatch = jest.fn();
+    const date = new Date();
+    date.setDate(date.getDate() + 3);
+    const saved = {
+      date: toInputDate(date), time: '18:00', guests: 3, occasion: 'Birthday',
+      seating: 'Indoor', name: 'Test Guest', email: 'guest@example.com', requests: '',
+    };
+    render(
+      <BookingForm
+        availableTimes={['17:00', '18:00']}
+        dispatch={dispatch}
+        submitForm={jest.fn()}
+        initialValues={saved}
+        submitLabel="Save changes"
+        formLabel="Change your reservation"
+      />
+    );
+
+    expect(screen.getByRole('form', { name: 'Change your reservation' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Save changes' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Choose date')).toHaveValue(saved.date);
+    expect(screen.getByLabelText('Choose time')).toHaveValue('18:00');
+    expect(screen.getByLabelText('Number of guests')).toHaveValue(3);
+    expect(screen.getByRole('radio', { name: 'Indoor' })).toBeChecked();
+    // The form asks for the times of the booking's own date when it appears (not today's).
+    expect(dispatch).toHaveBeenCalledWith({ type: 'DATE_CHANGED', date: saved.date });
+  });
+
+  test('an older saved booking without seating, name or requests still opens with sensible defaults', () => {
+    const date = new Date();
+    date.setDate(date.getDate() + 3);
+    render(
+      <BookingForm
+        availableTimes={['17:00']}
+        dispatch={jest.fn()}
+        submitForm={jest.fn()}
+        initialValues={{ date: toInputDate(date), time: '17:00', guests: 2, occasion: 'Birthday' }}
+      />
+    );
+
+    expect(screen.getByRole('radio', { name: 'No preference' })).toBeChecked();
+    expect(screen.getByLabelText('Full name')).toHaveValue('');
+    expect(screen.getByLabelText('Special requests (optional)')).toHaveValue('');
+  });
+});

@@ -161,3 +161,10 @@
   flex-wrap: wrap;
   gap: var(--space-2);
 }
+
+/* Change and Cancel side by side; they wrap onto two lines on a narrow phone. */
+.reservation-card-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
