@@ -30,6 +30,32 @@ function useLocalStorage(key, initialValue) {
     }
   }, [key, value]);
 
+  // NEW: the "storage" event. When ANOTHER tab of this site changes localStorage, the browser tells every
+  // other open tab with a "storage" event (the tab that made the change doesn't get one). Without this,
+  // each tab kept its own copy from when it opened: if tab A booked a table and then tab B (already open)
+  // booked another, tab B saved its old list plus its new booking, and tab A's booking was lost.
+  // Now, when another tab saves this key, this tab reads the new value too, so the next save includes it.
+  useEffect(() => {
+    function handleStorage(event) {
+      // Only our key. (event.key is null when another tab cleared all storage.)
+      if (event.key !== key && event.key !== null) {
+        return;
+      }
+      try {
+        // newValue is the new text, or null if it was removed: then start from the initial value.
+        setValue(event.newValue === null ? initialValue : JSON.parse(event.newValue));
+      } catch (error) {
+        // The other tab saved text that isn't valid JSON: keep this tab's value rather than crash.
+      }
+    }
+    window.addEventListener('storage', handleStorage);
+    // The cleanup removes the listener when the component goes away (or the key changes),
+    // so an old listener never updates a component that's gone.
+    return () => window.removeEventListener('storage', handleStorage);
+    // initialValue is usually a new [] on every render; listing it would re-add the listener every time.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+
   return [value, setValue];
 }
 

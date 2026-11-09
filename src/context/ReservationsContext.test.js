@@ -81,6 +81,58 @@ test('ignores saved data that is not a list', () => {
   expect(result.current.reservations).toEqual([]);
 });
 
+test('ignores entries that are not real reservations, and keeps the good ones', () => {
+  const good = { id: 'good', date: '2026-10-09', time: '18:00', guests: 2, occasion: 'Birthday' };
+  const saved = [null, 5, {}, { id: 7, date: '2026-10-09', time: '18:00' }, good];
+  localStorage.setItem('little-lemon-reservations', JSON.stringify(saved));
+
+  const { result } = renderReservations();
+
+  expect(result.current.reservations).toEqual([good]);
+  // Reading doesn't rewrite what's saved.
+  expect(JSON.parse(localStorage.getItem('little-lemon-reservations'))).toEqual(saved);
+});
+
+test('cancel and update still work when a bad entry is saved next to a good one', () => {
+  const good = { id: 'good', date: '2026-10-09', time: '18:00', guests: 2, occasion: 'Birthday' };
+  localStorage.setItem('little-lemon-reservations', JSON.stringify([null, good]));
+  const { result } = renderReservations();
+
+  act(() => {
+    result.current.updateReservation('good', { time: '19:00' });
+  });
+  expect(result.current.reservations).toEqual([{ ...good, time: '19:00' }]);
+
+  act(() => {
+    result.current.cancelReservation('good');
+  });
+  expect(result.current.reservations).toEqual([]);
+});
+
+test('a booking made in another tab is kept when this tab books too', () => {
+  // This tab and "another tab" both start with no bookings.
+  const { result } = renderReservations();
+  const fromOtherTab = { ...booking, id: 'other-tab', time: '20:00' };
+
+  // The other tab saves its booking; the browser tells this tab with a storage event.
+  act(() => {
+    localStorage.setItem('little-lemon-reservations', JSON.stringify([fromOtherTab]));
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: 'little-lemon-reservations',
+      newValue: JSON.stringify([fromOtherTab]),
+    }));
+  });
+  // Now this tab books as well.
+  act(() => {
+    result.current.addReservation(booking);
+  });
+
+  // Both bookings are kept, in this tab and in storage.
+  const saved = JSON.parse(localStorage.getItem('little-lemon-reservations'));
+  expect(saved.map((r) => r.time)).toEqual(['20:00', '18:00']);
+  expect(result.current.reservations).toHaveLength(2);
+});
+
 test('useReservations throws a clear error outside the provider', () => {
   // React logs the thrown error to the console; hide it so the test output stays clean.
   jest.spyOn(console, 'error').mockImplementation(() => {});

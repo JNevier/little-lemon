@@ -21,11 +21,28 @@ function asList(value) {
   return Array.isArray(value) ? value : [];
 }
 
+// One entry in that list could be anything too: null, a number, an empty object.
+// A real reservation is an object with a text id, date and time; anything else is ignored.
+// (Without this, one bad entry like [null] crashed My Reservations and the booking page:
+// reading null.date throws an error, and React showed a blank page.)
+// typeof null is "object" in JavaScript, so null needs its own check.
+function isReservation(entry) {
+  return (
+    typeof entry === 'object' &&
+    entry !== null &&
+    typeof entry.id === 'string' &&
+    typeof entry.date === 'string' &&
+    typeof entry.time === 'string'
+  );
+}
+
 // Wrap part of the app in <ReservationsProvider> to give it access to the reservations.
 // "children" is everything placed between the opening and closing tags.
 export function ReservationsProvider({ children }) {
   const [saved, setSaved] = useLocalStorage(STORAGE_KEY, []);
-  const reservations = asList(saved);
+  // The pages only ever see real reservations. The saved text itself isn't rewritten when it's read;
+  // bad entries are simply skipped.
+  const reservations = asList(saved).filter(isReservation);
 
   // Adds a booking and gives it an id. The functional update (current => ...) always starts
   // from the latest list, even if two updates happen quickly one after the other.
@@ -37,7 +54,11 @@ export function ReservationsProvider({ children }) {
 
   // Keeps every reservation except the one with this id.
   function cancelReservation(id) {
-    setSaved((current) => asList(current).filter((reservation) => reservation.id !== id));
+    // Bad entries are kept as they are (they're not this reservation); isReservation is checked first,
+    // so a null entry never gets asked for its .id.
+    setSaved((current) =>
+      asList(current).filter((reservation) => !isReservation(reservation) || reservation.id !== id)
+    );
   }
 
   // Changes one booking in place: the same id, with the new details on top of the old ones.
@@ -47,7 +68,7 @@ export function ReservationsProvider({ children }) {
   function updateReservation(id, changes) {
     setSaved((current) =>
       asList(current).map((reservation) =>
-        reservation.id === id ? { ...reservation, ...changes, id } : reservation
+        isReservation(reservation) && reservation.id === id ? { ...reservation, ...changes, id } : reservation
       )
     );
   }

@@ -63,3 +63,47 @@ test('keeps working when the browser blocks storage', () => {
   });
   expect(result.current[0]).toEqual(['kept in memory']);
 });
+
+describe('changes made in another tab', () => {
+  // Pretend another tab of the site saved something: the browser sends a "storage" event to this tab.
+  function otherTabSaves(key, newValue) {
+    act(() => {
+      window.dispatchEvent(new StorageEvent('storage', { key, newValue }));
+    });
+  }
+
+  test('picks up the new value when another tab saves the same key', () => {
+    const { result } = renderHook(() => useLocalStorage('test-key', []));
+
+    otherTabSaves('test-key', JSON.stringify(['from the other tab']));
+
+    expect(result.current[0]).toEqual(['from the other tab']);
+  });
+
+  test('ignores other keys, and broken text from the other tab', () => {
+    const { result } = renderHook(() => useLocalStorage('test-key', ['mine']));
+
+    otherTabSaves('another-key', JSON.stringify(['not for me']));
+    otherTabSaves('test-key', '{broken');
+
+    expect(result.current[0]).toEqual(['mine']);
+  });
+
+  test('goes back to the initial value when the other tab removes the key', () => {
+    localStorage.setItem('test-key', JSON.stringify(['saved']));
+    const { result } = renderHook(() => useLocalStorage('test-key', []));
+
+    otherTabSaves('test-key', null);
+
+    expect(result.current[0]).toEqual([]);
+  });
+
+  test('stops listening when the component goes away', () => {
+    const remove = jest.spyOn(window, 'removeEventListener');
+    const { unmount } = renderHook(() => useLocalStorage('test-key', []));
+
+    unmount();
+
+    expect(remove).toHaveBeenCalledWith('storage', expect.any(Function));
+  });
+});

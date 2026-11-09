@@ -1,5 +1,5 @@
 import { useReducer } from 'react';
-import { Routes, Route, useNavigate } from 'react-router';
+import { Routes, Route, useNavigate, useLocation } from 'react-router';
 import { fetchAPI, submitAPI } from '../../api';
 import { fromInputDate, isInputDate } from '../../utils/dates';
 import { useReservations } from '../../context/ReservationsContext';
@@ -11,6 +11,7 @@ import MenuPage from '../../pages/MenuPage/MenuPage';
 import AboutPage from '../../pages/AboutPage/AboutPage';
 import MyReservationsPage from '../../pages/MyReservationsPage/MyReservationsPage';
 import EditReservationPage from '../../pages/EditReservationPage/EditReservationPage';
+import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
 
 // Builds the starting list of available times: the times for today,
 // because the date field also starts on today.
@@ -41,6 +42,8 @@ function Main() {
   const [availableTimes, dispatch] = useReducer(updateTimes, undefined, initializeTimes);
   // A function that changes the page from code, like clicking a link. Hooks go at the top level.
   const navigate = useNavigate();
+  // The current address. The error boundary uses it to try again when the visitor goes to another page.
+  const { pathname } = useLocation();
   // The bookings saved in this browser, from the ReservationsProvider in App.js.
   const { reservations, addReservation, updateReservation } = useReservations();
 
@@ -72,37 +75,41 @@ function Main() {
     // id: the skip link's target. tabIndex={-1}: code can move focus here (the skip link does),
     // but it isn't added to the Tab order, because it isn't a control you operate.
     <main id="main-content" tabIndex={-1}>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route
-          path="/reservations"
-          element={
-            <BookingPage
-              availableTimes={availableTimes}
-              dispatch={dispatch}
-              submitForm={submitForm}
-              reservations={reservations}
-            />
-          }
-        />
-        {/* ":id" is a variable part of the address: /reservations/abc-123/edit changes the booking abc-123. */}
-        <Route
-          path="/reservations/:id/edit"
-          element={
-            <EditReservationPage
-              availableTimes={availableTimes}
-              dispatch={dispatch}
-              updateForm={updateForm}
-              reservations={reservations}
-            />
-          }
-        />
-        <Route path="/confirmed" element={<ConfirmedBooking />} />
-        <Route path="/my-reservations" element={<MyReservationsPage />} />
-        <Route path="/menu" element={<MenuPage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+      {/* If a page throws an error while drawing, the boundary shows "Something went wrong" here,
+          instead of the whole site going blank. The header and footer are outside it, so they stay. */}
+      <ErrorBoundary resetKey={pathname}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route
+            path="/reservations"
+            element={
+              <BookingPage
+                availableTimes={availableTimes}
+                dispatch={dispatch}
+                submitForm={submitForm}
+                reservations={reservations}
+              />
+            }
+          />
+          {/* ":id" is a variable part of the address: /reservations/abc-123/edit changes the booking abc-123. */}
+          <Route
+            path="/reservations/:id/edit"
+            element={
+              <EditReservationPage
+                availableTimes={availableTimes}
+                dispatch={dispatch}
+                updateForm={updateForm}
+                reservations={reservations}
+              />
+            }
+          />
+          <Route path="/confirmed" element={<ConfirmedBooking />} />
+          <Route path="/my-reservations" element={<MyReservationsPage />} />
+          <Route path="/menu" element={<MenuPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </ErrorBoundary>
     </main>
   );
 }
