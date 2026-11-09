@@ -88,3 +88,44 @@ test('broken saved data does not crash the app', () => {
 
   expect(screen.getByText("You don't have any reservations yet.")).toBeInTheDocument();
 });
+
+describe('the time list always matches the date the form shows', () => {
+  // Today and every other day get different times, so stale times are easy to spot.
+  const todayTimes = ['17:00', '18:00'];
+  const otherDayTimes = ['20:00', '21:00'];
+
+  beforeEach(() => {
+    const today = toInputDate(new Date());
+    fetchAPI.mockImplementation((date) => (toInputDate(date) === today ? todayTimes : otherDayTimes));
+    submitAPI.mockReturnValue(true);
+  });
+
+  test('after booking a later date, "Book another table" shows today with today\'s times', () => {
+    renderAppAt('/reservations');
+    fireEvent.change(screen.getByLabelText('Choose date'), { target: { value: tomorrow() } });
+    expect(offeredTimes()).toEqual(otherDayTimes);
+    fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'Test Guest' } });
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'guest@example.com' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm reservation' }));
+
+    fireEvent.click(screen.getByRole('link', { name: 'Book another table' }));
+
+    expect(screen.getByLabelText('Choose date')).toHaveValue(toInputDate(new Date()));
+    expect(offeredTimes()).toEqual(todayTimes);
+  });
+
+  test('after picking a later date, going to the Menu and back shows today with today\'s times', () => {
+    // The Menu page loads its dishes with fetch. This fake never answers: no menu data is needed here.
+    global.fetch = jest.fn(() => new Promise(() => {}));
+    renderAppAt('/reservations');
+    fireEvent.change(screen.getByLabelText('Choose date'), { target: { value: tomorrow() } });
+    expect(offeredTimes()).toEqual(otherDayTimes);
+
+    fireEvent.click(within(screen.getByRole('navigation', { name: 'Main' })).getByRole('link', { name: 'Menu' }));
+    fireEvent.click(screen.getAllByRole('link', { name: 'Reserve a Table' })[0]);
+
+    expect(screen.getByLabelText('Choose date')).toHaveValue(toInputDate(new Date()));
+    expect(offeredTimes()).toEqual(todayTimes);
+    delete global.fetch;
+  });
+});
